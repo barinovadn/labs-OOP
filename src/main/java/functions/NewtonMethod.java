@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 public class NewtonMethod {
 
-    public static double newton(
+    public static double apply(
             Function<Double, Double> f,  // функция
             Function<Double, Double> df, // производная
             double x0,                   // начальное приближение
