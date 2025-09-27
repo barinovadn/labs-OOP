@@ -1,9 +1,7 @@
-package tests;
+package functions;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import functions.MathFunction;
-import functions.IdentityFunction;
 
 class IdentityFunctionTest {
     @Test
