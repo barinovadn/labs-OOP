@@ -114,4 +114,53 @@ public class LinkedListTabulatedFunctionTest {
         assertEquals(10, f.getY(0));
     }
     
+    @Test
+    void testRemoveFirst() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.remove(0);
+        assertEquals(2, f.getCount());
+        assertEquals(2, f.getX(0));
+        assertEquals(3, f.getX(1));
+        assertEquals(2, f.leftBound());
+    }
+
+    @Test
+    void testRemoveLast() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.remove(2);
+        assertEquals(2, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(2, f.getX(1));
+        assertEquals(2, f.rightBound());
+    }
+
+    @Test
+    void testRemoveMiddle() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.remove(1);
+        assertEquals(2, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(3, f.getX(1));
+    }
+
+    @Test
+    void testRemoveSingle() {
+        double[] x = {1};
+        double[] y = {4};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.remove(0);
+        assertEquals(0, f.getCount());
+        assertNull(f.head);
+    }
+    
 }
