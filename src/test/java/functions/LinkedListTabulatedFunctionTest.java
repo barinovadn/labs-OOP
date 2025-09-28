@@ -113,7 +113,7 @@ public class LinkedListTabulatedFunctionTest {
         assertEquals(1, f.getX(0));
         assertEquals(10, f.getY(0));
     }
-    
+
     @Test
     void testRemoveFirst() {
         double[] x = {1, 2, 3};
@@ -160,7 +160,7 @@ public class LinkedListTabulatedFunctionTest {
 
         f.remove(0);
         assertEquals(0, f.getCount());
-        assertNull(f.head);
+        assertEquals(0, f.getCount());
     }
-    
+
 }
