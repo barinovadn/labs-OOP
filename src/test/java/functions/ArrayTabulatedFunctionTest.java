@@ -118,5 +118,51 @@ public class ArrayTabulatedFunctionTest {
         assertEquals(10, f.getY(1));
         assertEquals(4, f.getCount());
     }
-    
+
+    @Test
+    void testRemoveFirst() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        f.remove(0);
+        assertEquals(2, f.getCount());
+        assertEquals(2, f.getX(0));
+        assertEquals(3, f.getX(1));
+    }
+
+    @Test
+    void testRemoveLast() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        f.remove(2);
+        assertEquals(2, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(2, f.getX(1));
+    }
+
+    @Test
+    void testRemoveMiddle() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        f.remove(1);
+        assertEquals(2, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(3, f.getX(1));
+    }
+
+    @Test
+    void testRemoveSingle() {
+        double[] x = {1};
+        double[] y = {4};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        f.remove(0);
+        assertEquals(0, f.getCount());
+    }
+
 }
