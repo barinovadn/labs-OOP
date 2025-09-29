@@ -10,6 +10,8 @@
 .springBeans
 .sts4-cache
 
+### INTELLIJ IDEA TEST COVERAGE REPORTS
+htmlReport/
 
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 
