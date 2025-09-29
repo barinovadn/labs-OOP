@@ -124,7 +124,7 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
         if (x > xValues[count - 1]) return count;
 
         for (int i = 0; i < count - 1; i++) {
-            if (x >= xValues[i] && x < xValues[i + 1]) return i;
+            if (x < xValues[i + 1]) return i;
         }
         return count - 1;
     }

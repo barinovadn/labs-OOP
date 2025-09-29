@@ -45,7 +45,6 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
             current = current.next;
         }
 
-        current = head;
         Node newNode = new Node();
         newNode.x = x;
         newNode.y = y;
@@ -56,14 +55,9 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
             head.prev.next = newNode;
             head.prev = newNode;
             head = newNode;
-        } else if (x > head.prev.x) {
-            Node last = head.prev;
-            newNode.next = head;
-            newNode.prev = last;
-            last.next = newNode;
-            head.prev = newNode;
         } else {
-            while (current.next != head && current.next.x < x) {
+            current = head;
+            while (x > current.next.x && current.next != head) {
                 current = current.next;
             }
             newNode.next = current.next;
@@ -175,22 +169,18 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
 
         Node current = head;
         for (int i = 0; i < count - 1; i++) {
-            if (x >= current.x && x < current.next.x) return i;
+            if (x < current.next.x) return i;
             current = current.next;
         }
         return count - 1;
     }
 
     protected Node floorNodeOfX(double x) {
-        if (x < head.x) return head;
-        if (x > head.prev.x) return head.prev;
-
         Node current = head;
-        for (int i = 0; i < count - 1; i++) {
-            if (x >= current.x && x < current.next.x) return current;
+        while (x >= current.next.x) {
             current = current.next;
         }
-        return head.prev;
+        return current;
     }
 
     public double apply(double x) {
