@@ -49,6 +49,7 @@ public class ArrayTabulatedFunctionTest {
         assertEquals(1, f.indexOfX(2));
         assertEquals(2, f.indexOfY(6));
         assertEquals(-1, f.indexOfX(5));
+        assertEquals(-1, f.indexOfY(100));
     }
 
     @Test
@@ -62,14 +63,99 @@ public class ArrayTabulatedFunctionTest {
     }
 
     @Test
-    void testApply() {
+    void testApplyExactMatch() {
         double[] x = {0, 1, 2};
         double[] y = {0, 1, 4};
         ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
 
         assertEquals(0, f.apply(0));
         assertEquals(1, f.apply(1));
+        assertEquals(4, f.apply(2));
+    }
+
+    @Test
+    void testApplyInterpolation() {
+        double[] x = {0, 1, 2};
+        double[] y = {0, 1, 4};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertEquals(0.5, f.apply(0.5), 0.001);
         assertEquals(2.5, f.apply(1.5), 0.001);
+        assertEquals(3.25, f.apply(1.75), 0.001);
+    }
+
+    @Test
+    void testApplyExtrapolationLeft() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        double result = f.apply(0);
+        assertEquals(-2.0, result, 0.001);
+    }
+
+    @Test
+    void testApplyExtrapolationRight() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        double result = f.apply(4);
+        assertEquals(14.0, result, 0.001);
+    }
+
+    @Test
+    void testFloorIndexOfX() {
+        double[] x = {1, 3, 5};
+        double[] y = {2, 4, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertEquals(0, f.floorIndexOfX(1));
+        assertEquals(0, f.floorIndexOfX(2));
+        assertEquals(1, f.floorIndexOfX(3));
+        assertEquals(1, f.floorIndexOfX(4));
+        assertEquals(2, f.floorIndexOfX(5));
+        assertEquals(3, f.floorIndexOfX(6));
+    }
+
+    @Test
+    void testExtrapolateLeft() {
+        double[] x = {2, 4, 6};
+        double[] y = {4, 8, 12};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        double result = f.extrapolateLeft(0);
+        assertEquals(0.0, result, 0.001);
+    }
+
+    @Test
+    void testExtrapolateRight() {
+        double[] x = {2, 4, 6};
+        double[] y = {4, 8, 12};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        double result = f.extrapolateRight(8);
+        assertEquals(16.0, result, 0.001);
+    }
+
+    @Test
+    void testInterpolateWithIndex() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        double result = f.interpolate(1.5, 0);
+        assertEquals(2.5, result, 0.001);
+    }
+
+    @Test
+    void testInterpolateWithCoordinates() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        double result = f.interpolate(1.5, 1, 2, 1, 4);
+        assertEquals(2.5, result, 0.001);
     }
 
     @Test
