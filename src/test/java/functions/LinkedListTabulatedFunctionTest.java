@@ -163,4 +163,97 @@ public class LinkedListTabulatedFunctionTest {
         assertEquals(0, f.getCount());
     }
 
+    @Test
+    void testIndexOf() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(1, f.indexOfX(2));
+        assertEquals(2, f.indexOfY(6));
+        assertEquals(-1, f.indexOfX(5));
+        assertEquals(-1, f.indexOfY(100));
+    }
+
+    @Test
+    void testFloorIndexOfX() {
+        double[] x = {1, 3, 5};
+        double[] y = {2, 4, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(0, f.floorIndexOfX(1));
+        assertEquals(0, f.floorIndexOfX(2));
+        assertEquals(1, f.floorIndexOfX(3));
+        assertEquals(1, f.floorIndexOfX(4));
+        assertEquals(2, f.floorIndexOfX(5));
+        assertEquals(3, f.floorIndexOfX(6));
+    }
+
+    @Test
+    void testExtrapolation() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        double leftResult = f.apply(0);
+        double rightResult = f.apply(4);
+        assertEquals(-2.0, leftResult, 0.001);
+        assertEquals(14.0, rightResult, 0.001);
+    }
+
+    @Test
+    void testInterpolateWithIndex() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        double result = f.interpolate(1.5, 0);
+        assertEquals(2.5, result, 0.001);
+    }
+
+    @Test
+    void testConstructorFunctionWithXFromEqualToXTo() {
+        MathFunction source = x -> x * x;
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(source, 3, 3, 5);
+
+        assertEquals(5, f.getCount());
+        for (int i = 0; i < 5; i++) {
+            assertEquals(3, f.getX(i));
+            assertEquals(9, f.getY(i));
+        }
+    }
+
+    @Test
+    void testConstructorFunctionWithXFromGreaterThanXTo() {
+        MathFunction source = x -> 2 * x;
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(source, 10, 5, 2);
+
+        assertEquals(2, f.getCount());
+        assertEquals(5, f.getX(0));
+        assertEquals(10, f.getX(1));
+        assertEquals(10, f.getY(0));
+        assertEquals(20, f.getY(1));
+    }
+
+    @Test
+    void testFloorIndexOfXEdgeCases() {
+        double[] x = {2, 4, 6};
+        double[] y = {4, 8, 12};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(0, f.floorIndexOfX(1));
+        assertEquals(3, f.floorIndexOfX(7));
+    }
+
+    @Test
+    void testFloorNodeOfXBoundaries() {
+        double[] x = {2, 4, 6};
+        double[] y = {4, 8, 12};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(2, f.apply(1), 0.001);
+        assertEquals(14, f.apply(7), 0.001);
+        assertEquals(12, f.apply(6), 0.001);
+    }
+
 }

@@ -30,6 +30,45 @@ public class MockTabulatedFunctionTest {
     }
 
     @Test
+    void testFloorIndexOfX() {
+        MockTabulatedFunction mock = new MockTabulatedFunction();
+
+        assertEquals(0, mock.floorIndexOfX(0.5));
+        assertEquals(0, mock.floorIndexOfX(1.0));
+        assertEquals(0, mock.floorIndexOfX(2.0));
+        assertEquals(1, mock.floorIndexOfX(3.0));
+        assertEquals(2, mock.floorIndexOfX(4.0));
+    }
+
+    @Test
+    void testGetters() {
+        MockTabulatedFunction mock = new MockTabulatedFunction();
+
+        assertEquals(2, mock.getCount());
+        assertEquals(1.0, mock.getX(0));
+        assertEquals(3.0, mock.getX(1));
+        assertEquals(2.0, mock.getY(0));
+        assertEquals(6.0, mock.getY(1));
+    }
+
+    @Test
+    void testIndexOfY() {
+        MockTabulatedFunction mock = new MockTabulatedFunction();
+
+        assertEquals(0, mock.indexOfY(2.0));
+        assertEquals(1, mock.indexOfY(6.0));
+        assertEquals(-1, mock.indexOfY(5.0));
+    }
+
+    @Test
+    void testSetY() {
+        MockTabulatedFunction mock = new MockTabulatedFunction();
+
+        mock.setY(0, 10.0);
+        assertEquals(2.0, mock.getY(0));
+    }
+
+    @Test
     void testApplyExtrapolation() {
         MockTabulatedFunction mock = new MockTabulatedFunction();
 

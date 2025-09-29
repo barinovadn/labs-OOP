@@ -16,6 +16,36 @@ public class NewtonMethodTest {
     }
 
     @Test
+    void testZeroDerivative() {
+        double result = NewtonMethod.apply(
+                x -> x * x - 2,
+                x -> 0.0,
+                1.0, 1e-10, 100
+        );
+        assertEquals(1.0, result, 1e-9);
+    }
+
+    @Test
+    void testQuickConvergence() {
+        double result = NewtonMethod.apply(
+                x -> x - 5,
+                x -> 1.0,
+                10.0, 1e-10, 100
+        );
+        assertEquals(5.0, result, 1e-9);
+    }
+
+    @Test
+    void testMaxIterationsReached() {
+        double result = NewtonMethod.apply(
+                x -> x * x - 2,
+                x -> 2 * x,
+                100.0, 1e-10, 5
+        );
+        assertTrue(result > 0);
+    }
+
+    @Test
     void testLinearEquation() {
         double result = NewtonMethod.apply(
                 x -> 2 * x - 4,
