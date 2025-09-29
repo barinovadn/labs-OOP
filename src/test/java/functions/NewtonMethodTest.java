@@ -36,6 +36,12 @@ public class NewtonMethodTest {
     }
 
     @Test
+    void testClassInstantiation() {
+        NewtonMethod method = new NewtonMethod();
+        assertNotNull(method);
+    }
+
+    @Test
     void testMaxIterationsReached() {
         double result = NewtonMethod.apply(
                 x -> x * x - 2,
