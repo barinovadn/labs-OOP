@@ -25,4 +25,11 @@ class BSplineTest {
         double result = BSpline.apply(2, 2, 1.5, knots);
         assertTrue(result > 0);
     }
+
+    @Test
+    void testBSplineWithZeroDenominator() {
+        double[] knots = {0, 1, 1, 2};
+        double result = BSpline.apply(0, 1, 0.5, knots);
+        assertTrue(result >= 0);
+    }
 }
