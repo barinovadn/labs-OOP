@@ -1,5 +1,6 @@
 package functions;
 
+import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,6 +12,15 @@ public class MockTabulatedFunctionTest {
 
         double result = mock.interpolate(2.0, 1.0, 3.0, 2.0, 6.0);
         assertEquals(4.0, result, 0.001);
+    }
+
+    @Test
+    void testIteratorThrowsException() {
+        MockTabulatedFunction function = new MockTabulatedFunction();
+
+        assertThrows(UnsupportedOperationException.class, () -> {
+            Iterator<Point> iterator = function.iterator();
+        });
     }
 
     @Test

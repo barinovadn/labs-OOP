@@ -1,5 +1,6 @@
 package functions;
 
+import java.util.Iterator;
 import exceptions.ArrayIsNotSortedException;
 import exceptions.DifferentLengthOfArraysException;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,17 @@ public class LinkedListTabulatedFunctionTest {
         double[] x = {1};
         double[] y = {2};
         assertThrows(IllegalArgumentException.class, () -> new LinkedListTabulatedFunction(x, y));
+    }
+
+    @Test
+    void testIteratorThrowsException() {
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {1.0, 4.0, 9.0};
+        LinkedListTabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
+
+        assertThrows(UnsupportedOperationException.class, () -> {
+            Iterator<Point> iterator = function.iterator();
+        });
     }
 
     @Test
