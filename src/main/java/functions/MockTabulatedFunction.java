@@ -1,5 +1,7 @@
 package functions;
 
+import java.util.Iterator;
+
 public class MockTabulatedFunction extends AbstractTabulatedFunction {
     private final double x0 = 1.0;
     private final double x1 = 3.0;
@@ -52,5 +54,9 @@ public class MockTabulatedFunction extends AbstractTabulatedFunction {
 
     protected double interpolate(double x, int floorIndex) {
         return interpolate(x, x0, x1, y0, y1);
+    }
+
+    public Iterator<Point> iterator() {
+        throw new UnsupportedOperationException();
     }
 }

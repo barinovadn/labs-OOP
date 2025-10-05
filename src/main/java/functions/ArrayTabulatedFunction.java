@@ -1,6 +1,7 @@
 package functions;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements Insertable, Removable {
     private double[] xValues;
@@ -161,5 +162,9 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
 
     protected double interpolate(double x, int floorIndex) {
         return interpolate(x, xValues[floorIndex], xValues[floorIndex + 1], yValues[floorIndex], yValues[floorIndex + 1]);
+    }
+
+    public Iterator<Point> iterator() {
+        throw new UnsupportedOperationException();
     }
 }
