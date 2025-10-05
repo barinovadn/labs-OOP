@@ -1,6 +1,7 @@
 package functions;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class LinkedListTabulatedFunction extends AbstractTabulatedFunction implements Insertable, Removable {
     private static class Node {
@@ -243,6 +244,23 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
     }
 
     public Iterator<Point> iterator() {
-        throw new UnsupportedOperationException();
+        return new Iterator<Point>() {
+            private Node current = head;
+            private int returnedCount = 0;
+
+            public boolean hasNext() {
+                return returnedCount < count;
+            }
+
+            public Point next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                Point point = new Point(current.x, current.y);
+                current = current.next;
+                returnedCount++;
+                return point;
+            }
+        };
     }
 }
