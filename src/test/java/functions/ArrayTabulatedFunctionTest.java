@@ -1,6 +1,7 @@
 package functions;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import exceptions.ArrayIsNotSortedException;
 import exceptions.DifferentLengthOfArraysException;
 import org.junit.jupiter.api.Test;
@@ -9,21 +10,83 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ArrayTabulatedFunctionTest {
 
     @Test
-    void testConstructorArraysWithInvalidLength() {
-        double[] x = {1};
-        double[] y = {2};
-        assertThrows(IllegalArgumentException.class, () -> new ArrayTabulatedFunction(x, y));
-    }
-
-    @Test
-    void testIteratorThrowsException() {
+    void testIteratorWithWhileLoop() {
         double[] xValues = {1.0, 2.0, 3.0};
         double[] yValues = {1.0, 4.0, 9.0};
         ArrayTabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
 
-        assertThrows(UnsupportedOperationException.class, () -> {
-            Iterator<Point> iterator = function.iterator();
-        });
+        Iterator<Point> iterator = function.iterator();
+        int count = 0;
+        while (iterator.hasNext()) {
+            Point point = iterator.next();
+            assertEquals(xValues[count], point.x);
+            assertEquals(yValues[count], point.y);
+            count++;
+        }
+        assertEquals(3, count);
+    }
+
+    @Test
+    void testIteratorNextReturnsCorrectPoints() {
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {1.0, 4.0, 9.0};
+        ArrayTabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+
+        Iterator<Point> iterator = function.iterator();
+
+        Point point1 = iterator.next();
+        assertEquals(1.0, point1.x);
+        assertEquals(1.0, point1.y);
+
+        Point point2 = iterator.next();
+        assertEquals(2.0, point2.x);
+        assertEquals(4.0, point2.y);
+
+        Point point3 = iterator.next();
+        assertEquals(3.0, point3.x);
+        assertEquals(9.0, point3.y);
+    }
+
+    @Test
+    void testIteratorNextThrowsAfterLastElement() {
+        double[] xValues = {1.0, 2.0};
+        double[] yValues = {1.0, 4.0};
+        ArrayTabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+
+        Iterator<Point> iterator = function.iterator();
+        iterator.next();
+        iterator.next();
+
+        assertThrows(NoSuchElementException.class, iterator::next);
+    }
+
+    @Test
+    void testIteratorHasNextBeforeFirstCall() {
+        double[] xValues = {1.0, 2.0};
+        double[] yValues = {1.0, 4.0};
+        ArrayTabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+
+        Iterator<Point> iterator = function.iterator();
+        assertTrue(iterator.hasNext());
+    }
+
+    @Test
+    void testIteratorHasNextAfterAllCalls() {
+        double[] xValues = {1.0, 2.0};
+        double[] yValues = {1.0, 4.0};
+        ArrayTabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+
+        Iterator<Point> iterator = function.iterator();
+        iterator.next();
+        iterator.next();
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void testConstructorArraysWithInvalidLength() {
+        double[] x = {1};
+        double[] y = {2};
+        assertThrows(IllegalArgumentException.class, () -> new ArrayTabulatedFunction(x, y));
     }
 
     @Test
