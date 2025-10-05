@@ -32,4 +32,9 @@ class BSplineTest {
         double result = BSpline.apply(0, 1, 0.5, knots);
         assertTrue(result >= 0);
     }
+
+    @Test
+    void fullCoverage() {
+        BSpline newBSpline = new BSpline();
+    }
 }
