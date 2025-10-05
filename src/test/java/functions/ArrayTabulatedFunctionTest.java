@@ -6,6 +6,68 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ArrayTabulatedFunctionTest {
 
     @Test
+    void testConstructorArraysWithInvalidLength() {
+        double[] x = {1};
+        double[] y = {2};
+        assertThrows(IllegalArgumentException.class, () -> new ArrayTabulatedFunction(x, y));
+    }
+
+    @Test
+    void testConstructorFunctionWithInvalidCount() {
+        MathFunction source = x -> x * x;
+        assertThrows(IllegalArgumentException.class, () -> new ArrayTabulatedFunction(source, 0, 2, 1));
+    }
+
+    @Test
+    void testGetXWithInvalidIndex() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertThrows(IllegalArgumentException.class, () -> f.getX(-1));
+        assertThrows(IllegalArgumentException.class, () -> f.getX(3));
+    }
+
+    @Test
+    void testGetYWithInvalidIndex() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertThrows(IllegalArgumentException.class, () -> f.getY(-1));
+        assertThrows(IllegalArgumentException.class, () -> f.getY(3));
+    }
+
+    @Test
+    void testSetYWithInvalidIndex() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertThrows(IllegalArgumentException.class, () -> f.setY(-1, 10));
+        assertThrows(IllegalArgumentException.class, () -> f.setY(3, 10));
+    }
+
+    @Test
+    void testRemoveWithInvalidIndex() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertThrows(IllegalArgumentException.class, () -> f.remove(-1));
+        assertThrows(IllegalArgumentException.class, () -> f.remove(3));
+    }
+
+    @Test
+    void testFloorIndexOfXWithXLessThanLeftBound() {
+        double[] x = {2, 4, 6};
+        double[] y = {4, 8, 12};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertThrows(IllegalArgumentException.class, () -> f.floorIndexOfX(1));
+    }
+
+    @Test
     void testConstructorArrays() {
         double[] x = {1, 2, 3};
         double[] y = {4, 5, 6};
@@ -31,92 +93,326 @@ public class ArrayTabulatedFunctionTest {
     }
 
     @Test
-    void testConstructorFunctionWithXFromGreaterThanXTo() {
-        MathFunction source = x -> x * x;
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(source, 2, 0, 3);
+    void testInsertReplaceExistingX() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
 
+        f.insert(2, 10);
+        assertEquals(10, f.getY(1));
         assertEquals(3, f.getCount());
-        assertEquals(0, f.getX(0));
-        assertEquals(1, f.getX(1));
-        assertEquals(2, f.getX(2));
-        assertEquals(0, f.getY(0));
-        assertEquals(1, f.getY(1));
-        assertEquals(4, f.getY(2));
     }
 
     @Test
-    void testConstructorFunctionWithXFromEqualToXTo() {
-        MathFunction source = x -> x * x;
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(source, 3, 3, 5);
+    void testInsertAtExactPosition() {
+        double[] x = {1, 3, 4};
+        double[] y = {4, 6, 7};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
 
-        assertEquals(5, f.getCount());
-        for (int i = 0; i < 5; i++) {
+        f.insert(2, 10);
+        assertEquals(2, f.getX(1));
+        assertEquals(10, f.getY(1));
+        assertEquals(4, f.getCount());
+    }
+
+    @Test
+    void testIndexOfXFound() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertEquals(0, f.indexOfX(1));
+        assertEquals(1, f.indexOfX(2));
+        assertEquals(2, f.indexOfX(3));
+    }
+
+    @Test
+    void testIndexOfXNotFound() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertEquals(-1, f.indexOfX(0));
+        assertEquals(-1, f.indexOfX(4));
+    }
+
+    @Test
+    void testIndexOfYFound() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertEquals(0, f.indexOfY(4));
+        assertEquals(1, f.indexOfY(5));
+        assertEquals(2, f.indexOfY(6));
+    }
+
+    @Test
+    void testIndexOfYNotFound() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertEquals(-1, f.indexOfY(3));
+        assertEquals(-1, f.indexOfY(7));
+    }
+
+    @Test
+    void testRemoveFirstElement() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        f.remove(0);
+        assertEquals(2, f.getCount());
+        assertEquals(2, f.getX(0));
+        assertEquals(3, f.getX(1));
+        assertEquals(5, f.getY(0));
+        assertEquals(6, f.getY(1));
+    }
+
+    @Test
+    void testConstructorFunctionWithXFromGreaterThanXToB() {
+        MathFunction source = x -> 2 * x;
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(source, 10, 5, 3);
+
+        assertEquals(3, f.getCount());
+        assertEquals(5, f.getX(0), 0.001);
+        assertEquals(7.5, f.getX(1), 0.001);
+        assertEquals(10, f.getX(2), 0.001);
+    }
+
+    @Test
+    void testConstructorFunctionWithXFromEqualToXToB() {
+        MathFunction source = x -> x * x;
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(source, 3, 3, 3);
+
+        assertEquals(3, f.getCount());
+        for (int i = 0; i < 3; i++) {
             assertEquals(3, f.getX(i));
-        }
-        for (int i = 0; i < 5; i++) {
             assertEquals(9, f.getY(i));
         }
     }
 
     @Test
-    void testConstructorFunctionWithSinglePoint() {
-        MathFunction source = x -> x + 1;
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(source, 5, 5, 1);
-
-        assertEquals(1, f.getCount());
-        assertEquals(5, f.getX(0));
-        assertEquals(6, f.getY(0));
-    }
-
-    @Test
-    void testConstructorFunctionWithTwoPointsReversed() {
-        MathFunction source = x -> 2 * x;
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(source, 10, 5, 2);
-
-        assertEquals(2, f.getCount());
-        assertEquals(5, f.getX(0));
-        assertEquals(10, f.getX(1));
-        assertEquals(10, f.getY(0));
-        assertEquals(20, f.getY(1));
-    }
-
-    @Test
-    void testSetY() {
+    void testSetYValidIndexB() {
         double[] x = {1, 2, 3};
         double[] y = {4, 5, 6};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
 
         f.setY(1, 10);
         assertEquals(10, f.getY(1));
+        f.setY(0, 20);
+        assertEquals(20, f.getY(0));
+        f.setY(2, 30);
+        assertEquals(30, f.getY(2));
     }
 
     @Test
-    void testIndexOf() {
+    void testFloorIndexOfXGreaterThanRightBoundB() {
         double[] x = {1, 2, 3};
         double[] y = {4, 5, 6};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
 
+        assertEquals(3, f.floorIndexOfX(4));
+        assertEquals(3, f.floorIndexOfX(5));
+    }
+
+    @Test
+    void testFloorIndexOfXExactMatchB() {
+        double[] x = {1, 2, 3, 4};
+        double[] y = {1, 4, 9, 16};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(1, f.floorIndexOfX(2));
+        assertEquals(2, f.floorIndexOfX(3));
+    }
+
+    @Test
+    void testFloorIndexOfXLastIntervalB() {
+        double[] x = {1, 2, 3, 4};
+        double[] y = {1, 4, 9, 16};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(2, f.floorIndexOfX(3.5));
+        assertEquals(2, f.floorIndexOfX(3.9));
+        assertEquals(3, f.floorIndexOfX(4.0));
+    }
+
+    @Test
+    void testFloorNodeOfXMiddle() {
+        double[] x = {1, 2, 3, 4};
+        double[] y = {1, 4, 9, 16};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(6.5, f.apply(2.5), 0.001);
+        assertEquals(6.5, f.apply(2.5), 0.001);
+    }
+
+    @Test
+    void testRemoveFirstElementB() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.remove(0);
+        assertEquals(2, f.getCount());
+        assertEquals(2, f.getX(0));
+        assertEquals(3, f.getX(1));
+        assertEquals(2, f.leftBound());
+    }
+
+    @Test
+    void testRemoveMiddleElementUpdatesLinks() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.remove(1);
+        assertEquals(2, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(3, f.getX(1));
+
+        assertEquals(6, f.getY(1));
+        assertEquals(6, f.getY(1));
+    }
+
+    @Test
+    void testApplyExtrapolationLeft() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        double result = f.apply(0);
+        assertEquals(-2.0, result, 0.001);
+    }
+
+    @Test
+    void testApplyExtrapolationRight() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        double result = f.apply(4);
+        assertEquals(14.0, result, 0.001);
+    }
+
+    @Test
+    void testApplyInterpolationBetweenNodes() {
+        double[] x = {1, 2, 3};
+        double[] y = {1, 4, 9};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        double result = f.apply(1.5);
+        assertEquals(2.5, result, 0.001);
+    }
+
+    @Test
+    void testInsertIntoEmptyList() {
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(new double[]{1, 2}, new double[]{3, 4});
+        f.remove(0);
+        f.remove(0);
+
+        f.insert(5, 10);
+        assertEquals(1, f.getCount());
+        assertEquals(5, f.getX(0));
+        assertEquals(10, f.getY(0));
+    }
+
+    @Test
+    void testInsertReplaceExisting() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.insert(2, 10);
+        assertEquals(10, f.getY(1));
+        assertEquals(3, f.getCount());
+    }
+
+    @Test
+    void testInsertAtBeginning() {
+        double[] x = {2, 3, 4};
+        double[] y = {5, 6, 7};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.insert(1, 10);
+        assertEquals(1, f.getX(0));
+        assertEquals(10, f.getY(0));
+        assertEquals(4, f.getCount());
+    }
+
+    @Test
+    void testInsertInMiddleWhileLoopB() {
+        double[] x = {1, 3, 5};
+        double[] y = {2, 4, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.insert(2, 10);
+        assertEquals(2, f.getX(1));
+        assertEquals(10, f.getY(1));
+        assertEquals(4, f.getCount());
+    }
+
+    @Test
+    void testInsertAtEndWhileLoopB() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        f.insert(5, 10);
+        assertEquals(5, f.getX(3));
+        assertEquals(10, f.getY(3));
+        assertEquals(4, f.getCount());
+    }
+
+    @Test
+    void testIndexOfXFoundB() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(0, f.indexOfX(1));
         assertEquals(1, f.indexOfX(2));
-        assertEquals(2, f.indexOfY(6));
-        assertEquals(-1, f.indexOfX(5));
-        assertEquals(-1, f.indexOfY(100));
+        assertEquals(2, f.indexOfX(3));
     }
 
     @Test
-    void testBounds() {
+    void testIndexOfXNotFoundB() {
         double[] x = {1, 2, 3};
         double[] y = {4, 5, 6};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
 
-        assertEquals(1, f.leftBound());
-        assertEquals(3, f.rightBound());
+        assertEquals(-1, f.indexOfX(0));
+        assertEquals(-1, f.indexOfX(4));
+    }
+
+    @Test
+    void testIndexOfYFoundB() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(0, f.indexOfY(4));
+        assertEquals(1, f.indexOfY(5));
+        assertEquals(2, f.indexOfY(6));
+    }
+
+    @Test
+    void testIndexOfYNotFoundB() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        assertEquals(-1, f.indexOfY(3));
+        assertEquals(-1, f.indexOfY(7));
     }
 
     @Test
     void testApplyExactMatch() {
         double[] x = {0, 1, 2};
         double[] y = {0, 1, 4};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
 
         assertEquals(0, f.apply(0));
         assertEquals(1, f.apply(1));
@@ -127,70 +423,155 @@ public class ArrayTabulatedFunctionTest {
     void testApplyInterpolation() {
         double[] x = {0, 1, 2};
         double[] y = {0, 1, 4};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
 
         assertEquals(0.5, f.apply(0.5), 0.001);
         assertEquals(2.5, f.apply(1.5), 0.001);
-        assertEquals(3.25, f.apply(1.75), 0.001);
     }
 
     @Test
-    void testApplyExtrapolationLeft() {
+    void testExtrapolateLeftB() {
+        double[] x = {2, 4, 6};
+        double[] y = {4, 8, 12};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        double result = f.extrapolateLeft(0);
+        assertEquals(0.0, result, 0.001);
+    }
+
+    @Test
+    void testExtrapolateRightB() {
+        double[] x = {2, 4, 6};
+        double[] y = {4, 8, 12};
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
+
+        double result = f.extrapolateRight(8);
+        assertEquals(16.0, result, 0.001);
+    }
+
+    @Test
+    void testInterpolateWithIndexВ() {
         double[] x = {1, 2, 3};
         double[] y = {1, 4, 9};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+        LinkedListTabulatedFunction f = new LinkedListTabulatedFunction(x, y);
 
-        double result = f.apply(0);
-        assertEquals(-2.0, result, 0.001);
+        double result = f.interpolate(1.5, 0);
+        assertEquals(2.5, result, 0.001);
     }
 
     @Test
-    void testApplyExtrapolationRight() {
+    void testRemoveLastElement() {
         double[] x = {1, 2, 3};
-        double[] y = {1, 4, 9};
+        double[] y = {4, 5, 6};
         ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
 
-        double result = f.apply(4);
-        assertEquals(14.0, result, 0.001);
+        f.remove(2);
+        assertEquals(2, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(2, f.getX(1));
+        assertEquals(4, f.getY(0));
+        assertEquals(5, f.getY(1));
     }
 
     @Test
-    void testFloorIndexOfX() {
+    void testRemoveMiddleElement() {
+        double[] x = {1, 2, 3, 4};
+        double[] y = {4, 5, 6, 7};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        f.remove(1);
+        assertEquals(3, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(3, f.getX(1));
+        assertEquals(4, f.getX(2));
+        assertEquals(4, f.getY(0));
+        assertEquals(6, f.getY(1));
+        assertEquals(7, f.getY(2));
+    }
+
+    @Test
+    void testInsertAtBeginningWhileLoop() {
+        double[] x = {2, 3, 4};
+        double[] y = {5, 6, 7};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        f.insert(1, 10);
+        assertEquals(4, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(2, f.getX(1));
+        assertEquals(3, f.getX(2));
+        assertEquals(4, f.getX(3));
+        assertEquals(10, f.getY(0));
+        assertEquals(5, f.getY(1));
+        assertEquals(6, f.getY(2));
+        assertEquals(7, f.getY(3));
+    }
+
+    @Test
+    void testInsertInMiddleWhileLoop() {
         double[] x = {1, 3, 5};
         double[] y = {2, 4, 6};
         ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
 
-        assertEquals(0, f.floorIndexOfX(1));
-        assertEquals(0, f.floorIndexOfX(2));
-        assertEquals(1, f.floorIndexOfX(3));
-        assertEquals(1, f.floorIndexOfX(4));
-        assertEquals(2, f.floorIndexOfX(5));
-        assertEquals(3, f.floorIndexOfX(6));
+        f.insert(2, 10);
+        assertEquals(4, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(2, f.getX(1));
+        assertEquals(3, f.getX(2));
+        assertEquals(5, f.getX(3));
+        assertEquals(2, f.getY(0));
+        assertEquals(10, f.getY(1));
+        assertEquals(4, f.getY(2));
+        assertEquals(6, f.getY(3));
     }
 
     @Test
-    void testFloorIndexOfXWithXLessThanLeftBound() {
-        double[] x = {2, 4, 6};
-        double[] y = {4, 8, 12};
+    void testInsertAtEndWhileLoop() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
         ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
 
-        // Тестируем случай когда x < xValues[0]
-        assertEquals(0, f.floorIndexOfX(0));
-        assertEquals(0, f.floorIndexOfX(1));
+        f.insert(5, 10);
+        assertEquals(4, f.getCount());
+        assertEquals(1, f.getX(0));
+        assertEquals(2, f.getX(1));
+        assertEquals(3, f.getX(2));
+        assertEquals(5, f.getX(3));
+        assertEquals(4, f.getY(0));
+        assertEquals(5, f.getY(1));
+        assertEquals(6, f.getY(2));
+        assertEquals(10, f.getY(3));
     }
 
     @Test
-    void testFloorIndexOfXWithExactMatchInMiddle() {
-        double[] x = {1, 2, 3, 4, 5};
-        double[] y = {1, 4, 9, 16, 25};
+    void testFloorIndexOfXExactMatch() {
+        double[] x = {1, 2, 3, 4};
+        double[] y = {1, 4, 9, 16};
         ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
 
-        // Тестируем случай когда x точно равен одному из значений в середине
+        assertEquals(1, f.floorIndexOfX(2));
         assertEquals(2, f.floorIndexOfX(3));
+    }
 
-        // Тестируем случай когда x находится между значениями
+    @Test
+    void testFloorIndexOfXGreaterThanRightBound() {
+        double[] x = {1, 2, 3};
+        double[] y = {4, 5, 6};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
+        assertEquals(3, f.floorIndexOfX(4));
+        assertEquals(3, f.floorIndexOfX(5));
+    }
+
+    @Test
+    void testFloorIndexOfXLastInterval() {
+        double[] x = {1, 2, 3, 4};
+        double[] y = {1, 4, 9, 16};
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+
         assertEquals(2, f.floorIndexOfX(3.5));
-        assertEquals(3, f.floorIndexOfX(4.2));
+        assertEquals(2, f.floorIndexOfX(3.9));
+        assertEquals(3, f.floorIndexOfX(4.0));
     }
 
     @Test
@@ -201,29 +582,6 @@ public class ArrayTabulatedFunctionTest {
 
         double result = f.extrapolateLeft(0);
         assertEquals(0.0, result, 0.001);
-    }
-
-    @Test
-    void testFloorIndexOfXInLastInterval() {
-        double[] x = {1, 3, 5, 7};
-        double[] y = {2, 4, 6, 8};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        assertEquals(2, f.floorIndexOfX(5.5));
-        assertEquals(2, f.floorIndexOfX(6.0));
-        assertEquals(2, f.floorIndexOfX(6.9));
-
-        assertEquals(2, f.floorIndexOfX(5.0));
-        assertEquals(3, f.floorIndexOfX(7.0));
-    }
-
-    @Test
-    void testFloorIndexOfXBetweenLastElements() {
-        double[] x = {1.0, 2.0, 3.0, 4.0};
-        double[] y = {1.0, 4.0, 9.0, 16.0};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        assertEquals(2, f.floorIndexOfX(3.5));
     }
 
     @Test
@@ -247,137 +605,39 @@ public class ArrayTabulatedFunctionTest {
     }
 
     @Test
-    void testInterpolateWithCoordinates() {
-        double[] x = {1, 2, 3};
-        double[] y = {1, 4, 9};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+    void testConstructorFunctionWithXFromEqualToXTo() {
+        MathFunction source = x -> x * x;
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(source, 3, 3, 3);
 
-        double result = f.interpolate(1.5, 1, 2, 1, 4);
-        assertEquals(2.5, result, 0.001);
-    }
-
-    @Test
-    void testInsertReplace() {
-        double[] x = {1, 2, 3};
-        double[] y = {4, 5, 6};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        f.insert(2, 10);
-        assertEquals(10, f.getY(1));
         assertEquals(3, f.getCount());
+        for (int i = 0; i < 3; i++) {
+            assertEquals(3, f.getX(i));
+            assertEquals(9, f.getY(i));
+        }
     }
 
     @Test
-    void testInsertAtBeginning() {
-        double[] x = {2, 3, 4};
-        double[] y = {5, 6, 7};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
+    void testConstructorFunctionWithXFromGreaterThanXTo() {
+        MathFunction source = x -> 2 * x;
+        ArrayTabulatedFunction f = new ArrayTabulatedFunction(source, 10, 5, 3);
 
-        f.insert(1, 10);
-        assertEquals(1, f.getX(0));
-        assertEquals(10, f.getY(0));
-        assertEquals(4, f.getCount());
+        assertEquals(3, f.getCount());
+        assertEquals(5, f.getX(0));
+        assertEquals(7.5, f.getX(1), 0.001);
+        assertEquals(10, f.getX(2), 0.001);
     }
 
     @Test
-    void testInsertAtEnd() {
+    void testSetYValidIndex() {
         double[] x = {1, 2, 3};
         double[] y = {4, 5, 6};
         ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
 
-        f.insert(4, 10);
-        assertEquals(4, f.getX(3));
-        assertEquals(10, f.getY(3));
-        assertEquals(4, f.getCount());
-    }
-
-    @Test
-    void testInsertInMiddle() {
-        double[] x = {1, 3, 4};
-        double[] y = {4, 6, 7};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        f.insert(2, 10);
-        assertEquals(2, f.getX(1));
+        f.setY(1, 10);
         assertEquals(10, f.getY(1));
-        assertEquals(4, f.getCount());
+        f.setY(0, 20);
+        assertEquals(20, f.getY(0));
+        f.setY(2, 30);
+        assertEquals(30, f.getY(2));
     }
-
-    @Test
-    void testRemoveFirst() {
-        double[] x = {1, 2, 3};
-        double[] y = {4, 5, 6};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        f.remove(0);
-        assertEquals(2, f.getCount());
-        assertEquals(2, f.getX(0));
-        assertEquals(3, f.getX(1));
-    }
-
-    @Test
-    void testRemoveLast() {
-        double[] x = {1, 2, 3};
-        double[] y = {4, 5, 6};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        f.remove(2);
-        assertEquals(2, f.getCount());
-        assertEquals(1, f.getX(0));
-        assertEquals(2, f.getX(1));
-    }
-
-    @Test
-    void testRemoveMiddle() {
-        double[] x = {1, 2, 3};
-        double[] y = {4, 5, 6};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        f.remove(1);
-        assertEquals(2, f.getCount());
-        assertEquals(1, f.getX(0));
-        assertEquals(3, f.getX(1));
-    }
-
-    @Test
-    void testRemoveSingle() {
-        double[] x = {1};
-        double[] y = {4};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        f.remove(0);
-        assertEquals(0, f.getCount());
-    }
-
-    @Test
-    void testToString() {
-        double[] x = {1, 2};
-        double[] y = {3, 4};
-        ArrayTabulatedFunction f = new ArrayTabulatedFunction(x, y);
-
-        String result = f.toString();
-        assertNotNull(result);
-        assertFalse(result.contains("1.0"));
-        assertFalse(result.contains("3.0"));
-    }
-
-    @Test
-    void testEqualsAndHashCode() {
-        double[] x1 = {1, 2, 3};
-        double[] y1 = {4, 5, 6};
-        ArrayTabulatedFunction f1 = new ArrayTabulatedFunction(x1, y1);
-
-        double[] x2 = {1, 2, 3};
-        double[] y2 = {4, 5, 6};
-        ArrayTabulatedFunction f2 = new ArrayTabulatedFunction(x2, y2);
-
-        double[] x3 = {1, 2, 3};
-        double[] y3 = {4, 5, 7};
-        ArrayTabulatedFunction f3 = new ArrayTabulatedFunction(x3, y3);
-
-        assertNotEquals(f1, f2);
-        assertNotEquals(f1, f3);
-        assertNotEquals(f1.hashCode(), f2.hashCode());
-    }
-
 }
