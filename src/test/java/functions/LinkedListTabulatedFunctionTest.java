@@ -1,5 +1,7 @@
 package functions;
 
+import exceptions.ArrayIsNotSortedException;
+import exceptions.DifferentLengthOfArraysException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,6 +12,17 @@ public class LinkedListTabulatedFunctionTest {
         double[] x = {1};
         double[] y = {2};
         assertThrows(IllegalArgumentException.class, () -> new LinkedListTabulatedFunction(x, y));
+    }
+
+    @Test
+    void testConstructorWithInvalidArrays() {
+        double[] xValues = {1, 2, 3};
+        double[] yValues = {1, 2};
+        assertThrows(DifferentLengthOfArraysException.class, () -> new LinkedListTabulatedFunction(xValues, yValues));
+
+        double[] xNotSorted = {1, 3, 2};
+        double[] yNotSorted = {1, 2, 3};
+        assertThrows(ArrayIsNotSortedException.class, () -> new LinkedListTabulatedFunction(xNotSorted, yNotSorted));
     }
 
     @Test
