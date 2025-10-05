@@ -1,6 +1,7 @@
 package functions;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import exceptions.ArrayIsNotSortedException;
 import exceptions.DifferentLengthOfArraysException;
 import org.junit.jupiter.api.Test;
@@ -16,14 +17,44 @@ public class LinkedListTabulatedFunctionTest {
     }
 
     @Test
-    void testIteratorThrowsException() {
-        double[] xValues = {1.0, 2.0, 3.0};
-        double[] yValues = {1.0, 4.0, 9.0};
+    void testIteratorHasNextBeforeFirstCall() {
+        double[] xValues = {1.0, 2.0};
+        double[] yValues = {1.0, 4.0};
         LinkedListTabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
 
-        assertThrows(UnsupportedOperationException.class, () -> {
-            Iterator<Point> iterator = function.iterator();
+        Iterator<Point> iterator = function.iterator();
+        assertTrue(iterator.hasNext());
+    }
+
+    @Test
+    void testIteratorHasNextAfterAllCalls() {
+        double[] xValues = {1.0, 2.0};
+        double[] yValues = {1.0, 4.0};
+        LinkedListTabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
+
+        Iterator<Point> iterator = function.iterator();
+        iterator.next();
+        iterator.next();
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void testIteratorNextThrowsOnEmptyList() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new LinkedListTabulatedFunction(new double[]{1.0}, new double[]{1.0});
         });
+    }
+    @Test
+    void testIteratorNextThrowsAfterLastElement() {
+        double[] xValues = {1.0, 2.0};
+        double[] yValues = {1.0, 4.0};
+        LinkedListTabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
+
+        Iterator<Point> iterator = function.iterator();
+        iterator.next();
+        iterator.next();
+
+        assertThrows(NoSuchElementException.class, iterator::next);
     }
 
     @Test
