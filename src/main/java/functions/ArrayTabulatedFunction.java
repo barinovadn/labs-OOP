@@ -8,12 +8,18 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
     private int count;
 
     public ArrayTabulatedFunction(double[] xValues, double[] yValues) {
+        if (xValues.length < 2) {
+            throw new IllegalArgumentException("Length is less than minimum");
+        }
         this.count = xValues.length;
         this.xValues = Arrays.copyOf(xValues, count);
         this.yValues = Arrays.copyOf(yValues, count);
     }
 
     public ArrayTabulatedFunction(MathFunction source, double xFrom, double xTo, int count) {
+        if (count < 2) {
+            throw new IllegalArgumentException("Length is less than minimum");
+        }
         this.count = count;
         this.xValues = new double[count];
         this.yValues = new double[count];
@@ -35,6 +41,43 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
                 yValues[i] = source.apply(xValues[i]);
             }
         }
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public double getX(int index) {
+        if (index < 0 || index >= count) {
+            throw new IllegalArgumentException("Index out of bounds");
+        }
+        return xValues[index];
+    }
+
+    public double getY(int index) {
+        if (index < 0 || index >= count) {
+            throw new IllegalArgumentException("Index out of bounds");
+        }
+        return yValues[index];
+    }
+
+    public void setY(int index, double value) {
+        if (index < 0 || index >= count) {
+            throw new IllegalArgumentException("Index out of bounds");
+        }
+        yValues[index] = value;
+    }
+
+    protected int floorIndexOfX(double x) {
+        if (x < xValues[0]) {
+            throw new IllegalArgumentException("X is less than left bound");
+        }
+        if (x > xValues[count - 1]) return count;
+
+        for (int i = 0; i < count - 1; i++) {
+            if (x < xValues[i + 1]) return i;
+        }
+        return count - 1;
     }
 
     public void insert(double x, double y) {
@@ -67,6 +110,9 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
     }
 
     public void remove(int index) {
+        if (index < 0 || index >= count) {
+            throw new IllegalArgumentException("Index out of bounds");
+        }
         double[] newXValues = new double[count - 1];
         double[] newYValues = new double[count - 1];
 
@@ -79,22 +125,6 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
         xValues = newXValues;
         yValues = newYValues;
         count--;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public double getX(int index) {
-        return xValues[index];
-    }
-
-    public double getY(int index) {
-        return yValues[index];
-    }
-
-    public void setY(int index, double value) {
-        yValues[index] = value;
     }
 
     public double leftBound() {
@@ -117,16 +147,6 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
             if (yValues[i] == y) return i;
         }
         return -1;
-    }
-
-    protected int floorIndexOfX(double x) {
-        if (x < xValues[0]) return 0;
-        if (x > xValues[count - 1]) return count;
-
-        for (int i = 0; i < count - 1; i++) {
-            if (x < xValues[i + 1]) return i;
-        }
-        return count - 1;
     }
 
     protected double extrapolateLeft(double x) {
