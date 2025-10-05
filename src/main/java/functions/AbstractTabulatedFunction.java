@@ -14,6 +14,20 @@ public abstract class AbstractTabulatedFunction implements TabulatedFunction {
         return leftY + (rightY - leftY) * (x - leftX) / (rightX - leftX);
     }
 
+    public static void checkLengthIsTheSame(double[] xValues, double[] yValues) {
+        if (xValues.length != yValues.length) {
+            throw new exceptions.DifferentLengthOfArraysException("Arrays have different lengths");
+        }
+    }
+
+    public static void checkSorted(double[] xValues) {
+        for (int i = 1; i < xValues.length; i++) {
+            if (xValues[i] <= xValues[i - 1]) {
+                throw new exceptions.ArrayIsNotSortedException("Array is not sorted");
+            }
+        }
+    }
+
     public double apply(double x) {
         if (x < leftBound()) {
             return extrapolateLeft(x);
