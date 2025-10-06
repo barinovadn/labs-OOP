@@ -11,6 +11,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
+import java.io.ObjectOutputStream;
 import java.util.Iterator;
 
 public final class FunctionsIO {
@@ -68,6 +69,12 @@ public final class FunctionsIO {
         } catch (java.text.ParseException e) {
             throw new IOException("Error parsing number", e);
         }
+    }
+
+    public static void serialize(BufferedOutputStream stream, TabulatedFunction function) throws IOException {
+        ObjectOutputStream objectStream = new ObjectOutputStream(stream);
+        objectStream.writeObject(function);
+        objectStream.flush();
     }
 
     public static TabulatedFunction readTabulatedFunction(BufferedInputStream inputStream, TabulatedFunctionFactory factory) throws IOException {
