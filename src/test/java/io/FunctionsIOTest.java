@@ -37,4 +37,19 @@ public class FunctionsIOTest {
         constructor.setAccessible(true);
         assertThrows(InvocationTargetException.class, () -> constructor.newInstance());
     }
+
+    @Test
+    void testWriteTabulatedFunctionBinary() throws IOException {
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {10.0, 20.0, 30.0};
+        TabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+
+        java.io.ByteArrayOutputStream byteStream = new java.io.ByteArrayOutputStream();
+        java.io.BufferedOutputStream bufferedStream = new java.io.BufferedOutputStream(byteStream);
+
+        FunctionsIO.writeTabulatedFunction(bufferedStream, function);
+
+        byte[] result = byteStream.toByteArray();
+        assertTrue(result.length > 0);
+    }
 }
