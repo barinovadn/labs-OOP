@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import functions.LinkedListTabulatedFunction;
 import functions.TabulatedFunction;
 import functions.StrictTabulatedFunction;
+import functions.UnmodifiableTabulatedFunction;
 
 public class LinkedListTabulatedFunctionFactoryTest {
 
@@ -39,5 +40,35 @@ public class LinkedListTabulatedFunctionFactoryTest {
         assertEquals(20.0, function.apply(2.0), 1e-9);
 
         assertThrows(UnsupportedOperationException.class, () -> function.apply(1.5));
+    }
+
+    @Test
+    void testCreateUnmodifiableLinkedListTabulatedFunction() {
+        TabulatedFunctionFactory factory = new LinkedListTabulatedFunctionFactory();
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {10.0, 20.0, 30.0};
+
+        TabulatedFunction function = factory.createUnmodifiable(xValues, yValues);
+
+        assertTrue(function instanceof UnmodifiableTabulatedFunction);
+        assertEquals(3, function.getCount());
+        assertEquals(20.0, function.apply(2.0), 1e-9);
+
+        assertThrows(UnsupportedOperationException.class, () -> function.setY(0, 15.0));
+    }
+
+    @Test
+    void testCreateStrictUnmodifiableLinkedListTabulatedFunction() {
+        TabulatedFunctionFactory factory = new LinkedListTabulatedFunctionFactory();
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {10.0, 20.0, 30.0};
+
+        TabulatedFunction function = factory.createStrictUnmodifiable(xValues, yValues);
+
+        assertEquals(3, function.getCount());
+        assertEquals(20.0, function.apply(2.0), 1e-9);
+
+        assertThrows(UnsupportedOperationException.class, () -> function.apply(1.5));
+        assertThrows(UnsupportedOperationException.class, () -> function.setY(0, 15.0));
     }
 }
