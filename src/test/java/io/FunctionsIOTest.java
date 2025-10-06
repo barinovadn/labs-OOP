@@ -167,5 +167,27 @@ public class FunctionsIOTest {
 
         tempFile.delete();
     }
-    
+
+    @org.junit.jupiter.api.AfterAll
+    static void cleanup() {
+        java.io.File tempDir = new java.io.File("temp");
+        if (tempDir.exists()) {
+            deleteDirectory(tempDir);
+        }
+    }
+
+    static void deleteDirectory(java.io.File dir) {
+        java.io.File[] files = dir.listFiles();
+        if (files != null) {
+            for (java.io.File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        dir.delete();
+    }
+
 }
