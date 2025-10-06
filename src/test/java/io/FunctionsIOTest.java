@@ -137,6 +137,38 @@ public class FunctionsIOTest {
     }
 
     @Test
+    void testSerializeDeserializeJson() throws IOException {
+        java.io.File tempFile = new java.io.File("temp/json_test.json");
+        tempFile.getParentFile().mkdirs();
+
+        try (java.io.FileWriter fileWriter = new java.io.FileWriter(tempFile);
+             java.io.BufferedWriter bufferedWriter = new java.io.BufferedWriter(fileWriter)) {
+
+            double[] xValues = {1.0, 2.0, 3.0};
+            double[] yValues = {10.0, 20.0, 30.0};
+            ArrayTabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+
+            FunctionsIO.serializeJson(bufferedWriter, function);
+        }
+
+        try (java.io.FileReader fileReader = new java.io.FileReader(tempFile);
+             java.io.BufferedReader bufferedReader = new java.io.BufferedReader(fileReader)) {
+
+            ArrayTabulatedFunction deserializedFunction = FunctionsIO.deserializeJson(bufferedReader);
+
+            assertEquals(3, deserializedFunction.getCount());
+            assertEquals(1.0, deserializedFunction.getX(0), 1e-9);
+            assertEquals(10.0, deserializedFunction.getY(0), 1e-9);
+            assertEquals(2.0, deserializedFunction.getX(1), 1e-9);
+            assertEquals(20.0, deserializedFunction.getY(1), 1e-9);
+            assertEquals(3.0, deserializedFunction.getX(2), 1e-9);
+            assertEquals(30.0, deserializedFunction.getY(2), 1e-9);
+        }
+
+        tempFile.delete();
+    }
+
+    @Test
     void testSerializeDeserialize() throws IOException, ClassNotFoundException {
         java.io.File tempFile = new java.io.File("temp/serialized_test.bin");
         tempFile.getParentFile().mkdirs();
