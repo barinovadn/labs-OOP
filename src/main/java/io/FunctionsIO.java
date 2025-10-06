@@ -1,6 +1,7 @@
 package io;
 
 import functions.Point;
+import functions.ArrayTabulatedFunction;
 import functions.TabulatedFunction;
 import functions.factory.TabulatedFunctionFactory;
 import java.io.BufferedWriter;
@@ -45,6 +46,48 @@ public final class FunctionsIO {
         }
 
         dataOutputStream.flush();
+    }
+
+    public static void serializeXml(BufferedWriter writer, ArrayTabulatedFunction function) throws IOException {
+        writer.write("<ArrayTabulatedFunction>");
+        writer.write("<count>" + function.getCount() + "</count>");
+        for (int i = 0; i < function.getCount(); i++) {
+            writer.write("<point>");
+            writer.write("<x>" + function.getX(i) + "</x>");
+            writer.write("<y>" + function.getY(i) + "</y>");
+            writer.write("</point>");
+        }
+        writer.write("</ArrayTabulatedFunction>");
+        writer.flush();
+    }
+
+    public static ArrayTabulatedFunction deserializeXml(BufferedReader reader) throws IOException {
+        StringBuilder xml = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            xml.append(line);
+        }
+
+        String content = xml.toString();
+        int count = Integer.parseInt(extractTag(content, "count"));
+
+        double[] xValues = new double[count];
+        double[] yValues = new double[count];
+
+        String[] points = content.split("<point>");
+        for (int i = 1; i <= count; i++) {
+            String point = points[i];
+            xValues[i-1] = Double.parseDouble(extractTag(point, "x"));
+            yValues[i-1] = Double.parseDouble(extractTag(point, "y"));
+        }
+
+        return new ArrayTabulatedFunction(xValues, yValues);
+    }
+
+    private static String extractTag(String xml, String tag) {
+        int start = xml.indexOf("<" + tag + ">") + tag.length() + 2;
+        int end = xml.indexOf("</" + tag + ">");
+        return xml.substring(start, end);
     }
 
     public static TabulatedFunction readTabulatedFunction(BufferedReader reader, TabulatedFunctionFactory factory) throws IOException {
