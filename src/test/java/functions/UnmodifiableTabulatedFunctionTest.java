@@ -29,6 +29,34 @@ public class UnmodifiableTabulatedFunctionTest {
     }
 
     @Test
+    void testUnmodifiableWrappedInStrict() {
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {10.0, 20.0, 30.0};
+
+        TabulatedFunction arrayFunc = new ArrayTabulatedFunction(xValues, yValues);
+        TabulatedFunction unmodifiableFunc = new UnmodifiableTabulatedFunction(arrayFunc);
+        TabulatedFunction strictUnmodifiableFunc = new StrictTabulatedFunction(unmodifiableFunc);
+
+        assertEquals(20.0, strictUnmodifiableFunc.apply(2.0), 1e-9);
+        assertThrows(UnsupportedOperationException.class, () -> strictUnmodifiableFunc.apply(1.5));
+        assertThrows(UnsupportedOperationException.class, () -> strictUnmodifiableFunc.setY(0, 15.0));
+    }
+
+    @Test
+    void testStrictWrappedInUnmodifiable() {
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {10.0, 20.0, 30.0};
+
+        TabulatedFunction arrayFunc = new ArrayTabulatedFunction(xValues, yValues);
+        TabulatedFunction strictFunc = new StrictTabulatedFunction(arrayFunc);
+        TabulatedFunction unmodifiableStrictFunc = new UnmodifiableTabulatedFunction(strictFunc);
+
+        assertEquals(20.0, unmodifiableStrictFunc.apply(2.0), 1e-9);
+        assertThrows(UnsupportedOperationException.class, () -> unmodifiableStrictFunc.apply(1.5));
+        assertThrows(UnsupportedOperationException.class, () -> unmodifiableStrictFunc.setY(0, 15.0));
+    }
+
+    @Test
     void testGetCount() {
         double[] xValues = {1.0, 2.0};
         double[] yValues = {10.0, 20.0};
