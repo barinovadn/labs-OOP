@@ -4,8 +4,10 @@ import functions.Point;
 import functions.TabulatedFunction;
 import functions.factory.TabulatedFunctionFactory;
 import java.io.BufferedWriter;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
@@ -66,5 +68,20 @@ public final class FunctionsIO {
         } catch (java.text.ParseException e) {
             throw new IOException("Error parsing number", e);
         }
+    }
+
+    public static TabulatedFunction readTabulatedFunction(BufferedInputStream inputStream, TabulatedFunctionFactory factory) throws IOException {
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        int count = dataInputStream.readInt();
+
+        double[] xValues = new double[count];
+        double[] yValues = new double[count];
+
+        for (int i = 0; i < count; i++) {
+            xValues[i] = dataInputStream.readDouble();
+            yValues[i] = dataInputStream.readDouble();
+        }
+
+        return factory.create(xValues, yValues);
     }
 }
