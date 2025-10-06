@@ -2,11 +2,13 @@ package io;
 
 import functions.Point;
 import functions.TabulatedFunction;
+import functions.factory.TabulatedFunctionFactory;
 import java.io.BufferedWriter;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.BufferedReader;
 import java.util.Iterator;
 
 public final class FunctionsIO {
@@ -39,5 +41,30 @@ public final class FunctionsIO {
         }
 
         dataOutputStream.flush();
+    }
+
+    public static TabulatedFunction readTabulatedFunction(BufferedReader reader, TabulatedFunctionFactory factory) throws IOException {
+        try {
+            String countLine = reader.readLine();
+            int count = Integer.parseInt(countLine);
+
+            double[] xValues = new double[count];
+            double[] yValues = new double[count];
+
+            java.text.NumberFormat format = java.text.NumberFormat.getInstance(java.util.Locale.forLanguageTag("ru"));
+
+            for (int i = 0; i < count; i++) {
+                String line = reader.readLine();
+                String[] parts = line.split(" ");
+
+                xValues[i] = format.parse(parts[0]).doubleValue();
+                yValues[i] = format.parse(parts[1]).doubleValue();
+            }
+
+            return factory.create(xValues, yValues);
+
+        } catch (java.text.ParseException e) {
+            throw new IOException("Error parsing number", e);
+        }
     }
 }
