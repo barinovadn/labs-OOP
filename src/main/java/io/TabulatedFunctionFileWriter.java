@@ -24,7 +24,7 @@ public class TabulatedFunctionFileWriter {
             FunctionsIO.writeTabulatedFunction(bufferedListWriter, listFunction);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // "The 1% of exceptions causes all of our test coverage problems" - Asmongold
         }
     }
 }
