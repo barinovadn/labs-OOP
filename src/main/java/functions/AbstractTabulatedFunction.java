@@ -23,6 +23,24 @@ public abstract class AbstractTabulatedFunction implements TabulatedFunction {
         }
     }
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName())
+                .append(" size = ")
+                .append(getCount())
+                .append("\n");
+
+        for (int i = 0; i < getCount(); i++) {
+            sb.append("[")
+                    .append(getX(i))
+                    .append("; ")
+                    .append(getY(i))
+                    .append("]\n");
+        }
+
+        return sb.toString();
+    }
+
     public static void checkSorted(double[] xValues) {
         for (int i = 1; i < xValues.length; i++) {
             if (xValues[i] <= xValues[i - 1]) {
