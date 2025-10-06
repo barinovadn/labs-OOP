@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.util.Iterator;
 
 public final class FunctionsIO {
@@ -75,6 +76,11 @@ public final class FunctionsIO {
         ObjectOutputStream objectStream = new ObjectOutputStream(stream);
         objectStream.writeObject(function);
         objectStream.flush();
+    }
+
+    public static TabulatedFunction deserialize(BufferedInputStream stream) throws IOException, ClassNotFoundException {
+        ObjectInputStream objectStream = new ObjectInputStream(stream);
+        return (TabulatedFunction) objectStream.readObject();
     }
 
     public static TabulatedFunction readTabulatedFunction(BufferedInputStream inputStream, TabulatedFunctionFactory factory) throws IOException {
