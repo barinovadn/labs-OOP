@@ -1,6 +1,6 @@
 package io;
 
-import functions.ArrayTabulatedFunction;
+import functions.LinkedListTabulatedFunction;
 import functions.TabulatedFunction;
 import operations.TabulatedDifferentialOperator;
 import java.io.BufferedInputStream;
@@ -9,15 +9,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class ArrayTabulatedFunctionSerialization {
+public class LinkedListTabulatedFunctionSerialization {
     public static void main(String[] args) {
-        try (FileOutputStream fileStream = new FileOutputStream("output/serialized array functions.bin");
+        try (FileOutputStream fileStream = new FileOutputStream("output/serialized linked list functions.bin");
              BufferedOutputStream bufferedStream = new BufferedOutputStream(fileStream)) {
 
             double[] xValues = {0.0, 1.0, 2.0, 3.0, 4.0};
             double[] yValues = {0.0, 1.0, 4.0, 9.0, 16.0};
 
-            ArrayTabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+            LinkedListTabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
             TabulatedDifferentialOperator operator = new TabulatedDifferentialOperator();
 
             TabulatedFunction firstDerivative = operator.derive(function);
@@ -31,7 +31,7 @@ public class ArrayTabulatedFunctionSerialization {
             e.printStackTrace(); // "The 1% of exceptions causes all of our test coverage problems" - Asmongold
         }
 
-        try (FileInputStream fileStream = new FileInputStream("output/serialized array functions.bin");
+        try (FileInputStream fileStream = new FileInputStream("output/serialized linked list functions.bin");
              BufferedInputStream bufferedStream = new BufferedInputStream(fileStream)) {
 
             TabulatedFunction function = FunctionsIO.deserialize(bufferedStream);
