@@ -28,7 +28,7 @@ public class TabulatedFunctionFileReader {
             System.out.println(listFunction);
 
         } catch (IOException e) {
-            e.printStackTrace(); // "The 1% of exceptions cause all of our test coverage problems" - Asmongold
+            e.printStackTrace(); // "The 1% of exceptions causes all of our test coverage problems" - Asmongold
         }
     }
 }
