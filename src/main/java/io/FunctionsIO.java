@@ -121,6 +121,18 @@ public final class FunctionsIO {
         objectStream.flush();
     }
 
+    public static void serializeJson(BufferedWriter writer, ArrayTabulatedFunction function) throws IOException {
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        String json = mapper.writeValueAsString(function);
+        writer.write(json);
+        writer.flush();
+    }
+
+    public static ArrayTabulatedFunction deserializeJson(BufferedReader reader) throws IOException {
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        return mapper.readerFor(ArrayTabulatedFunction.class).readValue(reader);
+    }
+
     public static TabulatedFunction deserialize(BufferedInputStream stream) throws IOException, ClassNotFoundException {
         ObjectInputStream objectStream = new ObjectInputStream(stream);
         return (TabulatedFunction) objectStream.readObject();
