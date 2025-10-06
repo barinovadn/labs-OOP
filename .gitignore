@@ -16,6 +16,7 @@ htmlReport/
 # OOP Assingment
 output/
 input/
+temp/*
 
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 
