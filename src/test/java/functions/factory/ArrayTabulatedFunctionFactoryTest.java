@@ -4,8 +4,24 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import functions.ArrayTabulatedFunction;
 import functions.TabulatedFunction;
+import functions.StrictTabulatedFunction;
 
 public class ArrayTabulatedFunctionFactoryTest {
+
+    @Test
+    void testCreateStrictArrayTabulatedFunction() {
+        TabulatedFunctionFactory factory = new ArrayTabulatedFunctionFactory();
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {10.0, 20.0, 30.0};
+
+        TabulatedFunction function = factory.createStrict(xValues, yValues);
+
+        assertTrue(function instanceof StrictTabulatedFunction);
+        assertEquals(3, function.getCount());
+        assertEquals(20.0, function.apply(2.0), 1e-9);
+
+        assertThrows(UnsupportedOperationException.class, () -> function.apply(1.5));
+    }
 
     @Test
     void testCreateArrayTabulatedFunction() {
