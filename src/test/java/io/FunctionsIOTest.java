@@ -97,4 +97,44 @@ public class FunctionsIOTest {
         assertEquals(3.5, function.getX(2), 1e-9);
         assertEquals(30.5, function.getY(2), 1e-9);
     }
+
+    @Test
+    void testReadTabulatedFunctionBinary() throws IOException {
+        java.io.ByteArrayOutputStream byteStream = new java.io.ByteArrayOutputStream();
+        java.io.DataOutputStream dataStream = new java.io.DataOutputStream(byteStream);
+
+        dataStream.writeInt(2);
+        dataStream.writeDouble(1.0);
+        dataStream.writeDouble(10.0);
+        dataStream.writeDouble(2.0);
+        dataStream.writeDouble(20.0);
+
+        byte[] data = byteStream.toByteArray();
+        java.io.ByteArrayInputStream inputStream = new java.io.ByteArrayInputStream(data);
+        java.io.BufferedInputStream bufferedStream = new java.io.BufferedInputStream(inputStream);
+
+        functions.factory.ArrayTabulatedFunctionFactory factory = new functions.factory.ArrayTabulatedFunctionFactory();
+        functions.TabulatedFunction function = FunctionsIO.readTabulatedFunction(bufferedStream, factory);
+
+        assertEquals(2, function.getCount());
+        assertEquals(1.0, function.getX(0), 1e-9);
+        assertEquals(10.0, function.getY(0), 1e-9);
+        assertEquals(2.0, function.getX(1), 1e-9);
+        assertEquals(20.0, function.getY(1), 1e-9);
+    }
+
+    @Test
+    void testReadTabulatedFunctionParseException() {
+        String invalidInput = "2\n1,5 invalid\n2,5 20,5\n";
+        java.io.StringReader stringReader = new java.io.StringReader(invalidInput);
+        java.io.BufferedReader bufferedReader = new java.io.BufferedReader(stringReader);
+
+        functions.factory.ArrayTabulatedFunctionFactory factory = new functions.factory.ArrayTabulatedFunctionFactory();
+
+        assertThrows(IOException.class, () -> {
+            FunctionsIO.readTabulatedFunction(bufferedReader, factory);
+        });
+    }
+
+
 }
