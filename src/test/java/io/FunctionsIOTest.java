@@ -136,5 +136,36 @@ public class FunctionsIOTest {
         });
     }
 
+    @Test
+    void testSerializeDeserialize() throws IOException, ClassNotFoundException {
+        java.io.File tempFile = new java.io.File("temp/serialized_test.bin");
+        tempFile.getParentFile().mkdirs();
 
+        try (java.io.FileOutputStream fileStream = new java.io.FileOutputStream(tempFile);
+             java.io.BufferedOutputStream bufferedStream = new java.io.BufferedOutputStream(fileStream)) {
+
+            double[] xValues = {1.0, 2.0, 3.0};
+            double[] yValues = {10.0, 20.0, 30.0};
+            TabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+
+            FunctionsIO.serialize(bufferedStream, function);
+        }
+
+        try (java.io.FileInputStream fileStream = new java.io.FileInputStream(tempFile);
+             java.io.BufferedInputStream bufferedStream = new java.io.BufferedInputStream(fileStream)) {
+
+            TabulatedFunction deserializedFunction = FunctionsIO.deserialize(bufferedStream);
+
+            assertEquals(3, deserializedFunction.getCount());
+            assertEquals(1.0, deserializedFunction.getX(0), 1e-9);
+            assertEquals(10.0, deserializedFunction.getY(0), 1e-9);
+            assertEquals(2.0, deserializedFunction.getX(1), 1e-9);
+            assertEquals(20.0, deserializedFunction.getY(1), 1e-9);
+            assertEquals(3.0, deserializedFunction.getX(2), 1e-9);
+            assertEquals(30.0, deserializedFunction.getY(2), 1e-9);
+        }
+
+        tempFile.delete();
+    }
+    
 }
