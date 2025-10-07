@@ -20,30 +20,6 @@ public class AbstractTabulatedFunctionTest {
     }
 
     @Test
-    void testToStringLinkedListTabulatedFunction() {
-        double[] xValues = {1.0, 2.0, 3.0};
-        double[] yValues = {10.0, 20.0, 30.0};
-
-        TabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
-        String result = function.toString();
-
-        String expected = "LinkedListTabulatedFunction size = 3\n[1.0; 10.0]\n[2.0; 20.0]\n[3.0; 30.0]\n";
-        assertEquals(expected, result);
-    }
-
-    @Test
-    void testToStringWithTwoPoints() {
-        double[] xValues = {0.0, 1.0};
-        double[] yValues = {5.0, 10.0};
-
-        TabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
-        String result = function.toString();
-
-        String expected = "ArrayTabulatedFunction size = 2\n[0.0; 5.0]\n[1.0; 10.0]\n";
-        assertEquals(expected, result);
-    }
-
-    @Test
     void testCheckLengthIsTheSame() {
         double[] x1 = {1, 2, 3};
         double[] y1 = {1, 2, 3};

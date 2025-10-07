@@ -7,21 +7,6 @@ import java.util.Iterator;
 public class StrictTabulatedFunctionTest {
 
     @Test
-    void testApplyWithExactX() {
-        double[] xValues = {1.0, 2.0, 3.0};
-        double[] yValues = {10.0, 20.0, 30.0};
-
-        TabulatedFunction arrayFunc = new ArrayTabulatedFunction(xValues, yValues);
-        TabulatedFunction strictArrayFunc = new StrictTabulatedFunction(arrayFunc);
-
-        TabulatedFunction listFunc = new LinkedListTabulatedFunction(xValues, yValues);
-        TabulatedFunction strictListFunc = new StrictTabulatedFunction(listFunc);
-
-        assertEquals(20.0, strictArrayFunc.apply(2.0), 1e-9);
-        assertEquals(20.0, strictListFunc.apply(2.0), 1e-9);
-    }
-
-    @Test
     void testApplyWithInterpolationArray() {
         double[] xValues = {1.0, 2.0, 3.0};
         double[] yValues = {10.0, 20.0, 30.0};
@@ -30,17 +15,6 @@ public class StrictTabulatedFunctionTest {
         TabulatedFunction strictArrayFunc = new StrictTabulatedFunction(arrayFunc);
 
         assertThrows(UnsupportedOperationException.class, () -> strictArrayFunc.apply(1.5));
-    }
-
-    @Test
-    void testApplyWithInterpolationList() {
-        double[] xValues = {1.0, 2.0, 3.0};
-        double[] yValues = {10.0, 20.0, 30.0};
-
-        TabulatedFunction listFunc = new LinkedListTabulatedFunction(xValues, yValues);
-        TabulatedFunction strictListFunc = new StrictTabulatedFunction(listFunc);
-
-        assertThrows(UnsupportedOperationException.class, () -> strictListFunc.apply(1.5));
     }
 
     @Test

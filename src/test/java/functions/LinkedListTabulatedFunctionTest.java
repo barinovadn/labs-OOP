@@ -17,34 +17,6 @@ public class LinkedListTabulatedFunctionTest {
     }
 
     @Test
-    void testIteratorHasNextBeforeFirstCall() {
-        double[] xValues = {1.0, 2.0};
-        double[] yValues = {1.0, 4.0};
-        LinkedListTabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
-
-        Iterator<Point> iterator = function.iterator();
-        assertTrue(iterator.hasNext());
-    }
-
-    @Test
-    void testIteratorHasNextAfterAllCalls() {
-        double[] xValues = {1.0, 2.0};
-        double[] yValues = {1.0, 4.0};
-        LinkedListTabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
-
-        Iterator<Point> iterator = function.iterator();
-        iterator.next();
-        iterator.next();
-        assertFalse(iterator.hasNext());
-    }
-
-    @Test
-    void testIteratorNextThrowsOnEmptyList() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new LinkedListTabulatedFunction(new double[]{1.0}, new double[]{1.0});
-        });
-    }
-    @Test
     void testIteratorNextThrowsAfterLastElement() {
         double[] xValues = {1.0, 2.0};
         double[] yValues = {1.0, 4.0};

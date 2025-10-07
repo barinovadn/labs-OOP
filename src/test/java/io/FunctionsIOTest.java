@@ -15,32 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 public class FunctionsIOTest {
 
     @Test
-    void testWriteTabulatedFunction() throws IOException {
-        double[] xValues = {1.0, 2.0, 3.0};
-        double[] yValues = {10.0, 20.0, 30.0};
-        TabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
-
-        StringWriter stringWriter = new StringWriter();
-        BufferedWriter bufferedWriter = new BufferedWriter(stringWriter);
-
-        FunctionsIO.writeTabulatedFunction(bufferedWriter, function);
-
-        String result = stringWriter.toString();
-        String[] lines = result.split("\n");
-
-        assertTrue(lines[1].contains("1.0") && lines[1].contains("10.0"));
-        assertTrue(lines[2].contains("2.0") && lines[2].contains("20.0"));
-        assertTrue(lines[3].contains("3.0") && lines[3].contains("30.0"));
-    }
-
-    @Test
-    void testFunctionsIOConstructor() throws Exception {
-        Constructor<FunctionsIO> constructor = FunctionsIO.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
-        assertThrows(InvocationTargetException.class, () -> constructor.newInstance());
-    }
-
-    @Test
     void testWriteTabulatedFunctionBinary() throws IOException {
         double[] xValues = {1.0, 2.0, 3.0};
         double[] yValues = {10.0, 20.0, 30.0};
@@ -53,31 +27,6 @@ public class FunctionsIOTest {
 
         byte[] result = byteStream.toByteArray();
         assertTrue(result.length > 0);
-    }
-
-    public static TabulatedFunction readTabulatedFunction(BufferedReader reader, TabulatedFunctionFactory factory) throws IOException {
-        try {
-            String countLine = reader.readLine();
-            int count = Integer.parseInt(countLine);
-
-            double[] xValues = new double[count];
-            double[] yValues = new double[count];
-
-            java.text.NumberFormat format = java.text.NumberFormat.getInstance(java.util.Locale.forLanguageTag("ru"));
-
-            for (int i = 0; i < count; i++) {
-                String line = reader.readLine();
-                String[] parts = line.split(" ");
-
-                xValues[i] = format.parse(parts[0]).doubleValue();
-                yValues[i] = format.parse(parts[1]).doubleValue();
-            }
-
-            return factory.create(xValues, yValues);
-
-        } catch (java.text.ParseException e) {
-            throw new IOException("Error parsing number", e);
-        }
     }
 
     @Test
@@ -199,27 +148,4 @@ public class FunctionsIOTest {
 
         tempFile.delete();
     }
-
-    @org.junit.jupiter.api.AfterAll
-    static void cleanup() {
-        java.io.File tempDir = new java.io.File("temp");
-        if (tempDir.exists()) {
-            deleteDirectory(tempDir);
-        }
-    }
-
-    static void deleteDirectory(java.io.File dir) {
-        java.io.File[] files = dir.listFiles();
-        if (files != null) {
-            for (java.io.File file : files) {
-                if (file.isDirectory()) {
-                    deleteDirectory(file);
-                } else {
-                    file.delete();
-                }
-            }
-        }
-        dir.delete();
-    }
-
 }

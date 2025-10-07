@@ -3,6 +3,10 @@ package io;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.lang.reflect.Method;
+import java.io.File;
+import java.io.*;
+import functions.LinkedListTabulatedFunction;
+
 
 public class LinkedListTabulatedFunctionSerializationTest {
 

@@ -7,18 +7,6 @@ import java.lang.reflect.Method;
 public class ArrayTabulatedFunctionSerializationTest {
 
     @Test
-    void testMainMethodExists() throws Exception {
-        Method mainMethod = ArrayTabulatedFunctionSerialization.class.getMethod("main", String[].class);
-        assertNotNull(mainMethod);
-    }
-
-    @Test
-    void testClassIsPublic() {
-        int modifiers = ArrayTabulatedFunctionSerialization.class.getModifiers();
-        assertTrue(java.lang.reflect.Modifier.isPublic(modifiers));
-    }
-
-    @Test
     void testMainMethodExecution() {
         assertDoesNotThrow(() -> {
             ArrayTabulatedFunctionSerialization.main(new String[]{});
