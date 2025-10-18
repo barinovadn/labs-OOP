@@ -14,6 +14,6 @@ public class MultiplyingTask implements Runnable {
             double currentY = function.getY(i);
             function.setY(i, currentY * 2);
         }
-        System.out.println("Thread " + Thread.currentThread().getName() + " finished task");
+        System.out.println(Thread.currentThread().getName() + " finished task");
     }
 }

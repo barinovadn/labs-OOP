@@ -34,7 +34,7 @@ public class MultiplyingTaskTest {
             task.run();
 
             String output = outputStream.toString();
-            assertTrue(output.contains("Thread " + Thread.currentThread().getName() + " finished task"));
+            assertTrue(output.contains(Thread.currentThread().getName() + " finished task"));
 
             assertEquals(20.0, function.getY(0));
             assertEquals(40.0, function.getY(1));
