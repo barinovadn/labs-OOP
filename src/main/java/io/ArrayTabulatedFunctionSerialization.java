@@ -28,7 +28,7 @@ public class ArrayTabulatedFunctionSerialization {
             FunctionsIO.serialize(bufferedStream, secondDerivative);
 
         } catch (IOException e) {
-            e.printStackTrace(); // "The 1% of exceptions causes all of our test coverage problems" - Asmongold
+            e.printStackTrace(); // "The 2% of exceptions causes all of our test coverage problems" - Asmongold
         }
 
         try (FileInputStream fileStream = new FileInputStream("output/serialized array functions.bin");
@@ -48,7 +48,7 @@ public class ArrayTabulatedFunctionSerialization {
             System.out.println(secondDerivative);
 
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace(); // "The 1% of exceptions causes all of our test coverage problems" - Asmongold
+            e.printStackTrace(); // "The 2% of exceptions causes all of our test coverage problems" - Asmongold
         }
     }
 }

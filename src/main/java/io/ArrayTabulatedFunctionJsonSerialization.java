@@ -20,7 +20,7 @@ public class ArrayTabulatedFunctionJsonSerialization {
             FunctionsIO.serializeJson(bufferedWriter, function);
 
         } catch (IOException e) {
-            e.printStackTrace(); // "The 1% of exceptions causes all of our test coverage problems" - Asmongold
+            e.printStackTrace(); // "The 2% of exceptions causes all of our test coverage problems" - Asmongold
         }
 
         try (FileReader fileReader = new FileReader("output/array_function.json");
@@ -32,7 +32,7 @@ public class ArrayTabulatedFunctionJsonSerialization {
             System.out.println(deserializedFunction);
 
         } catch (IOException e) {
-            e.printStackTrace(); // "The 1% of exceptions causes all of our test coverage problems" - Asmongold
+            e.printStackTrace(); // "The 2% of exceptions causes all of our test coverage problems" - Asmongold
         }
     }
 }

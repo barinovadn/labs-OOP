@@ -52,7 +52,6 @@ public class ArrayTabulatedFunctionFactoryTest {
         assertEquals(3, function.getCount());
         assertEquals(20.0, function.apply(2.0), 1e-9);
 
-        // Проверяем обе особенности: strict и unmodifiable
         assertThrows(UnsupportedOperationException.class, () -> function.apply(1.5));
         assertThrows(UnsupportedOperationException.class, () -> function.setY(0, 15.0));
     }
