@@ -13,6 +13,14 @@ public class SynchronizedTabulatedFunction implements TabulatedFunction {
         this.function = function;
     }
 
+    public interface Operation<T> {
+        T apply(SynchronizedTabulatedFunction function);
+    }
+
+    public synchronized <T> T doSynchronously(Operation<? extends T> operation) {
+        return operation.apply(this);
+    }
+
     public synchronized int getCount() {
         return function.getCount();
     }
