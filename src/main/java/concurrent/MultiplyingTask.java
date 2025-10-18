@@ -4,9 +4,11 @@ import functions.TabulatedFunction;
 
 public class MultiplyingTask implements Runnable {
     private final TabulatedFunction function;
+    private volatile boolean completed;
 
     public MultiplyingTask(TabulatedFunction function) {
         this.function = function;
+        this.completed = false;
     }
 
     public void run() {
@@ -16,6 +18,11 @@ public class MultiplyingTask implements Runnable {
                 function.setY(i, currentY * 2);
             }
         }
+        completed = true;
         System.out.println(Thread.currentThread().getName() + " finished task");
+    }
+
+    public boolean isCompleted() {
+        return completed;
     }
 }
