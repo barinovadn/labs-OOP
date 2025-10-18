@@ -1,33 +1,26 @@
 package operations;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 import functions.ArrayTabulatedFunction;
 import functions.LinkedListTabulatedFunction;
 import functions.TabulatedFunction;
 import functions.factory.ArrayTabulatedFunctionFactory;
 import functions.factory.LinkedListTabulatedFunctionFactory;
-import functions.factory.TabulatedFunctionFactory;
+import concurrent.SynchronizedTabulatedFunction;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TabulatedDifferentialOperatorTest {
 
     @Test
-    void testDeriveWithArrayFactory() {
-        TabulatedFunctionFactory factory = new ArrayTabulatedFunctionFactory();
-        TabulatedDifferentialOperator operator = new TabulatedDifferentialOperator(factory);
-
+    void testDeriveSynchronouslyWithRegularFunction() {
         double[] xValues = {1.0, 2.0, 3.0, 4.0};
         double[] yValues = {1.0, 4.0, 9.0, 16.0};
-
         TabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
-        TabulatedFunction derivative = operator.derive(function);
+        TabulatedDifferentialOperator operator = new TabulatedDifferentialOperator();
+
+        TabulatedFunction derivative = operator.deriveSynchronously(function);
 
         assertEquals(4, derivative.getCount());
-        assertEquals(1.0, derivative.getX(0), 1e-9);
-        assertEquals(2.0, derivative.getX(1), 1e-9);
-        assertEquals(3.0, derivative.getX(2), 1e-9);
-        assertEquals(4.0, derivative.getX(3), 1e-9);
-
         assertEquals(3.0, derivative.getY(0), 1e-9);
         assertEquals(5.0, derivative.getY(1), 1e-9);
         assertEquals(7.0, derivative.getY(2), 1e-9);
@@ -35,55 +28,55 @@ public class TabulatedDifferentialOperatorTest {
     }
 
     @Test
-    void testDeriveWithLinkedListFactory() {
-        TabulatedFunctionFactory factory = new LinkedListTabulatedFunctionFactory();
-        TabulatedDifferentialOperator operator = new TabulatedDifferentialOperator(factory);
-
-        double[] xValues = {0.0, 1.0, 2.0, 3.0};
-        double[] yValues = {0.0, 1.0, 2.0, 3.0};
-
-        TabulatedFunction function = new LinkedListTabulatedFunction(xValues, yValues);
-        TabulatedFunction derivative = operator.derive(function);
-
-        assertEquals(4, derivative.getCount());
-        assertEquals(0.0, derivative.getX(0), 1e-9);
-        assertEquals(1.0, derivative.getX(1), 1e-9);
-        assertEquals(2.0, derivative.getX(2), 1e-9);
-        assertEquals(3.0, derivative.getX(3), 1e-9);
-
-        assertEquals(1.0, derivative.getY(0), 1e-9);
-        assertEquals(1.0, derivative.getY(1), 1e-9);
-        assertEquals(1.0, derivative.getY(2), 1e-9);
-        assertEquals(1.0, derivative.getY(3), 1e-9);
-    }
-
-    @Test
-    void testDeriveWithDefaultConstructor() {
+    void testDeriveSynchronouslyWithSyncFunction() {
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {2.0, 4.0, 6.0};
+        TabulatedFunction baseFunction = new LinkedListTabulatedFunction(xValues, yValues);
+        SynchronizedTabulatedFunction syncFunction = new SynchronizedTabulatedFunction(baseFunction);
         TabulatedDifferentialOperator operator = new TabulatedDifferentialOperator();
 
-        double[] xValues = {1.0, 2.0};
-        double[] yValues = {2.0, 4.0};
+        TabulatedFunction derivative = operator.deriveSynchronously(syncFunction);
 
-        TabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
-        TabulatedFunction derivative = operator.derive(function);
-
-        assertEquals(2, derivative.getCount());
-        assertEquals(1.0, derivative.getX(0), 1e-9);
-        assertEquals(2.0, derivative.getX(1), 1e-9);
-
+        assertEquals(3, derivative.getCount());
         assertEquals(2.0, derivative.getY(0), 1e-9);
         assertEquals(2.0, derivative.getY(1), 1e-9);
+        assertEquals(2.0, derivative.getY(2), 1e-9);
     }
 
     @Test
-    void testGetSetFactory() {
+    void testDeriveSynchronouslySameResultAsDerive() {
+        double[] xValues = {0.0, 1.0, 2.0};
+        double[] yValues = {0.0, 1.0, 4.0};
+        TabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
         TabulatedDifferentialOperator operator = new TabulatedDifferentialOperator();
 
-        assertTrue(operator.getFactory() instanceof ArrayTabulatedFunctionFactory);
+        TabulatedFunction derivative1 = operator.derive(function);
+        TabulatedFunction derivative2 = operator.deriveSynchronously(function);
 
-        TabulatedFunctionFactory newFactory = new LinkedListTabulatedFunctionFactory();
-        operator.setFactory(newFactory);
-
-        assertTrue(operator.getFactory() instanceof LinkedListTabulatedFunctionFactory);
+        assertEquals(derivative1.getCount(), derivative2.getCount());
+        for (int i = 0; i < derivative1.getCount(); i++) {
+            assertEquals(derivative1.getX(i), derivative2.getX(i), 1e-9);
+            assertEquals(derivative1.getY(i), derivative2.getY(i), 1e-9);
+        }
     }
-}   
+
+    @Test
+    void testDeriveSynchronouslyWithFactoryMethods() {
+        double[] xValues = {1.0, 2.0, 3.0};
+        double[] yValues = {1.0, 2.0, 3.0};
+        TabulatedFunction function = new ArrayTabulatedFunction(xValues, yValues);
+
+        ArrayTabulatedFunctionFactory arrayFactory = new ArrayTabulatedFunctionFactory();
+        TabulatedDifferentialOperator operator = new TabulatedDifferentialOperator(arrayFactory);
+
+        assertEquals(arrayFactory, operator.getFactory());
+
+        LinkedListTabulatedFunctionFactory listFactory = new LinkedListTabulatedFunctionFactory();
+        operator.setFactory(listFactory);
+        assertEquals(listFactory, operator.getFactory());
+
+        TabulatedFunction derivative = operator.deriveSynchronously(function);
+        assertNotNull(derivative);
+        assertEquals(3, derivative.getCount());
+    }
+}
