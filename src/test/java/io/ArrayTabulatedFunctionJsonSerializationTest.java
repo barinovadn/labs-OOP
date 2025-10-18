@@ -24,4 +24,10 @@ public class ArrayTabulatedFunctionJsonSerializationTest {
             ArrayTabulatedFunctionJsonSerialization.main(new String[]{});
         });
     }
+
+    @Test
+    void testClassInstantiation() {
+        ArrayTabulatedFunctionJsonSerialization json = new ArrayTabulatedFunctionJsonSerialization();
+        assertNotNull(json);
+    }
 }

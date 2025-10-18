@@ -75,4 +75,10 @@ public class TabulatedFunctionFileInputStreamTest {
             System.setOut(originalOut);
         }
     }
+
+    @Test
+    void testClassInstantiation() {
+        TabulatedFunctionFileInputStream stream = new TabulatedFunctionFileInputStream();
+        assertNotNull(stream);
+    }
 }

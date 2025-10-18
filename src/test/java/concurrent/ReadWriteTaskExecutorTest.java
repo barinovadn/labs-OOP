@@ -32,4 +32,10 @@ public class ReadWriteTaskExecutorTest {
         assertEquals(1, mainMethod.getParameterCount());
         assertEquals(String[].class, mainMethod.getParameterTypes()[0]);
     }
+
+    @Test
+    void testClassInstantiation() {
+        ReadWriteTaskExecutor executor = new ReadWriteTaskExecutor();
+        assertNotNull(executor);
+    }
 }

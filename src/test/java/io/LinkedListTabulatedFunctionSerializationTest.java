@@ -36,4 +36,10 @@ public class LinkedListTabulatedFunctionSerializationTest {
         assertEquals(1, mainMethod.getParameterCount());
         assertEquals(String[].class, mainMethod.getParameterTypes()[0]);
     }
+
+    @Test
+    void testClassInstantiation() {
+        LinkedListTabulatedFunctionSerialization serialization = new LinkedListTabulatedFunctionSerialization();
+        assertNotNull(serialization);
+    }
 }

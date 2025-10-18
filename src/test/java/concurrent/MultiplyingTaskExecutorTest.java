@@ -32,4 +32,10 @@ public class MultiplyingTaskExecutorTest {
         assertEquals(1, mainMethod.getParameterCount());
         assertEquals(String[].class, mainMethod.getParameterTypes()[0]);
     }
+
+    @Test
+    void testClassInstantiation() {
+        MultiplyingTaskExecutor executor = new MultiplyingTaskExecutor();
+        assertNotNull(executor);
+    }
 }

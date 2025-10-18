@@ -18,4 +18,10 @@ public class TabulatedFunctionFileOutputStreamTest {
             TabulatedFunctionFileOutputStream.main(new String[]{});
         });
     }
+
+    @Test
+    void testClassInstantiation() {
+        TabulatedFunctionFileOutputStream stream = new TabulatedFunctionFileOutputStream();
+        assertNotNull(stream);
+    }
 }

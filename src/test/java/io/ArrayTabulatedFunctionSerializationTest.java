@@ -20,4 +20,10 @@ public class ArrayTabulatedFunctionSerializationTest {
         assertEquals(1, mainMethod.getParameterCount());
         assertEquals(String[].class, mainMethod.getParameterTypes()[0]);
     }
+
+    @Test
+    void testClassInstantiation() {
+        ArrayTabulatedFunctionSerialization serialization = new ArrayTabulatedFunctionSerialization();
+        assertNotNull(serialization);
+    }
 }

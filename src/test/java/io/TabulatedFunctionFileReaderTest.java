@@ -18,4 +18,10 @@ public class TabulatedFunctionFileReaderTest {
             TabulatedFunctionFileReader.main(new String[]{});
         });
     }
+
+    @Test
+    void testClassInstantiation() {
+        TabulatedFunctionFileReader reader = new TabulatedFunctionFileReader();
+        assertNotNull(reader);
+    }
 }

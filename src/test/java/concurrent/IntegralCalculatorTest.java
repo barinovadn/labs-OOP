@@ -56,4 +56,10 @@ public class IntegralCalculatorTest {
         double result = IntegralCalculator.calculate(function, 3);
         assertEquals(4.0, result, 0.1);
     }
+
+    @Test
+    void testClassInstantiation() {
+        IntegralCalculator calculator = new IntegralCalculator();
+        assertNotNull(calculator);
+    }
 }

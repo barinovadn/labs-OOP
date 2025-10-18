@@ -36,7 +36,7 @@ public class MultiplyingTaskExecutor {
             try {
                 Thread.sleep(POLLING_INTERVAL_MS);
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                Thread.currentThread().interrupt(); // "The 2% of exceptions causes all of our test coverage problems" - Asmongold
                 break;
             }
         }

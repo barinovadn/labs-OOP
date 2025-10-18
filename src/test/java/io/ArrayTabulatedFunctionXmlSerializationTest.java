@@ -24,4 +24,10 @@ public class ArrayTabulatedFunctionXmlSerializationTest {
             ArrayTabulatedFunctionXmlSerialization.main(new String[]{});
         });
     }
+
+    @Test
+    void testClassInstantiation() {
+        ArrayTabulatedFunctionXmlSerialization xml = new ArrayTabulatedFunctionXmlSerialization();
+        assertNotNull(xml);
+    }
 }

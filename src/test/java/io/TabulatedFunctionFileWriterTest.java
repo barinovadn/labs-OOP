@@ -55,4 +55,10 @@ public class TabulatedFunctionFileWriterTest {
         assertEquals(1, parameterTypes.length);
         assertEquals(String[].class, parameterTypes[0]);
     }
+
+    @Test
+    void testClassInstantiation() {
+        TabulatedFunctionFileWriter writer = new TabulatedFunctionFileWriter();
+        assertNotNull(writer);
+    }
 }
