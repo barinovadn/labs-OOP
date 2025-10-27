@@ -15,13 +15,17 @@ import java.io.BufferedReader;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 public final class FunctionsIO {
+    private static final Logger logger = Logger.getLogger(FunctionsIO.class.getName());
+
     private FunctionsIO() {
         throw new UnsupportedOperationException();
     }
 
     public static void writeTabulatedFunction(BufferedWriter writer, TabulatedFunction function) throws IOException {
+        logger.info("Начало записи табулированной функции в текстовый файл");
         PrintWriter printWriter = new PrintWriter(writer);
         printWriter.println(function.getCount());
 
@@ -32,9 +36,11 @@ public final class FunctionsIO {
         }
 
         printWriter.flush();
+        logger.info("Запись табулированной функции в текстовый файл завершена");
     }
 
     public static void writeTabulatedFunction(BufferedOutputStream outputStream, TabulatedFunction function) throws IOException {
+        logger.info("Начало записи табулированной функции в бинарный файл");
         DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
         dataOutputStream.writeInt(function.getCount());
 
@@ -46,9 +52,11 @@ public final class FunctionsIO {
         }
 
         dataOutputStream.flush();
+        logger.info("Запись табулированной функции в бинарный файл завершена");
     }
 
     public static void serializeXml(BufferedWriter writer, ArrayTabulatedFunction function) throws IOException {
+        logger.info("Начало XML сериализации функции");
         writer.write("<ArrayTabulatedFunction>");
         writer.write("<count>" + function.getCount() + "</count>");
         for (int i = 0; i < function.getCount(); i++) {
@@ -59,9 +67,11 @@ public final class FunctionsIO {
         }
         writer.write("</ArrayTabulatedFunction>");
         writer.flush();
+        logger.info("XML сериализация функции завершена");
     }
 
     public static ArrayTabulatedFunction deserializeXml(BufferedReader reader) throws IOException {
+        logger.info("Начало XML десериализации функции");
         StringBuilder xml = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
@@ -81,6 +91,7 @@ public final class FunctionsIO {
             yValues[i-1] = Double.parseDouble(extractTag(point, "y"));
         }
 
+        logger.info("XML десериализация функции завершена");
         return new ArrayTabulatedFunction(xValues, yValues);
     }
 
@@ -91,6 +102,7 @@ public final class FunctionsIO {
     }
 
     public static TabulatedFunction readTabulatedFunction(BufferedReader reader, TabulatedFunctionFactory factory) throws IOException {
+        logger.info("Начало чтения табулированной функции из текстового файла");
         try {
             String countLine = reader.readLine();
             int count = Integer.parseInt(countLine);
@@ -108,37 +120,50 @@ public final class FunctionsIO {
                 yValues[i] = format.parse(parts[1]).doubleValue();
             }
 
+            logger.info("Чтение табулированной функции из текстового файла завершено");
             return factory.create(xValues, yValues);
 
         } catch (java.text.ParseException e) {
+            logger.severe("Ошибка парсинга числа при чтении функции: " + e.getMessage());
             throw new IOException("Error parsing number", e);
         }
     }
 
     public static void serialize(BufferedOutputStream stream, TabulatedFunction function) throws IOException {
+        logger.info("Начало сериализации функции");
         ObjectOutputStream objectStream = new ObjectOutputStream(stream);
         objectStream.writeObject(function);
         objectStream.flush();
+        logger.info("Сериализация функции завершена");
     }
 
     public static void serializeJson(BufferedWriter writer, ArrayTabulatedFunction function) throws IOException {
+        logger.info("Начало JSON сериализации функции");
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
         String json = mapper.writeValueAsString(function);
         writer.write(json);
         writer.flush();
+        logger.info("JSON сериализация функции завершена");
     }
 
     public static ArrayTabulatedFunction deserializeJson(BufferedReader reader) throws IOException {
+        logger.info("Начало JSON десериализации функции");
         com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-        return mapper.readerFor(ArrayTabulatedFunction.class).readValue(reader);
+        ArrayTabulatedFunction result = mapper.readerFor(ArrayTabulatedFunction.class).readValue(reader);
+        logger.info("JSON десериализация функции завершена");
+        return result;
     }
 
     public static TabulatedFunction deserialize(BufferedInputStream stream) throws IOException, ClassNotFoundException {
+        logger.info("Начало десериализации функции");
         ObjectInputStream objectStream = new ObjectInputStream(stream);
-        return (TabulatedFunction) objectStream.readObject();
+        TabulatedFunction result = (TabulatedFunction) objectStream.readObject();
+        logger.info("Десериализация функции завершена");
+        return result;
     }
 
     public static TabulatedFunction readTabulatedFunction(BufferedInputStream inputStream, TabulatedFunctionFactory factory) throws IOException {
+        logger.info("Начало чтения табулированной функции из бинарного файла");
         DataInputStream dataInputStream = new DataInputStream(inputStream);
         int count = dataInputStream.readInt();
 
@@ -150,6 +175,7 @@ public final class FunctionsIO {
             yValues[i] = dataInputStream.readDouble();
         }
 
+        logger.info("Чтение табулированной функции из бинарного файла завершено");
         return factory.create(xValues, yValues);
     }
 }

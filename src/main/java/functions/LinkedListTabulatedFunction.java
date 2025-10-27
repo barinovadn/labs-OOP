@@ -3,8 +3,10 @@ package functions;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 public class LinkedListTabulatedFunction extends AbstractTabulatedFunction implements Insertable, Removable, Serializable {
+    private static final Logger logger = Logger.getLogger(LinkedListTabulatedFunction.class.getName());
     private static final long serialVersionUID = -938374055443160808L;
 
     private static class Node implements Serializable {
@@ -18,7 +20,10 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
     private int count;
 
     public LinkedListTabulatedFunction(double[] xValues, double[] yValues) {
+        logger.info("Создание LinkedListTabulatedFunction из массивов");
+
         if (xValues.length < 2) {
+            logger.severe("Ошибка в LinkedListTabulatedFunction: неверный индекс");
             throw new IllegalArgumentException("Length is less than minimum");
         }
         AbstractTabulatedFunction.checkLengthIsTheSame(xValues, yValues);
@@ -29,7 +34,10 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
     }
 
     public LinkedListTabulatedFunction(MathFunction source, double xFrom, double xTo, int count) {
+        logger.info("Создание LinkedListTabulatedFunction из математической функции");
+
         if (count < 2) {
+            logger.severe("Ошибка в LinkedListTabulatedFunction: неверный индекс");
             throw new IllegalArgumentException("Length is less than minimum");
         }
         if (xFrom > xTo) {
@@ -54,6 +62,7 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
 
     public double getX(int index) {
         if (index < 0 || index >= count) {
+            logger.severe("Ошибка в LinkedListTabulatedFunction: неверный индекс");
             throw new IllegalArgumentException("Index out of bounds");
         }
         return getNode(index).x;
@@ -61,6 +70,7 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
 
     public double getY(int index) {
         if (index < 0 || index >= count) {
+            logger.severe("Ошибка в LinkedListTabulatedFunction: неверный индекс");
             throw new IllegalArgumentException("Index out of bounds");
         }
         return getNode(index).y;
@@ -68,6 +78,7 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
 
     public void setY(int index, double value) {
         if (index < 0 || index >= count) {
+            logger.severe("Ошибка в LinkedListTabulatedFunction: неверный индекс");
             throw new IllegalArgumentException("Index out of bounds");
         }
         getNode(index).y = value;
@@ -75,6 +86,7 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
 
     protected int floorIndexOfX(double x) {
         if (x < head.x) {
+            logger.severe("Ошибка в LinkedListTabulatedFunction: неверный индекс");
             throw new IllegalArgumentException("X is less than left bound");
         }
         if (x > head.prev.x) return count;
@@ -89,6 +101,7 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
 
     protected Node floorNodeOfX(double x) {
         if (x < head.x) {
+            logger.severe("Ошибка в LinkedListTabulatedFunction: неверный индекс");
             throw new IllegalArgumentException("X is less than left bound");
         }
         Node current = head;
@@ -99,7 +112,10 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
     }
 
     public void remove(int index) {
+        logger.fine("Удаление точки из LinkedListTabulatedFunction по индексу: " + index);
+
         if (index < 0 || index >= count) {
+            logger.severe("Ошибка в LinkedListTabulatedFunction: неверный индекс");
             throw new IllegalArgumentException("Index out of bounds");
         }
         if (count == 1) {
@@ -139,6 +155,8 @@ public class LinkedListTabulatedFunction extends AbstractTabulatedFunction imple
     }
 
     public void insert(double x, double y) {
+        logger.fine("Вставка точки в LinkedListTabulatedFunction: x=" + x + ", y=" + y);
+
         if (head == null) {
             addNode(x, y);
             return;

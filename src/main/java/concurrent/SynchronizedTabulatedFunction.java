@@ -5,8 +5,11 @@ import functions.TabulatedFunction;
 import operations.TabulatedFunctionOperationService;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 
 public class SynchronizedTabulatedFunction implements TabulatedFunction {
+    private static final Logger logger = Logger.getLogger(SynchronizedTabulatedFunction.class.getName());
+
     private final TabulatedFunction function;
 
     public SynchronizedTabulatedFunction(TabulatedFunction function) {
@@ -18,7 +21,10 @@ public class SynchronizedTabulatedFunction implements TabulatedFunction {
     }
 
     public synchronized <T> T doSynchronously(Operation<? extends T> operation) {
-        return operation.apply(this);
+        logger.fine("Начало синхронизированной операции");
+        T result = operation.apply(this);
+        logger.fine("Синхронизированная операция завершена");
+        return result;
     }
 
     public synchronized int getCount() {

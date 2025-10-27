@@ -3,13 +3,14 @@ package functions;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements Insertable, Removable, Serializable {
+    private static final Logger logger = Logger.getLogger(ArrayTabulatedFunction.class.getName());
     private static final long serialVersionUID = -8306707219971993877L;
 
     @JsonFormat(shape = JsonFormat.Shape.ARRAY)
@@ -98,6 +99,8 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
     }
 
     public void insert(double x, double y) {
+        logger.fine("Вставка точки в ArrayTabulatedFunction: x=" + x + ", y=" + y);
+
         int index = indexOfX(x);
         if (index != -1) {
             yValues[index] = y;
@@ -127,6 +130,8 @@ public class ArrayTabulatedFunction extends AbstractTabulatedFunction implements
     }
 
     public void remove(int index) {
+        logger.fine("Удаление точки из ArrayTabulatedFunction по индексу: " + index);
+
         if (index < 0 || index >= count) {
             throw new IllegalArgumentException("Index out of bounds");
         }

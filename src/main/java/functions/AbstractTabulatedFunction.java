@@ -2,8 +2,10 @@ package functions;
 
 import exceptions.ArrayIsNotSortedException;
 import exceptions.DifferentLengthOfArraysException;
+import java.util.logging.Logger;
 
 public abstract class AbstractTabulatedFunction implements TabulatedFunction {
+    private static final Logger logger = Logger.getLogger(AbstractTabulatedFunction.class.getName());
 
     protected abstract int floorIndexOfX(double x);
 
@@ -19,6 +21,7 @@ public abstract class AbstractTabulatedFunction implements TabulatedFunction {
 
     public static void checkLengthIsTheSame(double[] xValues, double[] yValues) {
         if (xValues.length != yValues.length) {
+            logger.severe("Массивы имеют разную длину: xValues=" + xValues.length + ", yValues=" + yValues.length);
             throw new DifferentLengthOfArraysException("Arrays have different lengths");
         }
     }
@@ -44,6 +47,7 @@ public abstract class AbstractTabulatedFunction implements TabulatedFunction {
     public static void checkSorted(double[] xValues) {
         for (int i = 1; i < xValues.length; i++) {
             if (xValues[i] <= xValues[i - 1]) {
+                logger.severe("Массив не отсортирован: xValues[" + (i-1) + "]=" + xValues[i-1] + ", xValues[" + i + "]=" + xValues[i]);
                 throw new ArrayIsNotSortedException("Array is not sorted");
             }
         }

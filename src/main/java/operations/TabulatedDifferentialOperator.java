@@ -5,8 +5,10 @@ import functions.TabulatedFunction;
 import functions.factory.TabulatedFunctionFactory;
 import functions.factory.ArrayTabulatedFunctionFactory;
 import concurrent.SynchronizedTabulatedFunction;
+import java.util.logging.Logger;
 
 public class TabulatedDifferentialOperator implements DifferentialOperator<TabulatedFunction> {
+    private static final Logger logger = Logger.getLogger(TabulatedDifferentialOperator.class.getName());
     private TabulatedFunctionFactory factory;
 
     public TabulatedDifferentialOperator() {
@@ -26,6 +28,8 @@ public class TabulatedDifferentialOperator implements DifferentialOperator<Tabul
     }
 
     public TabulatedFunction derive(TabulatedFunction function) {
+        logger.info("Начало вычисления производной табулированной функции");
+
         Point[] points = TabulatedFunctionOperationService.asPoints(function);
         int count = points.length;
 
@@ -42,6 +46,7 @@ public class TabulatedDifferentialOperator implements DifferentialOperator<Tabul
 
         yValues[count - 1] = yValues[count - 2];
 
+        logger.info("Вычисление производной завершено");
         return factory.create(xValues, yValues);
     }
 
