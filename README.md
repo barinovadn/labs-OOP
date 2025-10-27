@@ -6,6 +6,41 @@
 **Язык:** Java  
 **Темы:** функции, интерфейсы, наследование, коллекции, многопоточность, синхронизация
 
+### ER диаграмма
+
+```mermaid
+erDiagram
+    users {
+        INT user_id PK "Уникальный ID"
+        VARCHAR username "Логин"
+        VARCHAR password "Пароль"
+        VARCHAR email "Email"
+        TIMESTAMP created_at "Дата регистрации"
+    }
+
+    functions {
+        INT function_id PK "Уникальный ID"
+        INT user_id FK "Владелец"
+        VARCHAR function_name "Название функции"
+        VARCHAR function_type "Тип функции"
+        TEXT function_expression "Формула"
+        DECIMAL x_from "Начало диапазона"
+        DECIMAL x_to "Конец диапазона"
+        TIMESTAMP created_at "Дата создания"
+    }
+
+    computed_points {
+        INT point_id PK "Уникальный ID"
+        INT function_id FK "Функция"
+        DECIMAL x_value "Координата X"
+        DECIMAL y_value "Координата Y"
+        TIMESTAMP computed_at "Дата вычисления"
+    }
+
+    users ||--o{ functions : "имеет много"
+    functions ||--o{ computed_points : "имеет много"
+```
+
 ### Отчет о тестовом покрытии
 
 #### Overall Coverage Summary
