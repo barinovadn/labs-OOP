@@ -1,0 +1,61 @@
+@startuml
+!define table(x) class x << (T,#FFAAAA) >>
+!define primary_key(x) <b>+ {x}</b>
+!define foreign_key(x) <color:blue>{x}</color>
+
+hide methods
+hide stereotypes
+
+table(users) {
+  primary_key(user_id): INT
+  --
+  username: VARCHAR(50)
+  password: VARCHAR(255)
+  email: VARCHAR(100)
+  created_at: TIMESTAMP
+}
+
+table(functions) {
+  primary_key(function_id): INT
+  --
+  foreign_key(user_id): INT
+  function_name: VARCHAR(100)
+  function_type: VARCHAR(20)
+  function_expression: TEXT
+  x_from: DECIMAL
+  x_to: DECIMAL
+  created_at: TIMESTAMP
+}
+
+table(computed_points) {
+  primary_key(point_id): INT
+  --
+  foreign_key(function_id): INT
+  x_value: DECIMAL
+  y_value: DECIMAL
+  computed_at: TIMESTAMP
+}
+
+users ||--o{ functions : "имеет много"
+functions ||--o{ computed_points : "имеет много"
+
+note right of users
+  **Таблица Пользователи**
+  Хранит учетные записи
+  Первичный ключ: user_id
+  Пароль: password
+end note
+
+note right of functions
+  **Таблица Функции**
+  Хранит математические функции
+  Первичный ключ: function_id
+  Внешний ключ: user_id → users
+end note
+
+note right of computed_points
+  **Таблица Вычисленные точки**
+  Хранит вычисленные значения Y для X
+  Уникальный индекс: (function_id, x_value)
+end note
+@enduml

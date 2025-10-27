@@ -1,0 +1,14 @@
+@startuml
+actor Пользователь
+participant "Веб-приложение" as App
+participant "База данных" as DB
+
+Пользователь -> App: "Логин (username, password)"
+App -> DB: "Проверить учетные данные пользователя"
+DB -> App: Вернуть user_id если валидны
+
+Пользователь -> App: "Получить мои функции"
+App -> DB: "SELECT * FROM functions\nWHERE user_id = ?"
+DB -> App: Вернуть только функции пользователя
+App -> Пользователь: Показать список функций пользователя
+@enduml
