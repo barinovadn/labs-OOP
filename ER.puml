@@ -27,6 +27,16 @@ table(functions) {
   created_at: TIMESTAMP
 }
 
+table(composite_functions) {
+  primary_key(composite_id): INT
+  --
+  foreign_key(user_id): INT
+  foreign_key(first_function_id): INT
+  foreign_key(second_function_id): INT
+  composite_name: VARCHAR(100)
+  created_at: TIMESTAMP
+}
+
 table(computed_points) {
   primary_key(point_id): INT
   --
@@ -37,7 +47,10 @@ table(computed_points) {
 }
 
 users ||--o{ functions : "имеет много"
+users ||--o{ composite_functions : "имеет много"
 functions ||--o{ computed_points : "имеет много"
+functions ||--o{ composite_functions : "первая функция"
+functions ||--o{ composite_functions : "вторая функция"
 
 note right of users
   **Таблица Пользователи**
@@ -51,6 +64,12 @@ note right of functions
   Хранит математические функции
   Первичный ключ: function_id
   Внешний ключ: user_id → users
+end note
+
+note right of composite_functions
+  **Таблица Композитные функции**
+  Хранит f(g(x)) композиции
+  Связывает две базовые функции
 end note
 
 note right of computed_points
