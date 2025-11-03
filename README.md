@@ -29,6 +29,15 @@ erDiagram
         TIMESTAMP created_at "Дата создания"
     }
 
+    composite_functions {
+        INT composite_id PK "Уникальный ID"
+        INT user_id FK "Владелец"
+        INT first_function_id FK "Первая функция"
+        INT second_function_id FK "Вторая функция"
+        VARCHAR composite_name "Название композиции"
+        TIMESTAMP created_at "Дата создания"
+    }
+
     computed_points {
         INT point_id PK "Уникальный ID"
         INT function_id FK "Функция"
@@ -38,7 +47,10 @@ erDiagram
     }
 
     users ||--o{ functions : "имеет много"
+    users ||--o{ composite_functions : "имеет много"
     functions ||--o{ computed_points : "имеет много"
+    functions ||--o{ composite_functions : "используется как первая"
+    functions ||--o{ composite_functions : "используется как вторая"
 ```
 
 ### Отчет о тестовом покрытии
@@ -61,4 +73,4 @@ erDiagram
 *Generated on 2025-10-19*
 <br>
 
-<img width="100%" alt="sad-cement" src="https://media1.tenor.com/m/ZOfq5Jc-PYgAAAAd/sad-cement.gif" />
+<img width="50%" alt="sad-cement" src="https://media1.tenor.com/m/ZOfq5Jc-PYgAAAAd/sad-cement.gif" /> <img width="49%" alt="sad-cement" src="https://media1.tenor.com/m/tZiazDeyfWMAAAAd/he-was-forced-to-use-sql.gif" />
