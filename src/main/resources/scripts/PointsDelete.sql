@@ -1,1 +1,1 @@
-DELETE FROM computed_points WHERE function_id = ?;
+DELETE FROM computed_points WHERE point_id = ?;

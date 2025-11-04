@@ -1,2 +1,1 @@
-INSERT INTO computed_points (function_id, x_value, y_value) 
-VALUES (?, ?, ?);
+INSERT INTO computed_points (function_id, x_value, y_value) VALUES (?, ?, ?);

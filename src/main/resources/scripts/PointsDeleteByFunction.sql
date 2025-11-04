@@ -1,0 +1,1 @@
+DELETE FROM computed_points WHERE function_id = ?;

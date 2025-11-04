@@ -1,1 +1,1 @@
-SELECT * FROM computed_points WHERE function_id = ? ORDER BY x_value;
+SELECT * FROM computed_points WHERE point_id = ?;
