@@ -9,10 +9,8 @@ import manual.mapper.FunctionMapper;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class FunctionRepository {
-    private static final Logger logger = Logger.getLogger(FunctionRepository.class.getName());
     private Connection connection;
     private final String CREATE_SQL;
     private final String READ_SQL;
@@ -20,6 +18,10 @@ public class FunctionRepository {
     private final String DELETE_SQL;
     private final String READ_BY_USER_SQL;
     private final String READ_ALL_SQL;
+    private final String READ_ALL_ORDER_NAME_ASC;
+    private final String READ_ALL_ORDER_NAME_DESC;
+    private final String READ_ALL_ORDER_XFROM_ASC;
+    private final String READ_ALL_ORDER_TYPE_NAME;
 
     public FunctionRepository(Connection connection) {
         this.connection = connection;
@@ -29,11 +31,61 @@ public class FunctionRepository {
         this.DELETE_SQL = SqlFileReader.readSqlFile("FunctionDelete");
         this.READ_BY_USER_SQL = SqlFileReader.readSqlFile("FunctionReadByUserId");
         this.READ_ALL_SQL = "SELECT * FROM functions";
-        logger.info("FunctionRepository initialized with SQL files");
+        this.READ_ALL_ORDER_NAME_ASC = "SELECT * FROM functions ORDER BY function_name ASC";
+        this.READ_ALL_ORDER_NAME_DESC = "SELECT * FROM functions ORDER BY function_name DESC";
+        this.READ_ALL_ORDER_XFROM_ASC = "SELECT * FROM functions ORDER BY x_from ASC";
+        this.READ_ALL_ORDER_TYPE_NAME = "SELECT * FROM functions ORDER BY function_type, function_name";
+    }
+
+    public List<FunctionResponse> findAllOrderByNameAsc() throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(READ_ALL_ORDER_NAME_ASC)) {
+            ResultSet rs = stmt.executeQuery();
+            List<FunctionResponse> functions = new ArrayList<>();
+            while (rs.next()) {
+                FunctionEntity entity = mapToEntity(rs);
+                functions.add(FunctionMapper.toResponse(entity));
+            }
+            return functions;
+        }
+    }
+
+    public List<FunctionResponse> findAllOrderByNameDesc() throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(READ_ALL_ORDER_NAME_DESC)) {
+            ResultSet rs = stmt.executeQuery();
+            List<FunctionResponse> functions = new ArrayList<>();
+            while (rs.next()) {
+                FunctionEntity entity = mapToEntity(rs);
+                functions.add(FunctionMapper.toResponse(entity));
+            }
+            return functions;
+        }
+    }
+
+    public List<FunctionResponse> findAllOrderByXFromAsc() throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(READ_ALL_ORDER_XFROM_ASC)) {
+            ResultSet rs = stmt.executeQuery();
+            List<FunctionResponse> functions = new ArrayList<>();
+            while (rs.next()) {
+                FunctionEntity entity = mapToEntity(rs);
+                functions.add(FunctionMapper.toResponse(entity));
+            }
+            return functions;
+        }
+    }
+
+    public List<FunctionResponse> findAllOrderByTypeAndName() throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(READ_ALL_ORDER_TYPE_NAME)) {
+            ResultSet rs = stmt.executeQuery();
+            List<FunctionResponse> functions = new ArrayList<>();
+            while (rs.next()) {
+                FunctionEntity entity = mapToEntity(rs);
+                functions.add(FunctionMapper.toResponse(entity));
+            }
+            return functions;
+        }
     }
 
     public FunctionResponse create(CreateFunctionRequest request, UserEntity user) throws SQLException {
-        logger.info("Creating function: " + request.getFunctionName());
         try (PreparedStatement stmt = connection.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setLong(1, user.getUserId());
             stmt.setString(2, request.getFunctionName());
@@ -46,20 +98,14 @@ public class FunctionRepository {
             ResultSet keys = stmt.getGeneratedKeys();
             if (keys.next()) {
                 Long functionId = keys.getLong(1);
-                logger.info("Function created with ID: " + functionId);
-
                 FunctionEntity entity = findEntityById(functionId);
                 return FunctionMapper.toResponse(entity);
             }
-            throw new SQLException("Failed to get generated function ID");
-        } catch (SQLException e) {
-            logger.severe("Failed to create function: " + e.getMessage());
-            throw e;
+            throw new SQLException();
         }
     }
 
     public FunctionResponse findById(Long functionId) throws SQLException {
-        logger.fine("Finding function by ID: " + functionId);
         FunctionEntity entity = findEntityById(functionId);
         return entity != null ? FunctionMapper.toResponse(entity) : null;
     }
@@ -73,7 +119,6 @@ public class FunctionRepository {
     }
 
     public List<FunctionResponse> findByUserId(Long userId) throws SQLException {
-        logger.fine("Finding functions by user ID: " + userId);
         try (PreparedStatement stmt = connection.prepareStatement(READ_BY_USER_SQL)) {
             stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
@@ -82,16 +127,11 @@ public class FunctionRepository {
                 FunctionEntity entity = mapToEntity(rs);
                 functions.add(FunctionMapper.toResponse(entity));
             }
-            logger.fine("Found " + functions.size() + " functions for user " + userId);
             return functions;
-        } catch (SQLException e) {
-            logger.severe("Failed to find functions for user ID " + userId + ": " + e.getMessage());
-            throw e;
         }
     }
 
     public List<FunctionResponse> findAll() throws SQLException {
-        logger.fine("Finding all functions");
         try (PreparedStatement stmt = connection.prepareStatement(READ_ALL_SQL)) {
             ResultSet rs = stmt.executeQuery();
             List<FunctionResponse> functions = new ArrayList<>();
@@ -99,16 +139,11 @@ public class FunctionRepository {
                 FunctionEntity entity = mapToEntity(rs);
                 functions.add(FunctionMapper.toResponse(entity));
             }
-            logger.fine("Found " + functions.size() + " functions");
             return functions;
-        } catch (SQLException e) {
-            logger.severe("Failed to find all functions: " + e.getMessage());
-            throw e;
         }
     }
 
     public FunctionResponse update(Long functionId, CreateFunctionRequest request) throws SQLException {
-        logger.info("Updating function ID: " + functionId);
         try (PreparedStatement stmt = connection.prepareStatement(UPDATE_SQL)) {
             stmt.setString(1, request.getFunctionName());
             stmt.setString(2, request.getFunctionType());
@@ -118,29 +153,20 @@ public class FunctionRepository {
             stmt.setLong(6, functionId);
 
             boolean result = stmt.executeUpdate() > 0;
-            logger.info("Function update " + (result ? "successful" : "failed"));
 
             if (result) {
                 FunctionEntity entity = findEntityById(functionId);
                 return FunctionMapper.toResponse(entity);
             }
             return null;
-        } catch (SQLException e) {
-            logger.severe("Failed to update function ID " + functionId + ": " + e.getMessage());
-            throw e;
         }
     }
 
     public boolean delete(Long functionId) throws SQLException {
-        logger.info("Deleting function ID: " + functionId);
         try (PreparedStatement stmt = connection.prepareStatement(DELETE_SQL)) {
             stmt.setLong(1, functionId);
             boolean result = stmt.executeUpdate() > 0;
-            logger.info("Function deletion " + (result ? "successful" : "failed"));
             return result;
-        } catch (SQLException e) {
-            logger.severe("Failed to delete function ID " + functionId + ": " + e.getMessage());
-            throw e;
         }
     }
 
