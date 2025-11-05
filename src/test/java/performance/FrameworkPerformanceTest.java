@@ -1,111 +1,156 @@
 package performance;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import java.sql.*;
-import java.util.concurrent.TimeUnit;
+import java.time.LocalDateTime;
 import java.util.logging.Logger;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class FrameworkPerformanceTest {
-
     private static final Logger logger = Logger.getLogger(FrameworkPerformanceTest.class.getName());
-    private static Connection connection;
+    private static final int OPERATION_COUNT = 10000;
 
-    @BeforeAll
-    static void setup() throws SQLException {
-        logger.info("Инициализация тестов производительности Framework");
-        connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/lab5_oop",
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/labs_oop",
                 "postgres",
                 "admin"
         );
     }
 
+    @BeforeEach
+    void cleanupBeforeEachTest() throws SQLException {
+        Connection cleanupConn = getConnection();
+        Statement stmt = cleanupConn.createStatement();
+        stmt.execute("DELETE FROM computed_points");
+        stmt.execute("DELETE FROM composite_functions");
+        stmt.execute("DELETE FROM functions");
+        stmt.execute("DELETE FROM users");
+        stmt.close();
+        cleanupConn.close();
+    }
+
     @Test
-    void testSelectPerformance() throws SQLException {
-        logger.info("Начало теста SELECT производительности");
+    @Order(1)
+    void testCreatePerformance() throws SQLException {
+        Connection connection = getConnection();
+        long startTime = System.currentTimeMillis();
 
-        long startTime = System.nanoTime();
-        PreparedStatement stmt = connection.prepareStatement("SELECT * FROM users WHERE username LIKE ?");
+        String userSql = "INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)";
+        PreparedStatement userStmt = connection.prepareStatement(userSql);
+        for (int i = 0; i < OPERATION_COUNT; i++) {
+            userStmt.setString(1, "fw_user_" + i);
+            userStmt.setString(2, "password_" + i);
+            userStmt.setString(3, "fw_user_" + i + "@test.com");
+            userStmt.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+            userStmt.addBatch();
+            if (i % 1000 == 0) userStmt.executeBatch();
+        }
+        userStmt.executeBatch();
+        userStmt.close();
 
-        for (int i = 0; i < 1000; i++) {
-            stmt.setString(1, "%user%");
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) { }
+        long time = System.currentTimeMillis() - startTime;
+        System.out.println("Framework CREATE: " + time + "ms (10000 operations)");
+
+        connection.close();
+    }
+
+    @Test
+    @Order(2)
+    void testReadPerformance() throws SQLException {
+        testCreatePerformance();
+
+        Connection connection = getConnection();
+        long startTime = System.currentTimeMillis();
+
+        String userSql = "SELECT * FROM users WHERE user_id = ?";
+        PreparedStatement userStmt = connection.prepareStatement(userSql);
+        for (int i = 0; i < OPERATION_COUNT; i++) {
+            userStmt.setInt(1, i + 1);
+            ResultSet rs = userStmt.executeQuery();
+            if (rs.next()) {}
             rs.close();
         }
-        stmt.close();
+        userStmt.close();
 
-        long time = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-        logger.info("Framework SELECT: " + time + "ms");
+        long time = System.currentTimeMillis() - startTime;
+        System.out.println("Framework READ: " + time + "ms (10000 operations)");
+
+        connection.close();
     }
 
     @Test
-    void testInsertPerformance() throws SQLException {
-        logger.info("Начало теста INSERT производительности");
-
-        long startTime = System.nanoTime();
-        PreparedStatement stmt = connection.prepareStatement("INSERT INTO users (username, password, email) VALUES (?, ?, ?)");
-
-        for (int i = 0; i < 1000; i++) {
-            stmt.setString(1, "testuser_fw_" + System.currentTimeMillis() + "_" + i);
-            stmt.setString(2, "password");
-            stmt.setString(3, "email_fw_" + System.currentTimeMillis() + "_" + i + "@test.com");
-            stmt.executeUpdate();
-        }
-        stmt.close();
-
-        long time = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-        logger.info("Framework INSERT: " + time + "ms");
-    }
-
-    @Test
-    void testJoinPerformance() throws SQLException {
-        logger.info("Начало теста JOIN производительности");
-
-        long startTime = System.nanoTime();
-        String sql = "SELECT u.username, f.function_name, COUNT(p.point_id) as point_count " +
-                "FROM users u JOIN functions f ON u.user_id = f.user_id " +
-                "LEFT JOIN computed_points p ON f.function_id = p.function_id " +
-                "WHERE u.username LIKE ? GROUP BY u.username, f.function_name";
-
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        for (int i = 0; i < 100; i++) {
-            stmt.setString(1, "%user%");
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) { }
-            rs.close();
-        }
-        stmt.close();
-
-        long time = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-        logger.info("Framework JOIN: " + time + "ms");
-    }
-
-    @Test
+    @Order(3)
     void testUpdatePerformance() throws SQLException {
-        logger.info("Начало теста UPDATE производительности");
+        testCreatePerformance();
 
-        long startTime = System.nanoTime();
-        PreparedStatement stmt = connection.prepareStatement("UPDATE users SET password = ? WHERE user_id = ?");
-        PreparedStatement selectStmt = connection.prepareStatement("SELECT user_id FROM users LIMIT 500");
-        ResultSet rs = selectStmt.executeQuery();
+        Connection connection = getConnection();
+        long startTime = System.currentTimeMillis();
 
-        int count = 0;
-        while (rs.next() && count < 500) {
-            int userId = rs.getInt("user_id");
-            stmt.setString(1, "updated_pass_" + System.currentTimeMillis() + "_" + count);
-            stmt.setInt(2, userId);
-            stmt.addBatch();
-            count++;
+        String userSql = "UPDATE users SET password = ? WHERE user_id = ?";
+        PreparedStatement userStmt = connection.prepareStatement(userSql);
+        for (int i = 0; i < OPERATION_COUNT; i++) {
+            userStmt.setString(1, "updated_user_" + i);
+            userStmt.setInt(2, i + 1);
+            userStmt.addBatch();
+            if (i % 1000 == 0) userStmt.executeBatch();
         }
+        userStmt.executeBatch();
+        userStmt.close();
 
-        stmt.executeBatch();
-        stmt.close();
-        selectStmt.close();
-        rs.close();
+        long time = System.currentTimeMillis() - startTime;
+        System.out.println("Framework UPDATE: " + time + "ms (10000 operations)");
 
-        long time = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-        logger.info("Framework UPDATE: " + time + "ms");
+        connection.close();
+    }
+
+    @Test
+    @Order(4)
+    void testSearchPerformance() throws SQLException {
+        testCreatePerformance();
+
+        Connection connection = getConnection();
+        long startTime = System.currentTimeMillis();
+
+        String searchSql = "SELECT * FROM users WHERE username LIKE ?";
+        PreparedStatement searchStmt = connection.prepareStatement(searchSql);
+
+        for (int i = 0; i < 1000; i++) {
+            searchStmt.setString(1, "%fw_user%");
+            ResultSet rs = searchStmt.executeQuery();
+            while (rs.next()) {}
+            rs.close();
+        }
+        searchStmt.close();
+
+        long time = System.currentTimeMillis() - startTime;
+        System.out.println("Framework SEARCH: " + time + "ms (1000 operations)");
+
+        connection.close();
+    }
+
+    @Test
+    @Order(5)
+    void testDeletePerformance() throws SQLException {
+        testCreatePerformance();
+
+        Connection connection = getConnection();
+        long startTime = System.currentTimeMillis();
+
+        String userSql = "DELETE FROM users WHERE user_id = ?";
+        PreparedStatement userStmt = connection.prepareStatement(userSql);
+        for (int i = 0; i < OPERATION_COUNT; i++) {
+            userStmt.setInt(1, i + 1);
+            userStmt.addBatch();
+            if (i % 1000 == 0) userStmt.executeBatch();
+        }
+        userStmt.executeBatch();
+        userStmt.close();
+
+        long time = System.currentTimeMillis() - startTime;
+        System.out.println("Framework DELETE: " + time + "ms (10000 operations)");
+
+        connection.close();
     }
 }
