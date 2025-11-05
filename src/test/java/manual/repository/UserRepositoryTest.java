@@ -1,7 +1,8 @@
 package manual.repository;
 
 import manual.DatabaseConnection;
-import manual.dto.UserDto;
+import manual.dto.CreateUserRequest;
+import manual.dto.UserResponse;
 import org.junit.jupiter.api.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,16 +40,49 @@ class UserRepositoryTest {
 
     @Test
     void testCreateAndFindUser() throws SQLException {
-        UserDto user = new UserDto(null, "testuser1", "password123", "test1@email.com", null);
+        CreateUserRequest request = new CreateUserRequest("testuser1", "password123", "test1@email.com");
 
-        Long userId = userRepository.create(user);
-        assertNotNull(userId);
-
-        UserDto found = userRepository.findById(userId);
-        assertNotNull(found);
-        assertEquals("testuser1", found.getUsername());
-        assertEquals("test1@email.com", found.getEmail());
+        UserResponse response = userRepository.create(request);
+        assertNotNull(response);
+        assertNotNull(response.getUserId());
+        assertEquals("testuser1", response.getUsername());
+        assertEquals("test1@email.com", response.getEmail());
     }
 
-    // остальные тесты без изменений...
+    @Test
+    void testFindAllUsers() throws SQLException {
+        CreateUserRequest user1 = new CreateUserRequest("userA", "passA", "a@test.com");
+        CreateUserRequest user2 = new CreateUserRequest("userB", "passB", "b@test.com");
+
+        userRepository.create(user1);
+        userRepository.create(user2);
+
+        List<UserResponse> users = userRepository.findAll();
+        assertEquals(2, users.size());
+    }
+
+    @Test
+    void testUpdateUser() throws SQLException {
+        CreateUserRequest request = new CreateUserRequest("original", "pass", "original@test.com");
+        UserResponse created = userRepository.create(request);
+
+        CreateUserRequest updateRequest = new CreateUserRequest("updated", "newpass", "updated@test.com");
+        UserResponse updated = userRepository.update(created.getUserId(), updateRequest);
+
+        assertNotNull(updated);
+        assertEquals("updated", updated.getUsername());
+        assertEquals("updated@test.com", updated.getEmail());
+    }
+
+    @Test
+    void testDeleteUser() throws SQLException {
+        CreateUserRequest request = new CreateUserRequest("todelete", "pass", "delete@test.com");
+        UserResponse created = userRepository.create(request);
+
+        boolean deleted = userRepository.delete(created.getUserId());
+        assertTrue(deleted);
+
+        UserResponse found = userRepository.findById(created.getUserId());
+        assertNull(found);
+    }
 }

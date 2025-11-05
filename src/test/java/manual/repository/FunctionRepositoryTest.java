@@ -1,8 +1,11 @@
 package manual.repository;
 
 import manual.DatabaseConnection;
-import manual.dto.FunctionDto;
-import manual.dto.UserDto;
+import manual.entity.UserEntity;
+import manual.dto.CreateUserRequest;
+import manual.dto.CreateFunctionRequest;
+import manual.dto.UserResponse;
+import manual.dto.FunctionResponse;
 import org.junit.jupiter.api.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -15,7 +18,7 @@ class FunctionRepositoryTest {
     private Connection connection;
     private UserRepository userRepository;
     private FunctionRepository functionRepository;
-    private Long testUserId;
+    private UserEntity testUser;
 
     @BeforeAll
     void setup() throws SQLException {
@@ -33,8 +36,12 @@ class FunctionRepositoryTest {
             stmt.execute("DELETE FROM users");
         }
 
-        UserDto user = new UserDto(null, "functestuser", "pass", "functest@email.com", null);
-        testUserId = userRepository.create(user);
+        CreateUserRequest userRequest = new CreateUserRequest("functestuser", "pass", "functest@email.com");
+        UserResponse userResponse = userRepository.create(userRequest);
+
+        testUser = new UserEntity("functestuser", "pass", "functest@email.com");
+        testUser.setUserId(userResponse.getUserId());
+        testUser.setCreatedAt(userResponse.getCreatedAt());
     }
 
     @AfterAll
@@ -44,5 +51,27 @@ class FunctionRepositoryTest {
         }
     }
 
-    // тесты без изменений...
+    @Test
+    void testCreateAndFindFunction() throws SQLException {
+        CreateFunctionRequest request = new CreateFunctionRequest(testUser.getUserId(), "testfunc", "SQR", "x*x", 0.0, 10.0);
+
+        FunctionResponse response = functionRepository.create(request, testUser);
+        assertNotNull(response);
+        assertNotNull(response.getFunctionId());
+        assertEquals("testfunc", response.getFunctionName());
+        assertEquals("SQR", response.getFunctionType());
+        assertEquals("x*x", response.getFunctionExpression());
+    }
+
+    @Test
+    void testFindFunctionsByUserId() throws SQLException {
+        CreateFunctionRequest func1 = new CreateFunctionRequest(testUser.getUserId(), "func1", "SQR", "x*x", 0.0, 5.0);
+        CreateFunctionRequest func2 = new CreateFunctionRequest(testUser.getUserId(), "func2", "LINEAR", "2*x", 0.0, 5.0);
+
+        functionRepository.create(func1, testUser);
+        functionRepository.create(func2, testUser);
+
+        List<FunctionResponse> functions = functionRepository.findByUserId(testUser.getUserId());
+        assertEquals(2, functions.size());
+    }
 }

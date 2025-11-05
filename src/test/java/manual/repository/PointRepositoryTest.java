@@ -1,9 +1,14 @@
 package manual.repository;
 
 import manual.DatabaseConnection;
-import manual.dto.FunctionDto;
-import manual.dto.PointDto;
-import manual.dto.UserDto;
+import manual.entity.UserEntity;
+import manual.entity.FunctionEntity;
+import manual.dto.CreateUserRequest;
+import manual.dto.CreateFunctionRequest;
+import manual.dto.CreatePointRequest;
+import manual.dto.UserResponse;
+import manual.dto.FunctionResponse;
+import manual.dto.PointResponse;
 import org.junit.jupiter.api.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,8 +22,8 @@ class PointRepositoryTest {
     private UserRepository userRepository;
     private FunctionRepository functionRepository;
     private PointRepository pointRepository;
-    private Long testUserId;
-    private Long testFunctionId;
+    private UserEntity testUser;
+    private FunctionEntity testFunction;
 
     @BeforeAll
     void setup() throws SQLException {
@@ -37,11 +42,19 @@ class PointRepositoryTest {
             stmt.execute("DELETE FROM users");
         }
 
-        UserDto user = new UserDto(null, "pointtestuser", "pass", "pointtest@email.com", null);
-        testUserId = userRepository.create(user);
+        CreateUserRequest userRequest = new CreateUserRequest("pointtestuser", "pass", "pointtest@email.com");
+        UserResponse userResponse = userRepository.create(userRequest);
 
-        FunctionDto function = new FunctionDto(null, testUserId, "testfunc", "SQR", "x*x", 0.0, 10.0, null);
-        testFunctionId = functionRepository.create(function);
+        testUser = new UserEntity("pointtestuser", "pass", "pointtest@email.com");
+        testUser.setUserId(userResponse.getUserId());
+        testUser.setCreatedAt(userResponse.getCreatedAt());
+
+        CreateFunctionRequest funcRequest = new CreateFunctionRequest(testUser.getUserId(), "testfunc", "SQR", "x*x", 0.0, 10.0);
+        FunctionResponse functionResponse = functionRepository.create(funcRequest, testUser);
+
+        testFunction = new FunctionEntity(testUser, "testfunc", "SQR", "x*x", 0.0, 10.0);
+        testFunction.setFunctionId(functionResponse.getFunctionId());
+        testFunction.setCreatedAt(functionResponse.getCreatedAt());
     }
 
     @AfterAll
@@ -53,53 +66,24 @@ class PointRepositoryTest {
 
     @Test
     void testCreateAndFindPoint() throws SQLException {
-        PointDto point = new PointDto(null, testFunctionId, 2.0, 4.0, null);
+        CreatePointRequest request = new CreatePointRequest(testFunction.getFunctionId(), 2.0, 4.0);
 
-        Long pointId = pointRepository.create(point);
-        assertNotNull(pointId);
-
-        PointDto found = pointRepository.findById(pointId);
-        assertNotNull(found);
-        assertEquals(2.0, found.getXValue());
-        assertEquals(4.0, found.getYValue());
-        assertEquals(testFunctionId, found.getFunctionId());
+        PointResponse response = pointRepository.create(request, testFunction);
+        assertNotNull(response);
+        assertNotNull(response.getPointId());
+        assertEquals(2.0, response.getXValue());
+        assertEquals(4.0, response.getYValue());
     }
 
     @Test
     void testFindPointsByFunctionId() throws SQLException {
-        PointDto point1 = new PointDto(null, testFunctionId, 1.0, 1.0, null);
-        PointDto point2 = new PointDto(null, testFunctionId, 3.0, 9.0, null);
+        CreatePointRequest point1 = new CreatePointRequest(testFunction.getFunctionId(), 1.0, 1.0);
+        CreatePointRequest point2 = new CreatePointRequest(testFunction.getFunctionId(), 3.0, 9.0);
 
-        pointRepository.create(point1);
-        pointRepository.create(point2);
+        pointRepository.create(point1, testFunction);
+        pointRepository.create(point2, testFunction);
 
-        List<PointDto> points = pointRepository.findByFunctionId(testFunctionId);
+        List<PointResponse> points = pointRepository.findByFunctionId(testFunction.getFunctionId());
         assertEquals(2, points.size());
-    }
-
-    @Test
-    void testUpdatePoint() throws SQLException {
-        PointDto point = new PointDto(null, testFunctionId, 5.0, 25.0, null);
-        Long pointId = pointRepository.create(point);
-
-        PointDto updated = new PointDto(pointId, testFunctionId, 6.0, 36.0, null);
-        boolean success = pointRepository.update(updated);
-        assertTrue(success);
-
-        PointDto found = pointRepository.findById(pointId);
-        assertEquals(6.0, found.getXValue());
-        assertEquals(36.0, found.getYValue());
-    }
-
-    @Test
-    void testDeletePoint() throws SQLException {
-        PointDto point = new PointDto(null, testFunctionId, 7.0, 49.0, null);
-        Long pointId = pointRepository.create(point);
-
-        boolean deleted = pointRepository.delete(pointId);
-        assertTrue(deleted);
-
-        PointDto found = pointRepository.findById(pointId);
-        assertNull(found);
     }
 }

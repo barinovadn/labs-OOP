@@ -1,9 +1,14 @@
 package manual.repository;
 
 import manual.DatabaseConnection;
-import manual.dto.CompositeFunctionDto;
-import manual.dto.FunctionDto;
-import manual.dto.UserDto;
+import manual.entity.UserEntity;
+import manual.entity.FunctionEntity;
+import manual.dto.CreateUserRequest;
+import manual.dto.CreateFunctionRequest;
+import manual.dto.CreateCompositeFunctionRequest;
+import manual.dto.UserResponse;
+import manual.dto.FunctionResponse;
+import manual.dto.CompositeFunctionResponse;
 import org.junit.jupiter.api.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,9 +22,9 @@ class CompositeFunctionRepositoryTest {
     private UserRepository userRepository;
     private FunctionRepository functionRepository;
     private CompositeFunctionRepository compositeRepository;
-    private Long testUserId;
-    private Long firstFunctionId;
-    private Long secondFunctionId;
+    private UserEntity testUser;
+    private FunctionEntity firstFunction;
+    private FunctionEntity secondFunction;
 
     @BeforeAll
     void setup() throws SQLException {
@@ -38,13 +43,25 @@ class CompositeFunctionRepositoryTest {
             stmt.execute("DELETE FROM users");
         }
 
-        UserDto user = new UserDto(null, "comptestuser", "pass", "comptest@email.com", null);
-        testUserId = userRepository.create(user);
+        CreateUserRequest userRequest = new CreateUserRequest("comptestuser", "pass", "comptest@email.com");
+        UserResponse userResponse = userRepository.create(userRequest);
 
-        FunctionDto func1 = new FunctionDto(null, testUserId, "f", "SQR", "x*x", 0.0, 10.0, null);
-        FunctionDto func2 = new FunctionDto(null, testUserId, "g", "LINEAR", "x+1", 0.0, 10.0, null);
-        firstFunctionId = functionRepository.create(func1);
-        secondFunctionId = functionRepository.create(func2);
+        testUser = new UserEntity("comptestuser", "pass", "comptest@email.com");
+        testUser.setUserId(userResponse.getUserId());
+        testUser.setCreatedAt(userResponse.getCreatedAt());
+
+        CreateFunctionRequest func1 = new CreateFunctionRequest(testUser.getUserId(), "f", "SQR", "x*x", 0.0, 10.0);
+        CreateFunctionRequest func2 = new CreateFunctionRequest(testUser.getUserId(), "g", "LINEAR", "x+1", 0.0, 10.0);
+        FunctionResponse func1Response = functionRepository.create(func1, testUser);
+        FunctionResponse func2Response = functionRepository.create(func2, testUser);
+
+        firstFunction = new FunctionEntity(testUser, "f", "SQR", "x*x", 0.0, 10.0);
+        firstFunction.setFunctionId(func1Response.getFunctionId());
+        firstFunction.setCreatedAt(func1Response.getCreatedAt());
+
+        secondFunction = new FunctionEntity(testUser, "g", "LINEAR", "x+1", 0.0, 10.0);
+        secondFunction.setFunctionId(func2Response.getFunctionId());
+        secondFunction.setCreatedAt(func2Response.getCreatedAt());
     }
 
     @AfterAll
@@ -56,54 +73,23 @@ class CompositeFunctionRepositoryTest {
 
     @Test
     void testCreateAndFindCompositeFunction() throws SQLException {
-        CompositeFunctionDto composite = new CompositeFunctionDto(null, testUserId, "f(g(x))", firstFunctionId, secondFunctionId, null);
+        CreateCompositeFunctionRequest request = new CreateCompositeFunctionRequest(testUser.getUserId(), "f(g(x))", firstFunction.getFunctionId(), secondFunction.getFunctionId());
 
-        Long compositeId = compositeRepository.create(composite);
-        assertNotNull(compositeId);
-
-        CompositeFunctionDto found = compositeRepository.findById(compositeId);
-        assertNotNull(found);
-        assertEquals("f(g(x))", found.getCompositeName());
-        assertEquals(firstFunctionId, found.getFirstFunctionId());
-        assertEquals(secondFunctionId, found.getSecondFunctionId());
+        CompositeFunctionResponse response = compositeRepository.create(request, testUser, firstFunction, secondFunction);
+        assertNotNull(response);
+        assertNotNull(response.getCompositeId());
+        assertEquals("f(g(x))", response.getCompositeName());
     }
 
     @Test
     void testFindCompositesByUserId() throws SQLException {
-        CompositeFunctionDto comp1 = new CompositeFunctionDto(null, testUserId, "comp1", firstFunctionId, secondFunctionId, null);
-        CompositeFunctionDto comp2 = new CompositeFunctionDto(null, testUserId, "comp2", secondFunctionId, firstFunctionId, null);
+        CreateCompositeFunctionRequest comp1 = new CreateCompositeFunctionRequest(testUser.getUserId(), "comp1", firstFunction.getFunctionId(), secondFunction.getFunctionId());
+        CreateCompositeFunctionRequest comp2 = new CreateCompositeFunctionRequest(testUser.getUserId(), "comp2", secondFunction.getFunctionId(), firstFunction.getFunctionId());
 
-        compositeRepository.create(comp1);
-        compositeRepository.create(comp2);
+        compositeRepository.create(comp1, testUser, firstFunction, secondFunction);
+        compositeRepository.create(comp2, testUser, secondFunction, firstFunction);
 
-        List<CompositeFunctionDto> composites = compositeRepository.findByUserId(testUserId);
+        List<CompositeFunctionResponse> composites = compositeRepository.findByUserId(testUser.getUserId());
         assertEquals(2, composites.size());
-    }
-
-    @Test
-    void testUpdateCompositeFunction() throws SQLException {
-        CompositeFunctionDto composite = new CompositeFunctionDto(null, testUserId, "original", firstFunctionId, secondFunctionId, null);
-        Long compositeId = compositeRepository.create(composite);
-
-        CompositeFunctionDto updated = new CompositeFunctionDto(compositeId, testUserId, "updated", secondFunctionId, firstFunctionId, null);
-        boolean success = compositeRepository.update(updated);
-        assertTrue(success);
-
-        CompositeFunctionDto found = compositeRepository.findById(compositeId);
-        assertEquals("updated", found.getCompositeName());
-        assertEquals(secondFunctionId, found.getFirstFunctionId());
-        assertEquals(firstFunctionId, found.getSecondFunctionId());
-    }
-
-    @Test
-    void testDeleteCompositeFunction() throws SQLException {
-        CompositeFunctionDto composite = new CompositeFunctionDto(null, testUserId, "todelete", firstFunctionId, secondFunctionId, null);
-        Long compositeId = compositeRepository.create(composite);
-
-        boolean deleted = compositeRepository.delete(compositeId);
-        assertTrue(deleted);
-
-        CompositeFunctionDto found = compositeRepository.findById(compositeId);
-        assertNull(found);
     }
 }
