@@ -1,7 +1,11 @@
 package manual.repository;
 
 import manual.SqlFileReader;
-import manual.dto.PointDto;
+import manual.entity.PointEntity;
+import manual.entity.FunctionEntity;
+import manual.dto.CreatePointRequest;
+import manual.dto.PointResponse;
+import manual.mapper.PointMapper;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,45 +30,52 @@ public class PointRepository {
         logger.info("PointRepository initialized with SQL files");
     }
 
-    public Long create(PointDto point) throws SQLException {
-        logger.fine("Creating point for function ID: " + point.getFunctionId());
+    public PointResponse create(CreatePointRequest request, FunctionEntity function) throws SQLException {
+        logger.fine("Creating point for function ID: " + function.getFunctionId());
         try (PreparedStatement stmt = connection.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setLong(1, point.getFunctionId());
-            stmt.setDouble(2, point.getXValue());
-            stmt.setDouble(3, point.getYValue());
+            stmt.setLong(1, function.getFunctionId());
+            stmt.setDouble(2, request.getXValue());
+            stmt.setDouble(3, request.getYValue());
             stmt.executeUpdate();
 
             ResultSet keys = stmt.getGeneratedKeys();
-            Long pointId = keys.next() ? keys.getLong(1) : null;
-            logger.fine("Point created with ID: " + pointId);
-            return pointId;
+            if (keys.next()) {
+                Long pointId = keys.getLong(1);
+                logger.fine("Point created with ID: " + pointId);
+
+                PointEntity entity = findEntityById(pointId);
+                return PointMapper.toResponse(entity);
+            }
+            throw new SQLException("Failed to get generated point ID");
         } catch (SQLException e) {
             logger.severe("Failed to create point: " + e.getMessage());
             throw e;
         }
     }
 
-    public PointDto findById(Long pointId) throws SQLException {
+    public PointResponse findById(Long pointId) throws SQLException {
         logger.finest("Finding point by ID: " + pointId);
+        PointEntity entity = findEntityById(pointId);
+        return entity != null ? PointMapper.toResponse(entity) : null;
+    }
+
+    private PointEntity findEntityById(Long pointId) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement(READ_SQL)) {
             stmt.setLong(1, pointId);
             ResultSet rs = stmt.executeQuery();
-            PointDto result = rs.next() ? mapToDto(rs) : null;
-            return result;
-        } catch (SQLException e) {
-            logger.severe("Failed to find point by ID " + pointId + ": " + e.getMessage());
-            throw e;
+            return rs.next() ? mapToEntity(rs) : null;
         }
     }
 
-    public List<PointDto> findByFunctionId(Long functionId) throws SQLException {
+    public List<PointResponse> findByFunctionId(Long functionId) throws SQLException {
         logger.fine("Finding points by function ID: " + functionId);
         try (PreparedStatement stmt = connection.prepareStatement(READ_BY_FUNCTION_SQL)) {
             stmt.setLong(1, functionId);
             ResultSet rs = stmt.executeQuery();
-            List<PointDto> points = new ArrayList<>();
+            List<PointResponse> points = new ArrayList<>();
             while (rs.next()) {
-                points.add(mapToDto(rs));
+                PointEntity entity = mapToEntity(rs);
+                points.add(PointMapper.toResponse(entity));
             }
             logger.fine("Found " + points.size() + " points for function " + functionId);
             return points;
@@ -74,17 +85,22 @@ public class PointRepository {
         }
     }
 
-    public boolean update(PointDto point) throws SQLException {
-        logger.fine("Updating point ID: " + point.getPointId());
+    public PointResponse update(Long pointId, CreatePointRequest request) throws SQLException {
+        logger.fine("Updating point ID: " + pointId);
         try (PreparedStatement stmt = connection.prepareStatement(UPDATE_SQL)) {
-            stmt.setDouble(1, point.getXValue());
-            stmt.setDouble(2, point.getYValue());
-            stmt.setLong(3, point.getPointId());
+            stmt.setDouble(1, request.getXValue());
+            stmt.setDouble(2, request.getYValue());
+            stmt.setLong(3, pointId);
             boolean result = stmt.executeUpdate() > 0;
             logger.fine("Point update " + (result ? "successful" : "failed"));
-            return result;
+
+            if (result) {
+                PointEntity entity = findEntityById(pointId);
+                return PointMapper.toResponse(entity);
+            }
+            return null;
         } catch (SQLException e) {
-            logger.severe("Failed to update point ID " + point.getPointId() + ": " + e.getMessage());
+            logger.severe("Failed to update point ID " + pointId + ": " + e.getMessage());
             throw e;
         }
     }
@@ -102,13 +118,17 @@ public class PointRepository {
         }
     }
 
-    private PointDto mapToDto(ResultSet rs) throws SQLException {
-        return new PointDto(
-                rs.getLong("point_id"),
-                rs.getLong("function_id"),
-                rs.getDouble("x_value"),
-                rs.getDouble("y_value"),
-                rs.getTimestamp("computed_at").toLocalDateTime()
-        );
+    private PointEntity mapToEntity(ResultSet rs) throws SQLException {
+        PointEntity entity = new PointEntity();
+        entity.setPointId(rs.getLong("point_id"));
+        entity.setXValue(rs.getDouble("x_value"));
+        entity.setYValue(rs.getDouble("y_value"));
+        entity.setComputedAt(rs.getTimestamp("computed_at").toLocalDateTime());
+
+        FunctionEntity function = new FunctionEntity();
+        function.setFunctionId(rs.getLong("function_id"));
+        entity.setFunction(function);
+
+        return entity;
     }
 }

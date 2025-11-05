@@ -1,7 +1,12 @@
 package manual.repository;
 
 import manual.SqlFileReader;
-import manual.dto.CompositeFunctionDto;
+import manual.entity.CompositeFunctionEntity;
+import manual.entity.UserEntity;
+import manual.entity.FunctionEntity;
+import manual.dto.CreateCompositeFunctionRequest;
+import manual.dto.CompositeFunctionResponse;
+import manual.mapper.CompositeFunctionMapper;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,47 +31,54 @@ public class CompositeFunctionRepository {
         logger.info("CompositeFunctionRepository initialized with SQL files");
     }
 
-    public Long create(CompositeFunctionDto composite) throws SQLException {
-        logger.info("Creating composite function: " + composite.getCompositeName());
+    public CompositeFunctionResponse create(CreateCompositeFunctionRequest request, UserEntity user,
+                                            FunctionEntity firstFunction, FunctionEntity secondFunction) throws SQLException {
+        logger.info("Creating composite function: " + request.getCompositeName());
         try (PreparedStatement stmt = connection.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setLong(1, composite.getUserId());
-            stmt.setString(2, composite.getCompositeName());
-            stmt.setLong(3, composite.getFirstFunctionId());
-            stmt.setLong(4, composite.getSecondFunctionId());
+            stmt.setLong(1, user.getUserId());
+            stmt.setString(2, request.getCompositeName());
+            stmt.setLong(3, firstFunction.getFunctionId());
+            stmt.setLong(4, secondFunction.getFunctionId());
             stmt.executeUpdate();
 
             ResultSet keys = stmt.getGeneratedKeys();
-            Long compositeId = keys.next() ? keys.getLong(1) : null;
-            logger.info("Composite function created with ID: " + compositeId);
-            return compositeId;
+            if (keys.next()) {
+                Long compositeId = keys.getLong(1);
+                logger.info("Composite function created with ID: " + compositeId);
+
+                CompositeFunctionEntity entity = findEntityById(compositeId);
+                return CompositeFunctionMapper.toResponse(entity);
+            }
+            throw new SQLException("Failed to get generated composite function ID");
         } catch (SQLException e) {
             logger.severe("Failed to create composite function: " + e.getMessage());
             throw e;
         }
     }
 
-    public CompositeFunctionDto findById(Long compositeId) throws SQLException {
+    public CompositeFunctionResponse findById(Long compositeId) throws SQLException {
         logger.fine("Finding composite function by ID: " + compositeId);
+        CompositeFunctionEntity entity = findEntityById(compositeId);
+        return entity != null ? CompositeFunctionMapper.toResponse(entity) : null;
+    }
+
+    private CompositeFunctionEntity findEntityById(Long compositeId) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement(READ_SQL)) {
             stmt.setLong(1, compositeId);
             ResultSet rs = stmt.executeQuery();
-            CompositeFunctionDto result = rs.next() ? mapToDto(rs) : null;
-            logger.fine("Composite function found: " + (result != null));
-            return result;
-        } catch (SQLException e) {
-            logger.severe("Failed to find composite function by ID " + compositeId + ": " + e.getMessage());
-            throw e;
+            return rs.next() ? mapToEntity(rs) : null;
         }
     }
 
-    public List<CompositeFunctionDto> findByUserId(Long userId) throws SQLException {
+    public List<CompositeFunctionResponse> findByUserId(Long userId) throws SQLException {
         logger.fine("Finding composite functions by user ID: " + userId);
         try (PreparedStatement stmt = connection.prepareStatement(READ_BY_USER_SQL)) {
             stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
-            List<CompositeFunctionDto> composites = new ArrayList<>();
+            List<CompositeFunctionResponse> composites = new ArrayList<>();
             while (rs.next()) {
-                composites.add(mapToDto(rs));
+                CompositeFunctionEntity entity = mapToEntity(rs);
+                composites.add(CompositeFunctionMapper.toResponse(entity));
             }
             logger.fine("Found " + composites.size() + " composite functions for user " + userId);
             return composites;
@@ -76,18 +88,23 @@ public class CompositeFunctionRepository {
         }
     }
 
-    public boolean update(CompositeFunctionDto composite) throws SQLException {
-        logger.info("Updating composite function ID: " + composite.getCompositeId());
+    public CompositeFunctionResponse update(Long compositeId, CreateCompositeFunctionRequest request) throws SQLException {
+        logger.info("Updating composite function ID: " + compositeId);
         try (PreparedStatement stmt = connection.prepareStatement(UPDATE_SQL)) {
-            stmt.setString(1, composite.getCompositeName());
-            stmt.setLong(2, composite.getFirstFunctionId());
-            stmt.setLong(3, composite.getSecondFunctionId());
-            stmt.setLong(4, composite.getCompositeId());
+            stmt.setString(1, request.getCompositeName());
+            stmt.setLong(2, request.getFirstFunctionId());
+            stmt.setLong(3, request.getSecondFunctionId());
+            stmt.setLong(4, compositeId);
             boolean result = stmt.executeUpdate() > 0;
             logger.info("Composite function update " + (result ? "successful" : "failed"));
-            return result;
+
+            if (result) {
+                CompositeFunctionEntity entity = findEntityById(compositeId);
+                return CompositeFunctionMapper.toResponse(entity);
+            }
+            return null;
         } catch (SQLException e) {
-            logger.severe("Failed to update composite function ID " + composite.getCompositeId() + ": " + e.getMessage());
+            logger.severe("Failed to update composite function ID " + compositeId + ": " + e.getMessage());
             throw e;
         }
     }
@@ -105,14 +122,24 @@ public class CompositeFunctionRepository {
         }
     }
 
-    private CompositeFunctionDto mapToDto(ResultSet rs) throws SQLException {
-        return new CompositeFunctionDto(
-                rs.getLong("composite_id"),
-                rs.getLong("user_id"),
-                rs.getString("composite_name"),
-                rs.getLong("first_function_id"),
-                rs.getLong("second_function_id"),
-                rs.getTimestamp("created_at").toLocalDateTime()
-        );
+    private CompositeFunctionEntity mapToEntity(ResultSet rs) throws SQLException {
+        CompositeFunctionEntity entity = new CompositeFunctionEntity();
+        entity.setCompositeId(rs.getLong("composite_id"));
+        entity.setCompositeName(rs.getString("composite_name"));
+        entity.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+
+        UserEntity user = new UserEntity();
+        user.setUserId(rs.getLong("user_id"));
+        entity.setUser(user);
+
+        FunctionEntity firstFunction = new FunctionEntity();
+        firstFunction.setFunctionId(rs.getLong("first_function_id"));
+        entity.setFirstFunction(firstFunction);
+
+        FunctionEntity secondFunction = new FunctionEntity();
+        secondFunction.setFunctionId(rs.getLong("second_function_id"));
+        entity.setSecondFunction(secondFunction);
+
+        return entity;
     }
 }

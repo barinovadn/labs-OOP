@@ -1,7 +1,10 @@
 package manual.repository;
 
 import manual.SqlFileReader;
-import manual.dto.UserDto;
+import manual.entity.UserEntity;
+import manual.dto.CreateUserRequest;
+import manual.dto.UserResponse;
+import manual.mapper.UserMapper;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,45 +29,51 @@ public class UserRepository {
         logger.info("UserRepository initialized with SQL files");
     }
 
-    public Long create(UserDto user) throws SQLException {
-        logger.info("Creating user: " + user.getUsername());
+    public UserResponse create(CreateUserRequest request) throws SQLException {
+        logger.info("Creating user: " + request.getUsername());
         try (PreparedStatement stmt = connection.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPassword());
-            stmt.setString(3, user.getEmail());
+            stmt.setString(1, request.getUsername());
+            stmt.setString(2, request.getPassword());
+            stmt.setString(3, request.getEmail());
             stmt.executeUpdate();
 
             ResultSet keys = stmt.getGeneratedKeys();
-            Long userId = keys.next() ? keys.getLong(1) : null;
-            logger.info("User created with ID: " + userId);
-            return userId;
+            if (keys.next()) {
+                Long userId = keys.getLong(1);
+                logger.info("User created with ID: " + userId);
+
+                UserEntity entity = findEntityById(userId);
+                return UserMapper.toResponse(entity);
+            }
+            throw new SQLException("Failed to get generated user ID");
         } catch (SQLException e) {
             logger.severe("Failed to create user: " + e.getMessage());
             throw e;
         }
     }
 
-    public UserDto findById(Long userId) throws SQLException {
+    public UserResponse findById(Long userId) throws SQLException {
         logger.fine("Finding user by ID: " + userId);
+        UserEntity entity = findEntityById(userId);
+        return entity != null ? UserMapper.toResponse(entity) : null;
+    }
+
+    private UserEntity findEntityById(Long userId) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement(READ_SQL)) {
             stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
-            UserDto result = rs.next() ? mapToDto(rs) : null;
-            logger.fine("User found: " + (result != null));
-            return result;
-        } catch (SQLException e) {
-            logger.severe("Failed to find user by ID " + userId + ": " + e.getMessage());
-            throw e;
+            return rs.next() ? mapToEntity(rs) : null;
         }
     }
 
-    public List<UserDto> findAll() throws SQLException {
+    public List<UserResponse> findAll() throws SQLException {
         logger.fine("Finding all users");
         try (PreparedStatement stmt = connection.prepareStatement(READ_ALL_SQL)) {
             ResultSet rs = stmt.executeQuery();
-            List<UserDto> users = new ArrayList<>();
+            List<UserResponse> users = new ArrayList<>();
             while (rs.next()) {
-                users.add(mapToDto(rs));
+                UserEntity entity = mapToEntity(rs);
+                users.add(UserMapper.toResponse(entity));
             }
             logger.fine("Found " + users.size() + " users");
             return users;
@@ -74,18 +83,24 @@ public class UserRepository {
         }
     }
 
-    public boolean update(UserDto user) throws SQLException {
-        logger.info("Updating user ID: " + user.getUserId());
+    public UserResponse update(Long userId, CreateUserRequest request) throws SQLException {
+        logger.info("Updating user ID: " + userId);
         try (PreparedStatement stmt = connection.prepareStatement(UPDATE_SQL)) {
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPassword());
-            stmt.setString(3, user.getEmail());
-            stmt.setLong(4, user.getUserId());
+            stmt.setString(1, request.getUsername());
+            stmt.setString(2, request.getPassword());
+            stmt.setString(3, request.getEmail());
+            stmt.setLong(4, userId);
+
             boolean result = stmt.executeUpdate() > 0;
             logger.info("User update " + (result ? "successful" : "failed"));
-            return result;
+
+            if (result) {
+                UserEntity entity = findEntityById(userId);
+                return UserMapper.toResponse(entity);
+            }
+            return null;
         } catch (SQLException e) {
-            logger.severe("Failed to update user ID " + user.getUserId() + ": " + e.getMessage());
+            logger.severe("Failed to update user ID " + userId + ": " + e.getMessage());
             throw e;
         }
     }
@@ -103,13 +118,13 @@ public class UserRepository {
         }
     }
 
-    private UserDto mapToDto(ResultSet rs) throws SQLException {
-        return new UserDto(
-                rs.getLong("user_id"),
-                rs.getString("username"),
-                rs.getString("password"),
-                rs.getString("email"),
-                rs.getTimestamp("created_at").toLocalDateTime()
-        );
+    private UserEntity mapToEntity(ResultSet rs) throws SQLException {
+        UserEntity entity = new UserEntity();
+        entity.setUserId(rs.getLong("user_id"));
+        entity.setUsername(rs.getString("username"));
+        entity.setPassword(rs.getString("password"));
+        entity.setEmail(rs.getString("email"));
+        entity.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        return entity;
     }
 }
