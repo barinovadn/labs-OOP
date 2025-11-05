@@ -18,6 +18,10 @@ public interface FunctionRepository extends JpaRepository<FunctionEntity, Long> 
 
     List<FunctionEntity> findByFunctionNameContainingIgnoreCase(String functionName);
 
+    List<FunctionEntity> findByFunctionTypeContainingIgnoreCase(String functionType);
+
+    List<FunctionEntity> findByFunctionExpressionContainingIgnoreCase(String expression);
+
     @Query("SELECT f FROM FunctionEntity f WHERE f.xFrom >= :minX AND f.xTo <= :maxX")
     List<FunctionEntity> findFunctionsInRange(@Param("minX") Double minX, @Param("maxX") Double maxX);
 
