@@ -1,20 +1,22 @@
-# Лабораторные работы по ООП
+# Лабораторные работы по ООП <img height="32px" alt="emoji" src="https://media.tenor.com/igSFncymgkIAAAAi/4.gif" /> <img height="32px" alt="emoji" src="https://media.tenor.com/gIvmXax4PFcAAAAi/alien-cat.gif" />
 
 Лабораторные работы по объектно-ориентированному программированию на Java.
 
-**Университет:** [Самарский университет](https://ssau.ru/)   
+**Университет:** [Самарский университет](https://ssau.ru/)  
 **Язык:** Java  
-**Темы:** функции, интерфейсы, наследование, коллекции, многопоточность, синхронизация
+**Темы:** функции, интерфейсы, наследование, коллекции, многопоточность, синхронизация  
 
+
+<br>
 
 ### Сравнение производительности
 
 | Операция | [Manual](../../tree/manual) | [Framework](../../tree/framework) | Разница | Ускорение | Операций |
 |----------|--------|-----------|-----------|-----------|----------|
-| **CREATE** | 4630 ms | 436 ms | -4194 ms | **x10.5** | *10k* |
+| **CREATE** | 4630 ms | 436 ms | -4194 ms | **x10.5** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
 | **READ** | 650 ms | 559 ms | -91 ms | **x1.16** | *10k* |
-| **UPDATE** | 3945 ms | 91 ms | -3854 ms | **x43** | *10k* |
-| **DELETE** | 5794 ms | 76 ms | -5718 ms | **x76** | *10k* |
+| **UPDATE** | 3945 ms | 91 ms | -3854 ms | **x43** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
+| **DELETE** | 5794 ms | 76 ms | -5718 ms | **x76** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
 | **SEARCH** | 10302 ms | 6823 ms | -3479 ms | **x1.5** | *1k* |
 
 
@@ -23,7 +25,7 @@
 | Операция сортировки | [Manual](../../tree/manual) | [Framework](../../tree/framework) | Разница | Ускорение | Записей |
 |---------------------|-------------|-----------|---------|---------|---------|
 | Сортировка по имени | 55 ms | 47 ms | -8 ms | **x1.17** | *10k* |
-| Сортировка по типу и имени | 54 ms | 14 ms | -40 ms | **x3.85** | *10k* |
+| Сортировка по типу и имени | 54 ms | 14 ms | -40 ms | **x3.85** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
 
 
 <br>
@@ -33,7 +35,7 @@
 #### Overall Coverage Summary
 | Package | Class | Method | Branch | Line |
 |---------|-------|--------|--------|------|
-| all classes | 100% (56/56) | 100% (218/218) | 100% (250/250) | <ins>98.1% (728/742)</ins> |
+| all classes |  100% (56/56) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | 100% (218/218) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | 100% (250/250) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | <ins>98.1% (728/742)</ins>  <img height="18px" alt="emoji" src="https://media.tenor.com/s_gvo82o5Q4AAAAi/sad-depressed.gif" /> |
 
 #### Coverage Breakdown
 | Package | Class | Method | Branch | Line |
@@ -51,6 +53,8 @@
 <br>
 
 ### ER диаграмма
+
+<img height="100px" alt="emoji" src="https://media.tenor.com/4CfIDNeonQwAAAAi/postgres.gif" />
 
 ```mermaid
 erDiagram
