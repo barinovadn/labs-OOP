@@ -25,85 +25,6 @@ public class FunctionGraphSearch {
         logger.info("FunctionGraphSearch initialized");
     }
 
-    /**
-     * Поиск в ширину по графу композитных функций
-     */
-    public List<FunctionResponse> breadthFirstSearch(Long startFunctionId, SearchCriteria criteria) throws SQLException {
-        logger.info("BFS from function ID: " + startFunctionId);
-        long startTime = System.currentTimeMillis();
-
-        List<FunctionResponse> result = new ArrayList<>();
-        Set<Long> visited = new HashSet<>();
-        Queue<Long> queue = new LinkedList<>();
-
-        if (startFunctionId != null) {
-            queue.offer(startFunctionId);
-            visited.add(startFunctionId);
-        }
-
-        while (!queue.isEmpty()) {
-            Long currentFunctionId = queue.poll();
-            logger.fine("BFS processing: " + currentFunctionId);
-
-            FunctionResponse function = functionRepository.findById(currentFunctionId);
-            if (function != null && matchesCriteria(function, criteria)) {
-                result.add(function);
-            }
-
-            List<CompositeFunctionResponse> compositesAsFirst = compositeRepository.findByUserId(function.getUserId())
-                    .stream()
-                    .filter(c -> c.getFirstFunctionId().equals(currentFunctionId))
-                    .toList();
-
-            List<CompositeFunctionResponse> compositesAsSecond = compositeRepository.findByUserId(function.getUserId())
-                    .stream()
-                    .filter(c -> c.getSecondFunctionId().equals(currentFunctionId))
-                    .toList();
-
-            for (CompositeFunctionResponse composite : compositesAsFirst) {
-                if (!visited.contains(composite.getSecondFunctionId())) {
-                    queue.offer(composite.getSecondFunctionId());
-                    visited.add(composite.getSecondFunctionId());
-                }
-            }
-
-            for (CompositeFunctionResponse composite : compositesAsSecond) {
-                if (!visited.contains(composite.getFirstFunctionId())) {
-                    queue.offer(composite.getFirstFunctionId());
-                    visited.add(composite.getFirstFunctionId());
-                }
-            }
-
-            if (result.size() >= criteria.getLimit()) {
-                logger.info("BFS reached limit: " + criteria.getLimit());
-                break;
-            }
-        }
-
-        long endTime = System.currentTimeMillis();
-        logger.info("BFS completed. Found " + result.size() + " items in " + (endTime - startTime) + "ms");
-        return result;
-    }
-
-    /**
-     * Поиск в глубину по графу композитных функций
-     */
-    public List<FunctionResponse> depthFirstSearch(Long startFunctionId, SearchCriteria criteria) throws SQLException {
-        logger.info("DFS from function ID: " + startFunctionId);
-        long startTime = System.currentTimeMillis();
-
-        List<FunctionResponse> result = new ArrayList<>();
-        Set<Long> visited = new HashSet<>();
-
-        if (startFunctionId != null) {
-            dfsRecursive(startFunctionId, criteria, result, visited, 0);
-        }
-
-        long endTime = System.currentTimeMillis();
-        logger.info("DFS completed. Found " + result.size() + " items in " + (endTime - startTime) + "ms");
-        return result;
-    }
-
     private void dfsRecursive(Long functionId, SearchCriteria criteria, List<FunctionResponse> result,
                               Set<Long> visited, int depth) throws SQLException {
         if (visited.contains(functionId) || result.size() >= criteria.getLimit()) {
@@ -135,21 +56,6 @@ public class FunctionGraphSearch {
         for (CompositeFunctionResponse composite : compositesAsSecond) {
             dfsRecursive(composite.getFirstFunctionId(), criteria, result, visited, depth + 1);
         }
-    }
-
-    /**
-     * Иерархический поиск - находит все функции в иерархии от корневой функции
-     */
-    public List<FunctionResponse> hierarchicalSearch(Long rootFunctionId, SearchCriteria criteria) throws SQLException {
-        logger.info("Hierarchical search from root: " + rootFunctionId);
-        long startTime = System.currentTimeMillis();
-
-        List<FunctionResponse> result = new ArrayList<>();
-        buildHierarchy(rootFunctionId, criteria, result, 0);
-
-        long endTime = System.currentTimeMillis();
-        logger.info("Hierarchical search completed. Found " + result.size() + " items");
-        return result;
     }
 
     private void buildHierarchy(Long functionId, SearchCriteria criteria, List<FunctionResponse> result, int level) throws SQLException {
