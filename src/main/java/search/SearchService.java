@@ -24,20 +24,6 @@ public class SearchService {
     @Autowired
     private PointRepository pointRepository;
 
-    public List<Object> depthFirstSearch(Long userId, String searchTerm) {
-        logger.info("Начало поиска в глубину для пользователя: " + userId + ", термин: " + searchTerm);
-        List<Object> results = new ArrayList<>();
-        Set<Long> visited = new HashSet<>();
-
-        UserEntity user = userRepository.findById(userId).orElse(null);
-        if (user != null) {
-            dfsUserHierarchy(user, searchTerm.toLowerCase(), visited, results);
-        }
-
-        logger.info("Поиск в глубину завершен. Найдено: " + results.size() + " результатов");
-        return results;
-    }
-
     private void dfsUserHierarchy(UserEntity user, String searchTerm, Set<Long> visited, List<Object> results) {
         if (visited.contains(user.getUserId())) return;
         visited.add(user.getUserId());
@@ -86,32 +72,6 @@ public class SearchService {
         }
     }
 
-    public List<Object> breadthFirstSearch(Long userId, String searchTerm) {
-        logger.info("Начало поиска в ширину для пользователя: " + userId + ", термин: " + searchTerm);
-        List<Object> results = new ArrayList<>();
-        Set<Long> visited = new HashSet<>();
-        Queue<Object> queue = new LinkedList<>();
-
-        UserEntity user = userRepository.findById(userId).orElse(null);
-        if (user != null) {
-            queue.offer(user);
-            visited.add(user.getUserId());
-        }
-
-        while (!queue.isEmpty()) {
-            Object current = queue.poll();
-
-            if (containsSearchTerm(current, searchTerm.toLowerCase())) {
-                results.add(current);
-            }
-
-            addNeighborsToQueue(current, queue, visited);
-        }
-
-        logger.info("Поиск в ширину завершен. Найдено: " + results.size() + " результатов");
-        return results;
-    }
-
     private void addNeighborsToQueue(Object node, Queue<Object> queue, Set<Long> visited) {
         if (node instanceof UserEntity) {
             UserEntity user = (UserEntity) node;
@@ -146,28 +106,6 @@ public class SearchService {
                 visited.add(composite.getSecondFunction().getFunctionId());
             }
         }
-    }
-
-    public List<Object> hierarchicalSearch(Class<?> entityClass, String searchTerm, String sortField, boolean ascending) {
-        logger.info("Иерархический поиск для класса: " + entityClass.getSimpleName() + ", термин: " + searchTerm);
-
-        List<Object> results = new ArrayList<>();
-        String lowerSearchTerm = searchTerm.toLowerCase();
-
-        if (entityClass.equals(UserEntity.class)) {
-            results.addAll(searchUsers(lowerSearchTerm));
-        } else if (entityClass.equals(FunctionEntity.class)) {
-            results.addAll(searchFunctions(lowerSearchTerm));
-        } else if (entityClass.equals(CompositeFunctionEntity.class)) {
-            results.addAll(searchCompositeFunctions(lowerSearchTerm));
-        } else if (entityClass.equals(PointEntity.class)) {
-            results.addAll(searchPoints(lowerSearchTerm));
-        }
-
-        sortResults(results, sortField, ascending);
-
-        logger.info("Иерархический поиск завершен. Найдено: " + results.size() + " результатов");
-        return results;
     }
 
     public <T> Optional<T> singleSearch(Class<T> entityClass, String fieldName, Object value) {
