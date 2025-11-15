@@ -19,6 +19,7 @@ public class PointRepository {
     private final String UPDATE_SQL;
     private final String DELETE_SQL;
     private final String READ_BY_FUNCTION_SQL;
+    private final String READ_BY_FUNCTION_AND_X_SQL;
 
     public PointRepository(Connection connection) {
         this.connection = connection;
@@ -27,6 +28,7 @@ public class PointRepository {
         this.UPDATE_SQL = SqlFileReader.readSqlFile("PointsUpdate");
         this.DELETE_SQL = SqlFileReader.readSqlFile("PointsDelete");
         this.READ_BY_FUNCTION_SQL = SqlFileReader.readSqlFile("PointsReadByFunction");
+        this.READ_BY_FUNCTION_AND_X_SQL = SqlFileReader.readSqlFile("PointsReadByFunctionAndX");
         logger.info("PointRepository initialized with SQL files");
     }
 
@@ -81,6 +83,25 @@ public class PointRepository {
             return points;
         } catch (SQLException e) {
             logger.severe("Failed to find points for function ID " + functionId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public PointResponse findByFunctionIdAndX(Long functionId, Double x) throws SQLException {
+        logger.fine("Finding point by function ID: " + functionId + " and x: " + x);
+        try (PreparedStatement stmt = connection.prepareStatement(READ_BY_FUNCTION_AND_X_SQL)) {
+            stmt.setLong(1, functionId);
+            stmt.setDouble(2, x);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                PointEntity entity = mapToEntity(rs);
+                logger.fine("Point found in cache");
+                return PointMapper.toResponse(entity);
+            }
+            logger.fine("Point not found in cache");
+            return null;
+        } catch (SQLException e) {
+            logger.severe("Failed to find point by function ID " + functionId + " and x " + x + ": " + e.getMessage());
             throw e;
         }
     }
