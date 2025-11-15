@@ -1,6 +1,7 @@
 package manual.api;
 
 import manual.dto.*;
+import manual.search.SearchCriteria;
 
 import java.util.List;
 
