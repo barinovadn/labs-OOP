@@ -17,6 +17,8 @@ htmlReport/
 output/
 input/
 temp/*
+# POSTMAN
+node_modules/*
 
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 
