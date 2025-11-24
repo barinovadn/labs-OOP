@@ -1,6 +1,8 @@
 package manual.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import manual.dto.ApiResponse;
 import manual.dto.ErrorResponse;
 
@@ -14,6 +16,11 @@ import java.util.logging.Logger;
 public abstract class BaseServlet extends HttpServlet {
     protected static final Logger logger = Logger.getLogger(BaseServlet.class.getName());
     protected final ObjectMapper objectMapper = new ObjectMapper();
+
+    public BaseServlet() {
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
 
     protected void sendJsonResponse(HttpServletResponse response, int statusCode, Object data) throws IOException {
         response.setContentType("application/json");

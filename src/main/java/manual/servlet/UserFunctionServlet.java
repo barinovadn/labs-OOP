@@ -52,7 +52,7 @@ public class UserFunctionServlet extends BaseServlet {
             }
         } catch (Exception e) {
             logger.severe("Error in UserFunctionServlet: " + e.getMessage());
-            sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
+            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
 }

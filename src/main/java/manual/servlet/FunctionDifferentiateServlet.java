@@ -6,13 +6,9 @@ import manual.dto.FunctionResponse;
 import manual.repository.FunctionRepository;
 import manual.repository.PointRepository;
 import operations.TabulatedDifferentialOperator;
-import operations.LeftSteppingDifferentialOperator;
-import operations.RightSteppingDifferentialOperator;
-import operations.MiddleSteppingDifferentialOperator;
 import operations.DifferentialOperator;
 import functions.TabulatedFunction;
 import functions.factory.ArrayTabulatedFunctionFactory;
-import functions.Point;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -90,29 +86,9 @@ public class FunctionDifferentiateServlet extends BaseServlet {
                 ArrayTabulatedFunctionFactory factory = new ArrayTabulatedFunctionFactory();
                 TabulatedFunction function = factory.create(xValues, yValues);
 
-                DifferentialOperator<TabulatedFunction> operator;
-                if (step != null) {
-                    switch (differentialType.toUpperCase()) {
-                        case "LEFT":
-                            operator = new LeftSteppingDifferentialOperator(factory);
-                            logger.info("Using LEFT stepping differential operator with step: " + step);
-                            break;
-                        case "RIGHT":
-                            operator = new RightSteppingDifferentialOperator(factory);
-                            logger.info("Using RIGHT stepping differential operator with step: " + step);
-                            break;
-                        case "MIDDLE":
-                            operator = new MiddleSteppingDifferentialOperator(factory);
-                            logger.info("Using MIDDLE stepping differential operator with step: " + step);
-                            break;
-                        default:
-                            operator = new TabulatedDifferentialOperator(factory);
-                            logger.info("Using default differential operator");
-                    }
-                } else {
-                    operator = new TabulatedDifferentialOperator(factory);
-                    logger.info("Using default differential operator (no step specified)");
-                }
+                DifferentialOperator<TabulatedFunction> operator = new TabulatedDifferentialOperator(factory);
+                logger.info("Using TabulatedDifferentialOperator with differential type: " + differentialType + 
+                    (step != null ? " and step: " + step : ""));
 
                 long startTime = System.currentTimeMillis();
                 TabulatedFunction derivative = operator.derive(function);

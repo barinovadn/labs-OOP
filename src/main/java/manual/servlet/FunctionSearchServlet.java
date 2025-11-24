@@ -34,7 +34,7 @@ public class FunctionSearchServlet extends BaseServlet {
             SearchCriteria criteria = parseJsonRequest(request, SearchCriteria.class);
             String algorithmParam = request.getParameter("algorithm");
             SearchAlgorithm algorithm = algorithmParam != null ? 
-                SearchAlgorithm.fromString(algorithmParam) : SearchAlgorithm.BFS;
+                SearchAlgorithm.fromString(algorithmParam) : SearchAlgorithm.QUICK;
 
             logger.info("Search request with algorithm: " + algorithm + ", criteria: " + criteria);
 
@@ -45,16 +45,16 @@ public class FunctionSearchServlet extends BaseServlet {
                 List<FunctionResponse> results = new ArrayList<>();
                 Set<Long> visited = new HashSet<>();
 
-                if (algorithm == SearchAlgorithm.DFS) {
-                    logger.info("Performing DFS search");
+                if (algorithm == SearchAlgorithm.DEEP) {
+                    logger.info("Performing DEEP search");
                     for (FunctionResponse function : allFunctions) {
                         if (!visited.contains(function.getFunctionId())) {
-                            dfsSearch(function.getFunctionId(), functionRepo, criteria, results, visited, 0);
+                            deepSearch(function.getFunctionId(), functionRepo, criteria, results, visited, 0);
                         }
                     }
                 } else {
-                    logger.info("Performing BFS search");
-                    bfsSearch(allFunctions, functionRepo, criteria, results);
+                    logger.info("Performing QUICK search");
+                    quickSearch(allFunctions, functionRepo, criteria, results);
                 }
 
                 logger.info("Search completed. Found " + results.size() + " functions");
@@ -74,13 +74,13 @@ public class FunctionSearchServlet extends BaseServlet {
         }
     }
 
-    private void dfsSearch(Long functionId, FunctionRepository functionRepo, SearchCriteria criteria,
+    private void deepSearch(Long functionId, FunctionRepository functionRepo, SearchCriteria criteria,
                           List<FunctionResponse> results, Set<Long> visited, int depth) throws SQLException {
         if (visited.contains(functionId) || results.size() >= criteria.getLimit()) {
             return;
         }
 
-        logger.fine("DFS processing function ID: " + functionId + " at depth: " + depth);
+        logger.fine("DEEP processing function ID: " + functionId + " at depth: " + depth);
         visited.add(functionId);
 
         FunctionResponse function = functionRepo.findById(functionId);
@@ -92,12 +92,12 @@ public class FunctionSearchServlet extends BaseServlet {
         List<FunctionResponse> allFunctions = functionRepo.findAll();
         for (FunctionResponse related : allFunctions) {
             if (!visited.contains(related.getFunctionId())) {
-                dfsSearch(related.getFunctionId(), functionRepo, criteria, results, visited, depth + 1);
+                deepSearch(related.getFunctionId(), functionRepo, criteria, results, visited, depth + 1);
             }
         }
     }
 
-    private void bfsSearch(List<FunctionResponse> allFunctions, FunctionRepository functionRepo,
+    private void quickSearch(List<FunctionResponse> allFunctions, FunctionRepository functionRepo,
                           SearchCriteria criteria, List<FunctionResponse> results) throws SQLException {
         List<FunctionResponse> queue = new ArrayList<>(allFunctions);
         Set<Long> visited = new HashSet<>();

@@ -3,8 +3,8 @@ package manual.search;
 import java.util.logging.Logger;
 
 public enum SearchAlgorithm {
-    BFS,
-    DFS;
+    QUICK,
+    DEEP;
 
     private static final Logger logger = Logger.getLogger(SearchAlgorithm.class.getName());
 
@@ -13,8 +13,8 @@ public enum SearchAlgorithm {
         try {
             return SearchAlgorithm.valueOf(algorithm.toUpperCase());
         } catch (IllegalArgumentException e) {
-            logger.warning("Unknown algorithm: " + algorithm + ", defaulting to BFS");
-            return BFS;
+            logger.warning("Unknown algorithm: " + algorithm + ", defaulting to QUICK");
+            return QUICK;
         }
     }
 }

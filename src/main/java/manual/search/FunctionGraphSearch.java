@@ -25,13 +25,13 @@ public class FunctionGraphSearch {
         logger.info("FunctionGraphSearch initialized");
     }
 
-    private void dfsRecursive(Long functionId, SearchCriteria criteria, List<FunctionResponse> result,
+    private void deepRecursive(Long functionId, SearchCriteria criteria, List<FunctionResponse> result,
                               Set<Long> visited, int depth) throws SQLException {
         if (visited.contains(functionId) || result.size() >= criteria.getLimit()) {
             return;
         }
 
-        logger.fine("DFS processing: " + functionId + " at depth: " + depth);
+        logger.fine("DEEP processing: " + functionId + " at depth: " + depth);
         visited.add(functionId);
 
         FunctionResponse function = functionRepository.findById(functionId);
@@ -50,11 +50,11 @@ public class FunctionGraphSearch {
                 .toList();
 
         for (CompositeFunctionResponse composite : compositesAsFirst) {
-            dfsRecursive(composite.getSecondFunctionId(), criteria, result, visited, depth + 1);
+            deepRecursive(composite.getSecondFunctionId(), criteria, result, visited, depth + 1);
         }
 
         for (CompositeFunctionResponse composite : compositesAsSecond) {
-            dfsRecursive(composite.getFirstFunctionId(), criteria, result, visited, depth + 1);
+            deepRecursive(composite.getFirstFunctionId(), criteria, result, visited, depth + 1);
         }
     }
 

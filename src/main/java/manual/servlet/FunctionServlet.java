@@ -1,5 +1,8 @@
 package manual.servlet;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
 import manual.DatabaseConnection;
 import manual.dto.CreateFunctionRequest;
 import manual.dto.FunctionResponse;
@@ -80,7 +83,18 @@ public class FunctionServlet extends BaseServlet {
         logger.info("POST request to FunctionServlet");
 
         try {
-            CreateFunctionRequest createRequest = parseJsonRequest(request, CreateFunctionRequest.class);
+            StringBuilder sb = new StringBuilder();
+            String line;
+            try (BufferedReader reader = request.getReader()) {
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+            }
+            
+            String jsonBody = sb.toString();
+            logger.info("Received JSON: " + jsonBody);
+            
+            CreateFunctionRequest createRequest = objectMapper.readValue(jsonBody, CreateFunctionRequest.class);
             Long userId = createRequest.getUserId();
             
             if (userId == null) {
@@ -95,11 +109,13 @@ public class FunctionServlet extends BaseServlet {
                     sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "User not found");
                     return;
                 }
-                UserEntity user = mapToEntity(userResponse);
+                
                 FunctionRepository repository = new FunctionRepository(conn);
-                FunctionResponse function = repository.create(createRequest, user);
+                FunctionResponse function = repository.create(createRequest, mapToEntity(userResponse));
+                
                 response.setStatus(HttpServletResponse.SC_CREATED);
                 sendSuccess(request, response, function);
+                
             } catch (SQLException e) {
                 logger.severe("Database error creating function: " + e.getMessage());
                 sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to create function");
@@ -170,11 +186,12 @@ public class FunctionServlet extends BaseServlet {
     }
 
     private UserEntity mapToEntity(manual.dto.UserResponse response) {
-        UserEntity entity = new UserEntity();
-        entity.setUserId(response.getUserId());
-        entity.setUsername(response.getUsername());
-        entity.setEmail(response.getEmail());
-        return entity;
-    }
+    UserEntity entity = new UserEntity();
+    entity.setUserId(response.getUserId());
+    entity.setUsername(response.getUsername());
+    entity.setEmail(response.getEmail());
+    entity.setCreatedAt(response.getCreatedAt());
+    return entity;
+}
 }
 
