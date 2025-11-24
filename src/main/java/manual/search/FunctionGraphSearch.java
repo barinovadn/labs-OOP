@@ -1,15 +1,17 @@
 package manual.search;
 
-import manual.DatabaseConnection;
-import manual.dto.FunctionResponse;
-import manual.dto.CompositeFunctionResponse;
-import manual.repository.FunctionRepository;
-import manual.repository.CompositeFunctionRepository;
-
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import manual.DatabaseConnection;
+import manual.dto.CompositeFunctionResponse;
+import manual.dto.FunctionResponse;
+import manual.repository.CompositeFunctionRepository;
+import manual.repository.FunctionRepository;
 
 public class FunctionGraphSearch {
     private static final Logger logger = Logger.getLogger(FunctionGraphSearch.class.getName());
@@ -42,12 +44,12 @@ public class FunctionGraphSearch {
         List<CompositeFunctionResponse> compositesAsFirst = compositeRepository.findByUserId(function.getUserId())
                 .stream()
                 .filter(c -> c.getFirstFunctionId().equals(functionId))
-                .toList();
+                .collect(Collectors.toList());
 
         List<CompositeFunctionResponse> compositesAsSecond = compositeRepository.findByUserId(function.getUserId())
                 .stream()
                 .filter(c -> c.getSecondFunctionId().equals(functionId))
-                .toList();
+                .collect(Collectors.toList());
 
         for (CompositeFunctionResponse composite : compositesAsFirst) {
             deepRecursive(composite.getSecondFunctionId(), criteria, result, visited, depth + 1);
@@ -73,7 +75,7 @@ public class FunctionGraphSearch {
         List<CompositeFunctionResponse> childComposites = compositeRepository.findByUserId(function.getUserId())
                 .stream()
                 .filter(c -> c.getFirstFunctionId().equals(functionId))
-                .toList();
+                .collect(Collectors.toList());
 
         for (CompositeFunctionResponse composite : childComposites) {
             buildHierarchy(composite.getSecondFunctionId(), criteria, result, level + 1);
