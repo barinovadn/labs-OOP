@@ -9,6 +9,8 @@ import manual.dto.FunctionResponse;
 import manual.entity.UserEntity;
 import manual.repository.FunctionRepository;
 import manual.repository.UserRepository;
+import manual.security.RoleChecker;
+import manual.security.SecurityContext;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -28,12 +30,25 @@ public class FunctionServlet extends BaseServlet {
         setRequestPath(request, response);
         logger.info("GET request to FunctionServlet: " + request.getPathInfo());
 
+        SecurityContext securityContext = getSecurityContext(request);
+        if (securityContext == null || !securityContext.isAuthenticated()) {
+            logger.warning("Unauthenticated request to FunctionServlet");
+            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+            return;
+        }
+
         try (Connection conn = DatabaseConnection.getConnection()) {
             FunctionRepository repository = new FunctionRepository(conn);
             String pathInfo = request.getPathInfo();
             String sort = request.getParameter("sort");
 
             if (pathInfo == null || pathInfo.equals("/")) {
+                if (!RoleChecker.canReadAll(securityContext)) {
+                    logger.warning("User " + securityContext.getUserId() + " attempted to list all functions without permission");
+                    sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
+                    return;
+                }
+                logger.info("User " + securityContext.getUserId() + " listing all functions");
                 List<FunctionResponse> functions;
                 if (sort == null) {
                     functions = repository.findAll();
@@ -67,6 +82,13 @@ public class FunctionServlet extends BaseServlet {
                 if (function == null) {
                     sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
                 } else {
+                    if (!RoleChecker.isOwnerOrAdmin(securityContext, function.getUserId()) && 
+                        !RoleChecker.canReadAll(securityContext)) {
+                        logger.warning("User " + securityContext.getUserId() + " attempted to access function " + functionId + " without permission");
+                        sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
+                        return;
+                    }
+                    logger.info("User " + securityContext.getUserId() + " accessing function " + functionId);
                     sendSuccess(request, response, function);
                 }
             }
@@ -81,6 +103,13 @@ public class FunctionServlet extends BaseServlet {
             throws ServletException, IOException {
         setRequestPath(request, response);
         logger.info("POST request to FunctionServlet");
+
+        SecurityContext securityContext = getSecurityContext(request);
+        if (securityContext == null || !securityContext.isAuthenticated()) {
+            logger.warning("Unauthenticated request to create function");
+            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+            return;
+        }
 
         try {
             StringBuilder sb = new StringBuilder();
@@ -98,9 +127,17 @@ public class FunctionServlet extends BaseServlet {
             Long userId = createRequest.getUserId();
             
             if (userId == null) {
-                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "User ID is required");
+                userId = securityContext.getUserId();
+                createRequest.setUserId(userId);
+            }
+
+            if (!securityContext.getUserId().equals(userId) && !RoleChecker.canWriteAll(securityContext)) {
+                logger.warning("User " + securityContext.getUserId() + " attempted to create function for user " + userId + " without permission");
+                sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
                 return;
             }
+
+            logger.info("User " + securityContext.getUserId() + " creating function for user " + userId);
 
             try (Connection conn = DatabaseConnection.getConnection()) {
                 UserRepository userRepo = new UserRepository(conn);
@@ -132,6 +169,13 @@ public class FunctionServlet extends BaseServlet {
         setRequestPath(request, response);
         logger.info("PUT request to FunctionServlet: " + request.getPathInfo());
 
+        SecurityContext securityContext = getSecurityContext(request);
+        if (securityContext == null || !securityContext.isAuthenticated()) {
+            logger.warning("Unauthenticated request to update function");
+            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+            return;
+        }
+
         try {
             Long functionId = parseIdFromPath(request.getPathInfo());
             if (functionId == null) {
@@ -139,10 +183,23 @@ public class FunctionServlet extends BaseServlet {
                 return;
             }
 
-            CreateFunctionRequest updateRequest = parseJsonRequest(request, CreateFunctionRequest.class);
-            
             try (Connection conn = DatabaseConnection.getConnection()) {
                 FunctionRepository repository = new FunctionRepository(conn);
+                FunctionResponse existingFunction = repository.findById(functionId);
+                if (existingFunction == null) {
+                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
+                    return;
+                }
+
+                if (!RoleChecker.isOwnerOrAdmin(securityContext, existingFunction.getUserId())) {
+                    logger.warning("User " + securityContext.getUserId() + " attempted to update function " + functionId + " without permission");
+                    sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
+                    return;
+                }
+
+                CreateFunctionRequest updateRequest = parseJsonRequest(request, CreateFunctionRequest.class);
+                logger.info("User " + securityContext.getUserId() + " updating function " + functionId);
+                
                 FunctionResponse function = repository.update(functionId, updateRequest);
                 if (function == null) {
                     sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
@@ -165,6 +222,13 @@ public class FunctionServlet extends BaseServlet {
         setRequestPath(request, response);
         logger.info("DELETE request to FunctionServlet: " + request.getPathInfo());
 
+        SecurityContext securityContext = getSecurityContext(request);
+        if (securityContext == null || !securityContext.isAuthenticated()) {
+            logger.warning("Unauthenticated request to delete function");
+            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+            return;
+        }
+
         Long functionId = parseIdFromPath(request.getPathInfo());
         if (functionId == null) {
             sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
@@ -173,6 +237,19 @@ public class FunctionServlet extends BaseServlet {
 
         try (Connection conn = DatabaseConnection.getConnection()) {
             FunctionRepository repository = new FunctionRepository(conn);
+            FunctionResponse function = repository.findById(functionId);
+            if (function == null) {
+                sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
+                return;
+            }
+
+            if (!RoleChecker.isOwnerOrAdmin(securityContext, function.getUserId())) {
+                logger.warning("User " + securityContext.getUserId() + " attempted to delete function " + functionId + " without permission");
+                sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
+                return;
+            }
+
+            logger.info("User " + securityContext.getUserId() + " deleting function " + functionId);
             boolean deleted = repository.delete(functionId);
             if (deleted) {
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);

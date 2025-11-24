@@ -8,6 +8,16 @@
     <description>University OOP laboratory assignments</description>
     <absolute-ordering />
 
+    <!-- User Role Servlet -->
+    <servlet>
+        <servlet-name>UserRoleServlet</servlet-name>
+        <servlet-class>manual.servlet.UserRoleServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserRoleServlet</servlet-name>
+        <url-pattern>/api/user-roles/*</url-pattern>
+    </servlet-mapping>
+
     <!-- User Servlet -->
     <servlet>
         <servlet-name>UserServlet</servlet-name>
@@ -89,5 +99,15 @@
         <servlet-name>CompositeFunctionServlet</servlet-name>
         <url-pattern>/api/composite-functions/*</url-pattern>
     </servlet-mapping>
+
+    <!-- Security Filter -->
+    <filter>
+        <filter-name>SecurityFilter</filter-name>
+        <filter-class>manual.security.SecurityFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SecurityFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
 
 </web-app>

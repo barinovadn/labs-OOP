@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import manual.dto.ApiResponse;
 import manual.dto.ErrorResponse;
+import manual.security.SecurityContext;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +17,10 @@ import java.util.logging.Logger;
 public abstract class BaseServlet extends HttpServlet {
     protected static final Logger logger = Logger.getLogger(BaseServlet.class.getName());
     protected final ObjectMapper objectMapper = new ObjectMapper();
+
+    protected SecurityContext getSecurityContext(HttpServletRequest request) {
+        return (SecurityContext) request.getAttribute("securityContext");
+    }
 
     public BaseServlet() {
         objectMapper.registerModule(new JavaTimeModule());

@@ -18,6 +18,7 @@ public class UserRepository {
     private final String UPDATE_SQL;
     private final String DELETE_SQL;
     private final String READ_ALL_SQL;
+    private final String READ_BY_USERNAME_SQL;
 
     public UserRepository(Connection connection) {
         this.connection = connection;
@@ -26,6 +27,7 @@ public class UserRepository {
         this.UPDATE_SQL = SqlFileReader.readSqlFile("UserUpdate");
         this.DELETE_SQL = SqlFileReader.readSqlFile("UserDelete");
         this.READ_ALL_SQL = SqlFileReader.readSqlFile("UserReadAll");
+        this.READ_BY_USERNAME_SQL = SqlFileReader.readSqlFile("UserReadByUsername");
         logger.info("UserRepository initialized with SQL files");
     }
 
@@ -56,6 +58,15 @@ public class UserRepository {
         logger.fine("Finding user by ID: " + userId);
         UserEntity entity = findEntityById(userId);
         return entity != null ? UserMapper.toResponse(entity) : null;
+    }
+
+    public UserEntity findEntityByUsername(String username) throws SQLException {
+        logger.fine("Finding user by username: " + username);
+        try (PreparedStatement stmt = connection.prepareStatement(READ_BY_USERNAME_SQL)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() ? mapToEntity(rs) : null;
+        }
     }
 
     private UserEntity findEntityById(Long userId) throws SQLException {
