@@ -1,7 +1,22 @@
+### Custom Section ###
+
+# University Assingment
+output/
+input/
+temp/
+# IntelliJ IDEA
+htmlReport/
+# NodeJS
+node_modules/
+package-lock.json
+yarn.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+node_modules/
+# Other
 /target/
 !.mvn/wrapper/maven-wrapper.jar
-
-### STS ###
 .apt_generated
 .classpath
 .factorypath
@@ -9,16 +24,6 @@
 .settings
 .springBeans
 .sts4-cache
-
-### CUSTOM:
-# INTELLIJ IDEA TEST COVERAGE REPORTS
-htmlReport/
-# OOP Assingment
-output/
-input/
-temp/*
-# POSTMAN
-node_modules/*
 
 # Created by https://www.gitignore.io/api/git,java,maven,eclipse,windows
 
