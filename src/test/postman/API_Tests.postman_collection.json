@@ -1,0 +1,770 @@
+{
+	"info": {
+		"_postman_id": "api-tests-collection",
+		"name": "API Tests - Manual Branch",
+		"description": "Newman tests for all API endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/labs-oop",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "functionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "pointId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "compositeFunctionId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('User created successfully', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('object');",
+									"    pm.expect(jsonData.data.userId).to.be.a('number');",
+									"    pm.collectionVariables.set('userId', jsonData.data.userId.toString());",
+									"    console.log('User ID set to: ' + jsonData.data.userId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"user_{{$timestamp}}\",\n    \"password\": \"password123\",\n    \"email\": \"test{{$timestamp}}@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Get User By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "{{userId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"updateduser\",\n    \"password\": \"newpassword\",\n    \"email\": \"updated@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "{{userId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Functions",
+			"item": [
+				{
+					"name": "Create Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is successful', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.test('Function created with ID', function() {",
+									"        pm.expect(jsonData.data).to.be.an('object');",
+									"        pm.expect(jsonData.data.functionId).to.be.a('number');",
+									"    });",
+									"    pm.collectionVariables.set('functionId', jsonData.data.functionId.toString());",
+									"    console.log('Function ID set to: ' + jsonData.data.functionId);",
+									"} else {",
+									"    console.log('Create Function failed with status: ' + pm.response.code);",
+									"    console.log('Response: ' + pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type", 
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": {{userId}},\n    \"functionName\": \"testFunction\",\n    \"functionType\": \"LINEAR\", \n    \"functionExpression\": \"2*x\",\n    \"xfrom\": 0.0,\n    \"xto\": 10.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"]
+						}
+					}
+				},
+				{
+					"name": "Get All Functions",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"]
+						}
+					}
+				},
+				{
+					"name": "Get Functions Sorted by Name ASC",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions?sort=name_asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"],
+							"query": [
+								{
+									"key": "sort",
+									"value": "name_asc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Functions Sorted by Name DESC",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions?sort=name_desc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"],
+							"query": [
+								{
+									"key": "sort",
+									"value": "name_desc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Functions Sorted by X From ASC",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions?sort=x_from_asc",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"],
+							"query": [
+								{
+									"key": "sort",
+									"value": "x_from_asc"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Functions Sorted by Type and Name",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions?sort=type_name",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"],
+							"query": [
+								{
+									"key": "sort",
+									"value": "type_name"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Function By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Function",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": {{userId}},\n    \"functionName\": \"updatedFunction\",\n    \"functionType\": \"SQR\",\n    \"functionExpression\": \"x*x\",\n    \"xFrom\": 1.0,\n    \"xTo\": 5.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "User Functions",
+			"item": [
+				{
+					"name": "Get Functions By User ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "{{userId}}", "functions"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Points",
+			"item": [
+				{
+					"name": "Create Point",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Point created successfully', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('object');",
+									"    pm.expect(jsonData.data.pointId).to.be.a('number');",
+									"    pm.collectionVariables.set('pointId', jsonData.data.pointId.toString());",
+									"    console.log('Point ID set to: ' + jsonData.data.pointId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"xvalue\": 5.0,\n    \"yvalue\": 10.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/points",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}", "points"]
+						}
+					}
+				},
+				{
+					"name": "Get Points By Function ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/points",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}", "points"]
+						}
+					}
+				},
+				{
+					"name": "Get Point By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/points/{{pointId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "points", "{{pointId}}"]
+						}
+					}
+				},
+				{
+					"name": "Calculate Function Value",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/calculate?x=3.5",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}", "calculate"],
+							"query": [
+								{
+									"key": "x",
+									"value": "3.5"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Point",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"xValue\": 6.0,\n    \"yValue\": 12.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/points/{{pointId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "points", "{{pointId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Composite Functions",
+			"item": [
+				{
+					"name": "Create Composite Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Composite function created successfully', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.be.an('object');",
+									"    pm.expect(jsonData.data.compositeId).to.be.a('number');",
+									"    pm.collectionVariables.set('compositeFunctionId', jsonData.data.compositeId.toString());",
+									"    console.log('Composite Function ID set to: ' + jsonData.data.compositeId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": {{userId}},\n    \"compositeName\": \"compositeTest\",\n    \"firstFunctionId\": {{functionId}},\n    \"secondFunctionId\": {{functionId}}\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions"]
+						}
+					}
+				},
+				{
+					"name": "Get Composite Function By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions", "{{compositeFunctionId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Composite Functions By User ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}/composite-functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "{{userId}}", "composite-functions"]
+						}
+					}
+				},
+				{
+					"name": "Update Composite Function",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": {{userId}},\n    \"compositeName\": \"updatedComposite\",\n    \"firstFunctionId\": {{functionId}},\n    \"secondFunctionId\": {{functionId}}\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions", "{{compositeFunctionId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Function Operations",
+			"item": [
+				{
+					"name": "Add Functions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operation\": \"add\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/operations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "operations"]
+						}
+					}
+				},
+				{
+					"name": "Subtract Functions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operation\": \"subtract\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/operations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "operations"]
+						}
+					}
+				},
+				{
+					"name": "Multiply Functions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operation\": \"multiply\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/operations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "operations"]
+						}
+					}
+				},
+				{
+					"name": "Divide Functions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operation\": \"divide\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yvalues\": [1.0, 2.0, 3.0]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/operations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "operations"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Function Differentiate",
+			"item": [
+				{
+					"name": "Differentiate Function - MIDDLE",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=MIDDLE",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}", "differentiate"],
+							"query": [
+								{
+									"key": "differentialType",
+									"value": "MIDDLE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Differentiate Function - LEFT",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=LEFT&step=0.1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}", "differentiate"],
+							"query": [
+								{
+									"key": "differentialType",
+									"value": "LEFT"
+								},
+								{
+									"key": "step",
+									"value": "0.1"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Differentiate Function - RIGHT",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=RIGHT&step=0.1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}", "differentiate"],
+							"query": [
+								{
+									"key": "differentialType",
+									"value": "RIGHT"
+								},
+								{
+									"key": "step",
+									"value": "0.1"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Function Search",
+			"item": [
+				{
+					"name": "Search Functions - BFS",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"functionName\": \"test\",\n    \"limit\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/search?algorithm=BFS",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "search"],
+							"query": [
+								{
+									"key": "algorithm",
+									"value": "BFS"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Functions - DEEP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"functionType\": \"LINEAR\",\n    \"limit\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/search?algorithm=DEEP",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "search"],
+							"query": [
+								{
+									"key": "algorithm",
+									"value": "DEEP"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Delete",
+			"item": [
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "{{userId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Function",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Point",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/points/{{pointId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "points", "{{pointId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Composite Function",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions", "{{compositeFunctionId}}"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"exec": [
+					"console.log('Current variables:');",
+					"console.log('userId: ' + pm.collectionVariables.get('userId'));",
+					"console.log('functionId: ' + pm.collectionVariables.get('functionId'));",
+					"console.log('pointId: ' + pm.collectionVariables.get('pointId'));",
+					"console.log('compositeFunctionId: ' + pm.collectionVariables.get('compositeFunctionId'));"
+				],
+				"type": "text/javascript"
+			}
+		}
+	]
+}

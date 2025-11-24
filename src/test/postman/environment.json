@@ -1,0 +1,15 @@
+{
+	"id": "api-test-environment",
+	"name": "API Test Environment",
+	"values": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/labs-oop",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment"
+}
+
+

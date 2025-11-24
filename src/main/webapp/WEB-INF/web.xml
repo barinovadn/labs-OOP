@@ -4,9 +4,90 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
          http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
-
     <display-name>Labs OOP</display-name>
     <description>University OOP laboratory assignments</description>
+    <absolute-ordering />
+
+    <!-- User Servlet -->
+    <servlet>
+        <servlet-name>UserServlet</servlet-name>
+        <servlet-class>manual.servlet.UserServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserServlet</servlet-name>
+        <url-pattern>/api/users/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Point Servlet -->
+    <servlet>
+        <servlet-name>PointServlet</servlet-name>
+        <servlet-class>manual.servlet.PointServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PointServlet</servlet-name>
+        <url-pattern>/api/points/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PointServlet</servlet-name>
+        <url-pattern>/api/functions/*/points</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PointServlet</servlet-name>
+        <url-pattern>/api/functions/*/points/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PointServlet</servlet-name>
+        <url-pattern>/api/functions/*/calculate</url-pattern>
+    </servlet-mapping>
+
+    <!-- Function Differentiate Servlet -->
+    <servlet>
+        <servlet-name>FunctionDifferentiateServlet</servlet-name>
+        <servlet-class>manual.servlet.FunctionDifferentiateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FunctionDifferentiateServlet</servlet-name>
+        <url-pattern>/api/functions/*/differentiate</url-pattern>
+    </servlet-mapping>
+
+    <!-- Function Operation Servlet -->
+    <servlet>
+        <servlet-name>FunctionOperationServlet</servlet-name>
+        <servlet-class>manual.servlet.FunctionOperationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FunctionOperationServlet</servlet-name>
+        <url-pattern>/api/functions/operations</url-pattern>
+    </servlet-mapping>
+
+    <!-- Function Search Servlet -->
+    <servlet>
+        <servlet-name>FunctionSearchServlet</servlet-name>
+        <servlet-class>manual.servlet.FunctionSearchServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FunctionSearchServlet</servlet-name>
+        <url-pattern>/api/functions/search</url-pattern>
+    </servlet-mapping>
+
+    <!-- Function Servlet -->
+    <servlet>
+        <servlet-name>FunctionServlet</servlet-name>
+        <servlet-class>manual.servlet.FunctionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FunctionServlet</servlet-name>
+        <url-pattern>/api/functions/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Composite Function Servlet -->
+    <servlet>
+        <servlet-name>CompositeFunctionServlet</servlet-name>
+        <servlet-class>manual.servlet.CompositeFunctionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CompositeFunctionServlet</servlet-name>
+        <url-pattern>/api/composite-functions/*</url-pattern>
+    </servlet-mapping>
 
 </web-app>
-
