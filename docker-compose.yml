@@ -1,0 +1,52 @@
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:13-alpine
+    container_name: labs-oop-postgres
+    environment:
+      POSTGRES_DB: labs_oop
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/scripts/InitDB.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - labs-oop-network
+
+  # Spring Boot
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: labs-oop-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/labs_oop
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - labs-oop-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  labs-oop-network:
+    driver: bridge
