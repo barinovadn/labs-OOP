@@ -185,7 +185,7 @@ public class SearchService {
         return criteria.entrySet().stream()
                 .allMatch(entry -> {
                     try {
-                        var field = entity.getClass().getDeclaredField(entry.getKey());
+                        java.lang.reflect.Field field = entity.getClass().getDeclaredField(entry.getKey());
                         field.setAccessible(true);
                         Object value = field.get(entity);
                         return value != null && value.toString().contains(entry.getValue().toString());
@@ -229,8 +229,8 @@ public class SearchService {
 
         results.sort((a, b) -> {
             try {
-                var fieldA = a.getClass().getDeclaredField(sortField);
-                var fieldB = b.getClass().getDeclaredField(sortField);
+                java.lang.reflect.Field fieldA = a.getClass().getDeclaredField(sortField);
+                java.lang.reflect.Field fieldB = b.getClass().getDeclaredField(sortField);
                 fieldA.setAccessible(true);
                 fieldB.setAccessible(true);
 
