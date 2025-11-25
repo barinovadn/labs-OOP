@@ -1,0 +1,12 @@
+{
+  "name": "labs-oop-postman-tests",
+  "version": "1.0.0",
+  "description": "Newman tests for labs-OOP API",
+  "scripts": {
+    "test": "newman run API_Tests.postman_collection.json -e environment.json --reporters cli,json --reporter-json-export results/results.json",
+    "test:performance": "node performance-test.js"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1"
+  }
+}
