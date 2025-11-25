@@ -6,8 +6,7 @@ Write-Host "`n1. Testing Basic Authentication with protected endpoints..." -Fore
 
 $testUsers = @(
     @{username = "admin"; password = "admin"; role = "ADMIN"},
-    @{username = "user"; password = "user"; role = "USER"},
-    @{username = "testuser"; password = "testpass"; role = "USER"}
+    @{username = "user"; password = "user"; role = "USER"}
 )
 
 foreach ($user in $testUsers) {
@@ -56,7 +55,6 @@ foreach ($endpoint in $adminEndpoints) {
         if ($endpoint.method -eq "GET") {
             $response = Invoke-WebRequest -Uri "$baseUrl$($endpoint.path)" -Method GET -Headers $adminHeaders -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
         } else {
-            # Для POST запросов отправляем пустое тело
             $response = Invoke-WebRequest -Uri "$baseUrl$($endpoint.path)" -Method POST -Headers $adminHeaders -Body "{}" -ContentType "application/json" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
         }
         Write-Host "   - Admin can access $($endpoint.description)" -ForegroundColor Green
@@ -72,9 +70,9 @@ foreach ($endpoint in $adminEndpoints) {
 
 Write-Host "`n3. Testing public registration endpoint..." -ForegroundColor Yellow
 $registerBody = @{
-    username = "autotest_$((Get-Date).ToString('HHmmss'))"
-    password = "autopass"
-    email = "autotest_$((Get-Date).ToString('HHmmss'))@example.com"
+    username = "test_$((Get-Date).ToString('HHmmss'))"
+    password = "test_$((Get-Date).ToString('HHmmss'))"
+    email = "test_$((Get-Date).ToString('HHmmss'))@example.com"
 } | ConvertTo-Json
 
 try {

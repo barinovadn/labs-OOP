@@ -1,6 +1,7 @@
 Write-Host "Building and starting Docker containers..." -ForegroundColor Green
 
 Write-Host "Stopping and deleting existing containers..." -ForegroundColor Yellow
+docker rm -f labs-oop-app labs-oop-db 2>$null
 docker-compose down -v
 
 Write-Host "Building and starting containers..." -ForegroundColor Yellow
