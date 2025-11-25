@@ -9,7 +9,7 @@
 
 - [Отчеты и таблицы](#отчеты-и-таблицы)
 - [Схемы и диаграммы](#схемы-и-диаграммы)
-- [Документация](#документация)
+- [Документация](#документация-)
 
 
 <br>
@@ -17,7 +17,6 @@
 ## Отчеты и таблицы
 
 ### Сравнение производительности
-
 | Операция | [Manual](../../tree/manual) | [Framework](../../tree/framework) | Разница | Ускорение | Операций |
 |----------|--------|-----------|-----------|-----------|----------|
 | **CREATE** | 4630 ms | 436 ms | -4194 ms | **x10.5** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
@@ -28,7 +27,6 @@
 
 
 ### Сравнение производительности сортировки
-
 | Операция сортировки | [Manual](../../tree/manual) | [Framework](../../tree/framework) | Разница | Ускорение | Записей |
 |---------------------|-------------|-----------|---------|---------|---------|
 | Сортировка по имени | 55 ms | 47 ms | -8 ms | **x1.17** | *10k* |
@@ -45,7 +43,6 @@
 | all classes |  100% (56/56) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | 100% (218/218) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | 100% (250/250) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | <ins>98.1% (728/742)</ins> <img height="18px" alt="emoji" src="https://media.tenor.com/s_gvo82o5Q4AAAAi/sad-depressed.gif" /> |
 
 #### Coverage Breakdown
-
 | Package | Class | Method | Branch | Line |
 |---------|-------|--------|--------|------|
 | **concurrent** | 100% (9/9) | 100% (30/30) | 100% (26/26) | <ins>99% (101/102)</ins> |
@@ -61,7 +58,6 @@
 <br>
 
 ### Итоговая производительность API
-
 | Запрос к конечной точке API | [Manual](../../tree/manual) среднее время (мс) | [Framework](../../tree/framework) среднее время (мс) | Преимущество [Framework](../../tree/framework) |
 |----------------|-----------------|--------------------|------------------|
 | Add Functions | 12 | 8 | x1.50 |
@@ -103,12 +99,9 @@
 
 <br>
 
-## Схемы и диаграммы
-
-<img height="100px" alt="emoji" src="https://media.tenor.com/4CfIDNeonQwAAAAi/postgres.gif" />
+## Схемы и диаграммы <img width="15px" alt="" src="https://i.imgur.com/qFmcbT0.png" /> <img height="65px" alt="emoji" src="https://media.tenor.com/4CfIDNeonQwAAAAi/postgres.gif" />
 
 ### ER диаграмма
-
 ```mermaid
 erDiagram
     users {
@@ -155,8 +148,7 @@ erDiagram
 ```
 
 ### Файлы диаграмм
-
-- Entity-relationship diagram - [ER.puml](ER.puml)
+- Entity-relationship diagram - [ER.puml](ER.puml) <img width="10px" alt="same as above" src="https://media.tenor.com/MUBfaK_k9O8AAAAi/habbo-habbohotel.gif" />
 - Sequence diagram for authentication - [SD_AUTH.puml](SD_AUTH.puml)
 - Sequence diagram for calculations - [SD_CACL.puml](SD_CACL.puml)
 
@@ -165,7 +157,96 @@ erDiagram
 
 ## Документация <img height="32px" alt="Tenor Gif" src="https://media.tenor.com/a2m-Y3dLmD0AAAAi/mona-github-loading-github.gif" />
 
-    . . .
+
+### Единый API контракт
+Для обоих веток реализации - [Framework](../../tree/framework) и [Manual](../../tree/manual).
+
+| Конечная точка | Описание |
+|----------------|----------|
+| `/api/auth/register` | Создать пользователя (без ролей). |
+| `/api/auth/assign-roles` | Выдать роли существующему пользователю. |
+| `/api/users` | Список пользователей. |
+| `/api/users/{id}` | Прочитать, обновить или удалить конкретного пользователя. |
+| `/api/users/{id}/functions` | Получить функции владельца. |
+| `/api/users/{id}/composite-functions` | Получить составные функции владельца. |
+| `/api/functions` | Список функций (поддерживает сортировку) и создание. |
+| `/api/functions/{id}` | Работа с конкретной функцией. |
+| `/api/functions/{id}/calculate` | Посчитать значение функции по точке. |
+| `/api/functions/{id}/differentiate` | Посчитать производную (тип передаётся параметром). |
+| `/api/functions/{id}/points` | Список точек функции / создание точки. |
+| `/api/points/{id}` | Работа с конкретной точкой. |
+| `/api/functions/operations` | Сложение/вычитание/умножение/деление табличных функций. |
+| `/api/functions/search` | Поиск функций по тексту, сортировка, пагинация. |
+| `/api/composite-functions` | Список и создание составных функций. |
+| `/api/composite-functions/{id}` | CRUD по конкретной составной функции. |
+| `/api/roles` | Список ролей и создание новой. |
+| `/api/roles/{id}` | Работа с конкретной ролью. |
+
+#### API
+- Базовый URL: http://localhost:8080.
+- Авторизация: логин + пароль пользователя, созданного через `/api/auth/register` + `/api/auth/assign-roles`.
+- Основные ресурсы: `/api/auth`, `/api/users`, `/api/functions`, `/api/points`, `/api/composite-functions`, `/api/roles`.
+
+<br>
+
+### Предварительные требования <img width="10px" alt="" src="https://i.imgur.com/qFmcbT0.png" /><img height="50px" alt="emoji" src="https://media.tenor.com/APUoW9dDiPsAAAAi/clippy-head-scratch.gif" />
+- Java 17 и Maven 3.9+.
+- PostgreSQL 16.1+.
+- Docker Desktop и Git.
+- Node.js 18+ и Newman: `npm install -g newman`.
+
+#### Дополнительные требования для [Manual](../../tree/manual):
+- Tomcat: apache-tomcat-9.0.112.
+
+
+<br>
+
+### Установка и запуск <img width="10px" alt="" src="https://i.imgur.com/qFmcbT0.png" /> <img height="50px" alt="emoji" src="https://media.tenor.com/UaBq8N2Z46wAAAAi/add-disc-pc.gif" />
+1. **Клонирование репозитория:**
+
+   ```bash
+   git clone https://github.com/barinovadn/labs-OOP
+   cd labs-OOP
+   ```
+2. **Выбор ветки:**
+   
+   Выберите одну из реализаций:
+   ```bash
+   git checkout manual # Servlets & Tomcat
+   ```
+   ```bash
+   git checkout framework # Spring Boot
+   ```
+3. **Сборка и запуск:**
+
+   Откройте PowerShell в корне репозитория и выполните:
+   ```powershell
+   .\docker-run.ps1
+   ```
+   Скрипт автоматически соберет и запустит проект в Docker контейнере.<br>
+
+4. **Проверка:**
+
+   В том же окне:
+   ```powershell
+   .\docker-test.ps1
+   ```
+   Или по http://localhost:8080/api/users - `admin` `admin`.
+
+
+<br>
+
+### Тесты <img width="10px" alt="" src="https://i.imgur.com/qFmcbT0.png" /> <img height="50px" alt="emoji" src="https://media.tenor.com/V4_qWWNPQnQAAAAi/floor.gif" />
+- [docker-test.ps1](../manual/docker-test.ps1) | [docker-test.ps1](../framework/docker-test.ps1) - Упрощенные API тесты.
+- [src/test/postman](src/test/postman/) - Newman тесты.
+    - [run-tests.ps1](../manual/src/test/postman/run-tests.ps1) | [run-tests.ps1](../framework/src/test/postman/run-tests.ps1) - Основные API тесты.
+    - [run-performance.ps1](../manual/src/test/postman/run-performance.ps1) | [run-performance.ps1](../framework/src/test/postman/run-performance.ps1) - Тесты для проверки. производительности, [таблица сравнения](#итоговая-производительность-api).
+    - [/results/](src/test/postman/results/) - Подробные результаты Newman тестов.
+- [src/test/java](src/test/java/) - Java тесты.
+
+### Дополнительно
+- Результаты производительности для каждой ветки сохраняются в [src/test/postman/results/PERFORMANCE_RESULTS.md](../manual/src/test/postman/results/PERFORMANCE_RESULTS.md).
+
 
 <br>
 
