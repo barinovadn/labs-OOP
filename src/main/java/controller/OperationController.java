@@ -4,22 +4,25 @@ import dto.ApiResponse;
 import dto.OperationRequest;
 import dto.SearchRequest;
 import entity.FunctionEntity;
+import entity.PointEntity;
+import functions.ArrayTabulatedFunction;
 import functions.TabulatedFunction;
 import functions.factory.ArrayTabulatedFunctionFactory;
 import functions.factory.TabulatedFunctionFactory;
 import operations.TabulatedDifferentialOperator;
 import operations.TabulatedFunctionOperationService;
 import repository.FunctionRepository;
+import repository.PointRepository;
 import search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/functions")
@@ -30,24 +33,77 @@ public class OperationController {
     private FunctionRepository functionRepository;
 
     @Autowired
+    private PointRepository pointRepository;
+
+    @Autowired
     private SearchService searchService;
 
     private TabulatedFunctionFactory factory = new ArrayTabulatedFunctionFactory();
     private TabulatedFunctionOperationService operationService = new TabulatedFunctionOperationService();
     private TabulatedDifferentialOperator differentialOperator = new TabulatedDifferentialOperator();
 
+    private TabulatedFunction convertToTabulatedFunction(FunctionEntity functionEntity) {
+        logger.info("Converting FunctionEntity to TabulatedFunction for function ID: " + functionEntity.getFunctionId());
+        List<PointEntity> points = pointRepository.findByFunctionIdOrderByXValue(functionEntity.getFunctionId());
+        
+        if (points.size() < 2) {
+            throw new RuntimeException("Function must have at least 2 points");
+        }
+        
+        double[] xValues = new double[points.size()];
+        double[] yValues = new double[points.size()];
+        
+        for (int i = 0; i < points.size(); i++) {
+            xValues[i] = points.get(i).getXValue();
+            yValues[i] = points.get(i).getYValue();
+        }
+        
+        return new ArrayTabulatedFunction(xValues, yValues);
+    }
+
     @PostMapping("/operations")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> performOperation(@RequestBody OperationRequest request) {
-        logger.info("POST /api/functions/operations - Operation: " + request.getOperation());
+        logger.info("POST /api/functions/operations - Operation: " + request.getOperation() + 
+                    ", FunctionA: " + request.getFunctionAId() + ", FunctionB: " + request.getFunctionBId());
         try {
-            // This is a simplified implementation
-            // In a real scenario, you would load functions from DB, convert to TabulatedFunction,
-            // perform operation, and save result
+            FunctionEntity functionA = functionRepository.findById(request.getFunctionAId())
+                    .orElseThrow(() -> new RuntimeException("Function A not found with id: " + request.getFunctionAId()));
+            FunctionEntity functionB = functionRepository.findById(request.getFunctionBId())
+                    .orElseThrow(() -> new RuntimeException("Function B not found with id: " + request.getFunctionBId()));
+            
+            TabulatedFunction tabulatedA = convertToTabulatedFunction(functionA);
+            TabulatedFunction tabulatedB = convertToTabulatedFunction(functionB);
+            
+            TabulatedFunction resultFunction;
+            String operationName = request.getOperation().toLowerCase();
+            
+            switch (operationName) {
+                case "add":
+                    resultFunction = operationService.add(tabulatedA, tabulatedB);
+                    break;
+                case "subtract":
+                    resultFunction = operationService.subtract(tabulatedA, tabulatedB);
+                    break;
+                case "multiply":
+                    resultFunction = operationService.multiply(tabulatedA, tabulatedB);
+                    break;
+                case "divide":
+                    resultFunction = operationService.divide(tabulatedA, tabulatedB);
+                    break;
+                default:
+                    throw new RuntimeException("Unknown operation: " + request.getOperation());
+            }
+            
             Map<String, Object> result = new HashMap<>();
             result.put("operation", request.getOperation());
+            result.put("functionAId", request.getFunctionAId());
+            result.put("functionBId", request.getFunctionBId());
             result.put("status", "success");
-            result.put("message", "Operation completed");
+            result.put("message", "Operation completed successfully");
+            result.put("resultPointsCount", resultFunction.getCount());
             
+            logger.info("Operation " + request.getOperation() + " completed successfully");
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (Exception e) {
             logger.severe("Error performing operation: " + e.getMessage());
@@ -57,17 +113,26 @@ public class OperationController {
     }
 
     @PostMapping("/{functionId}/differentiate")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> differentiateFunction(@PathVariable Long functionId) {
-        logger.info("POST /api/functions/" + functionId + "/differentiate");
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> differentiateFunction(
+            @PathVariable Long functionId,
+            @RequestParam(required = false, defaultValue = "LEFT") String type) {
+        logger.info("POST /api/functions/" + functionId + "/differentiate?type=" + type);
         try {
-            // This is a simplified implementation
-            // In a real scenario, you would load function from DB, convert to TabulatedFunction,
-            // calculate derivative, and save result
+            FunctionEntity functionEntity = functionRepository.findById(functionId)
+                    .orElseThrow(() -> new RuntimeException("Function not found with id: " + functionId));
+            
+            TabulatedFunction tabulatedFunction = convertToTabulatedFunction(functionEntity);
+            TabulatedFunction derivative = differentialOperator.derive(tabulatedFunction);
+            
             Map<String, Object> result = new HashMap<>();
             result.put("functionId", functionId);
+            result.put("type", type);
             result.put("status", "success");
-            result.put("message", "Derivative calculated");
+            result.put("message", "Derivative calculated successfully");
+            result.put("derivativePointsCount", derivative.getCount());
             
+            logger.info("Derivative calculated successfully for function ID: " + functionId);
             return ResponseEntity.ok(ApiResponse.success(result));
         } catch (Exception e) {
             logger.severe("Error calculating derivative: " + e.getMessage());
@@ -77,20 +142,60 @@ public class OperationController {
     }
 
     @PostMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> searchFunctions(@RequestBody SearchRequest request) {
-        logger.info("POST /api/functions/search - Search term: " + request.getSearchTerm());
+        logger.info("POST /api/functions/search - Search term: " + request.getSearchTerm() + 
+                    ", Criteria: " + request.getCriteria());
         try {
-            // Use SearchService to perform search
             if (request.getSearchTerm() != null && !request.getSearchTerm().isEmpty()) {
-                List<Object> results = new java.util.ArrayList<>();
-                // Perform search using SearchService
-                // This is simplified - actual implementation would use SearchService methods
+                List<Object> results = new ArrayList<>();
+                
+                List<FunctionEntity> functions = functionRepository.findAll();
+                String searchTermLower = request.getSearchTerm().toLowerCase();
+                
+                for (FunctionEntity function : functions) {
+                    if (function.getFunctionName().toLowerCase().contains(searchTermLower) ||
+                        function.getFunctionType().toLowerCase().contains(searchTermLower) ||
+                        (function.getFunctionExpression() != null && 
+                         function.getFunctionExpression().toLowerCase().contains(searchTermLower))) {
+                        results.add(function);
+                    }
+                }
+                
+                if (request.getSortField() != null && !results.isEmpty()) {
+                    results.sort((a, b) -> {
+                        try {
+                            java.lang.reflect.Field field = a.getClass().getDeclaredField(request.getSortField());
+                            field.setAccessible(true);
+                            Comparable valueA = (Comparable) field.get(a);
+                            Comparable valueB = (Comparable) field.get(b);
+                            int comparison = valueA.compareTo(valueB);
+                            return request.getAscending() != null && request.getAscending() ? comparison : -comparison;
+                        } catch (Exception e) {
+                            return 0;
+                        }
+                    });
+                }
+                
+                int totalCount = results.size();
+                
+                if (request.getPage() != null && request.getSize() != null) {
+                    int start = request.getPage() * request.getSize();
+                    int end = Math.min(start + request.getSize(), results.size());
+                    if (start < results.size()) {
+                        results = results.subList(start, end);
+                    } else {
+                        results = new ArrayList<>();
+                    }
+                }
                 
                 Map<String, Object> result = new HashMap<>();
                 result.put("searchTerm", request.getSearchTerm());
                 result.put("results", results);
                 result.put("count", results.size());
+                result.put("totalCount", totalCount);
                 
+                logger.info("Search completed. Found " + totalCount + " total results, returning " + results.size());
                 return ResponseEntity.ok(ApiResponse.success(result));
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)

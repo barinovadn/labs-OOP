@@ -10,13 +10,17 @@ import functions.TabulatedFunction;
 import functions.factory.ArrayTabulatedFunctionFactory;
 import functions.factory.TabulatedFunctionFactory;
 import operations.TabulatedFunctionOperationService;
+import repository.FunctionRepository;
+import repository.PointRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.logging.Logger;
+import entity.FunctionEntity;
+import entity.PointEntity;
 
 @RestController
 @RequestMapping("/api/functions")
@@ -26,10 +30,17 @@ public class FunctionController {
     @Autowired
     private FunctionService functionService;
 
+    @Autowired
+    private FunctionRepository functionRepository;
+
+    @Autowired
+    private PointRepository pointRepository;
+
     private TabulatedFunctionFactory factory = new ArrayTabulatedFunctionFactory();
     private TabulatedFunctionOperationService operationService = new TabulatedFunctionOperationService();
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<FunctionResponse>> createFunction(@RequestBody FunctionRequest request) {
         logger.info("POST /api/functions - Creating function");
         try {
@@ -44,6 +55,7 @@ public class FunctionController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<FunctionResponse>> getFunctionById(@PathVariable Long id) {
         logger.info("GET /api/functions/" + id);
         try {
@@ -58,11 +70,12 @@ public class FunctionController {
 
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<List<FunctionResponse>>> getAllFunctions(
-            @RequestParam(required = false) String sortBy) {
-        logger.info("GET /api/functions?sortBy=" + sortBy);
+            @RequestParam(required = false) String sort) {
+        logger.info("GET /api/functions?sort=" + sort);
         try {
-            List<FunctionResponse> response = functionService.getAllFunctions(sortBy);
+            List<FunctionResponse> response = functionService.getAllFunctions(sort);
             return ResponseEntity.ok(ApiResponse.success(response));
         } catch (Exception e) {
             logger.severe("Error getting functions: " + e.getMessage());
@@ -72,6 +85,7 @@ public class FunctionController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<FunctionResponse>> updateFunction(
             @PathVariable Long id, @RequestBody FunctionRequest request) {
         logger.info("PUT /api/functions/" + id);
@@ -86,6 +100,7 @@ public class FunctionController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<Void>> deleteFunction(@PathVariable Long id) {
         logger.info("DELETE /api/functions/" + id);
         try {
@@ -99,16 +114,52 @@ public class FunctionController {
     }
 
     @PostMapping("/{functionId}/calculate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<CalculationResponse>> calculateFunction(
             @PathVariable Long functionId, @RequestBody CalculationRequest request) {
-        logger.info("POST /api/functions/" + functionId + "/calculate");
+        logger.info("POST /api/functions/" + functionId + "/calculate - Operation: " + 
+                    request.getOperation() + ", X value: " + request.getFunction());
         try {
-            // This is a simplified implementation
-            // In a real scenario, you would load the function from DB and calculate
+            FunctionEntity functionEntity = functionRepository.findById(functionId)
+                    .orElseThrow(() -> new RuntimeException("Function not found with id: " + functionId));
+            
+            List<entity.PointEntity> points = pointRepository.findByFunctionIdOrderByXValue(functionId);
+            if (points.size() < 2) {
+                throw new RuntimeException("Function must have at least 2 points to calculate");
+            }
+            
+            double[] xValues = new double[points.size()];
+            double[] yValues = new double[points.size()];
+            for (int i = 0; i < points.size(); i++) {
+                xValues[i] = points.get(i).getXValue();
+                yValues[i] = points.get(i).getYValue();
+            }
+            TabulatedFunction tabulatedFunction = new functions.ArrayTabulatedFunction(xValues, yValues);
+            
+            Double xValue = null;
+            if (request.getFunction() != null && request.getFunction().getXValues() != null && 
+                request.getFunction().getXValues().length > 0) {
+                xValue = request.getFunction().getXValues()[0];
+            } else if (request.getFunction() != null && request.getFunction().getXFrom() != null) {
+                xValue = request.getFunction().getXFrom();
+            }
+            
+            if (xValue == null) {
+                throw new RuntimeException("X value is required for calculation");
+            }
+            
+            long startTime = System.currentTimeMillis();
+            double result = tabulatedFunction.apply(xValue);
+            long computationTime = System.currentTimeMillis() - startTime;
+            
             CalculationResponse response = new CalculationResponse();
-            response.setOperation("calculate");
-            response.setResult(0.0);
-            response.setFunctionType("TABULATED");
+            response.setOperation(request.getOperation() != null ? request.getOperation() : "calculate");
+            response.setResult(result);
+            response.setFunctionType(functionEntity.getFunctionType());
+            response.setComputationTimeMs(computationTime);
+            response.setDetails("Calculated value at x=" + xValue + " for function " + functionId);
+            
+            logger.info("Function calculated successfully. Result: " + result + " at x=" + xValue);
             return ResponseEntity.ok(ApiResponse.success(response));
         } catch (Exception e) {
             logger.severe("Error calculating function: " + e.getMessage());

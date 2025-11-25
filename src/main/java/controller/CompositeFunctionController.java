@@ -7,6 +7,7 @@ import service.CompositeFunctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class CompositeFunctionController {
     private CompositeFunctionService compositeFunctionService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<CompositeFunctionResponse>> createCompositeFunction(
             @RequestBody CompositeFunctionRequest request) {
         logger.info("POST /api/composite-functions - Creating composite function");
@@ -36,6 +38,7 @@ public class CompositeFunctionController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<CompositeFunctionResponse>> getCompositeFunctionById(@PathVariable Long id) {
         logger.info("GET /api/composite-functions/" + id);
         try {
@@ -50,6 +53,7 @@ public class CompositeFunctionController {
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<CompositeFunctionResponse>> updateCompositeFunction(
             @PathVariable Long id, @RequestBody CompositeFunctionRequest request) {
         logger.info("PUT /api/composite-functions/" + id);
@@ -64,6 +68,7 @@ public class CompositeFunctionController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<Void>> deleteCompositeFunction(@PathVariable Long id) {
         logger.info("DELETE /api/composite-functions/" + id);
         try {

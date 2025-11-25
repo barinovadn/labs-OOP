@@ -12,7 +12,6 @@ public class UserEntityTest {
     void testAllGettersAndSetters() {
         UserEntity user = new UserEntity();
 
-        // Тестируем все сеттеры и геттеры
         user.setUserId(1L);
         user.setUsername("testuser");
         user.setPassword("password123");
@@ -26,7 +25,6 @@ public class UserEntityTest {
         List<CompositeFunctionEntity> compositeFunctions = new ArrayList<>();
         user.setCompositeFunctions(compositeFunctions);
 
-        // Проверяем все геттеры
         assertEquals(1L, user.getUserId());
         assertEquals("testuser", user.getUsername());
         assertEquals("password123", user.getPassword());

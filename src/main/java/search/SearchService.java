@@ -24,7 +24,7 @@ public class SearchService {
     @Autowired
     private PointRepository pointRepository;
 
-    private void dfsUserHierarchy(UserEntity user, String searchTerm, Set<Long> visited, List<Object> results) {
+    private void deepUserHierarchy(UserEntity user, String searchTerm, Set<Long> visited, List<Object> results) {
         if (visited.contains(user.getUserId())) return;
         visited.add(user.getUserId());
 
@@ -33,15 +33,15 @@ public class SearchService {
         }
 
         for (FunctionEntity function : user.getFunctions()) {
-            dfsFunctionHierarchy(function, searchTerm, visited, results);
+            deepFunctionHierarchy(function, searchTerm, visited, results);
         }
 
         for (CompositeFunctionEntity composite : user.getCompositeFunctions()) {
-            dfsCompositeHierarchy(composite, searchTerm, visited, results);
+            deepCompositeHierarchy(composite, searchTerm, visited, results);
         }
     }
 
-    private void dfsFunctionHierarchy(FunctionEntity function, String searchTerm, Set<Long> visited, List<Object> results) {
+    private void deepFunctionHierarchy(FunctionEntity function, String searchTerm, Set<Long> visited, List<Object> results) {
         if (visited.contains(function.getFunctionId())) return;
         visited.add(function.getFunctionId());
 
@@ -56,7 +56,7 @@ public class SearchService {
         }
     }
 
-    private void dfsCompositeHierarchy(CompositeFunctionEntity composite, String searchTerm, Set<Long> visited, List<Object> results) {
+    private void deepCompositeHierarchy(CompositeFunctionEntity composite, String searchTerm, Set<Long> visited, List<Object> results) {
         if (visited.contains(composite.getCompositeId())) return;
         visited.add(composite.getCompositeId());
 
@@ -65,10 +65,10 @@ public class SearchService {
         }
 
         if (composite.getFirstFunction() != null) {
-            dfsFunctionHierarchy(composite.getFirstFunction(), searchTerm, visited, results);
+            deepFunctionHierarchy(composite.getFirstFunction(), searchTerm, visited, results);
         }
         if (composite.getSecondFunction() != null) {
-            dfsFunctionHierarchy(composite.getSecondFunction(), searchTerm, visited, results);
+            deepFunctionHierarchy(composite.getSecondFunction(), searchTerm, visited, results);
         }
     }
 

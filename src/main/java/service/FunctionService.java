@@ -68,7 +68,6 @@ public class FunctionService {
     public List<FunctionResponse> getAllFunctions(String sortBy) {
         logger.info("Getting all functions, sort by: " + sortBy);
         List<FunctionEntity> functions = functionRepository.findAll();
-        // Simple sorting - can be enhanced
         if (sortBy != null && !sortBy.isEmpty()) {
             functions.sort((a, b) -> {
                 switch (sortBy.toLowerCase()) {

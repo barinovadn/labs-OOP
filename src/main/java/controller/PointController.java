@@ -7,6 +7,7 @@ import service.PointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class PointController {
     private PointService pointService;
 
     @PostMapping("/functions/{functionId}/points")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<PointResponse>> createPoint(
             @PathVariable Long functionId, @RequestBody PointRequest request) {
         logger.info("POST /api/functions/" + functionId + "/points");
@@ -37,6 +39,7 @@ public class PointController {
     }
 
     @GetMapping("/points/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<PointResponse>> getPointById(@PathVariable Long id) {
         logger.info("GET /api/points/" + id);
         try {
@@ -50,6 +53,7 @@ public class PointController {
     }
 
     @GetMapping("/functions/{functionId}/points")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<List<PointResponse>>> getPointsByFunctionId(@PathVariable Long functionId) {
         logger.info("GET /api/functions/" + functionId + "/points");
         try {
@@ -63,6 +67,7 @@ public class PointController {
     }
 
     @PutMapping("/points/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<PointResponse>> updatePoint(
             @PathVariable Long id, @RequestBody PointRequest request) {
         logger.info("PUT /api/points/" + id);
@@ -77,6 +82,7 @@ public class PointController {
     }
 
     @DeleteMapping("/points/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<Void>> deletePoint(@PathVariable Long id) {
         logger.info("DELETE /api/points/" + id);
         try {

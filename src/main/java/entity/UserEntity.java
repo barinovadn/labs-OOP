@@ -36,6 +36,14 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CompositeFunctionEntity> compositeFunctions = new ArrayList<>();
     
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private List<RoleEntity> roles = new ArrayList<>();
+    
     public UserEntity() {}
     
     public UserEntity(String username, String password, String email) {
@@ -65,4 +73,7 @@ public class UserEntity {
     
     public List<CompositeFunctionEntity> getCompositeFunctions() { return compositeFunctions; }
     public void setCompositeFunctions(List<CompositeFunctionEntity> compositeFunctions) { this.compositeFunctions = compositeFunctions; }
+    
+    public List<RoleEntity> getRoles() { return roles; }
+    public void setRoles(List<RoleEntity> roles) { this.roles = roles; }
 }

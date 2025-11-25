@@ -11,6 +11,7 @@ import service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class UserController {
     private CompositeFunctionService compositeFunctionService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody UserRequest request) {
         logger.info("POST /api/users - Creating user");
         try {
@@ -45,6 +47,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Long id) {
         logger.info("GET /api/users/" + id);
         try {
@@ -58,6 +61,7 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         logger.info("GET /api/users - Getting all users");
         try {
@@ -71,6 +75,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable Long id, @RequestBody UserRequest request) {
         logger.info("PUT /api/users/" + id);
         try {
@@ -84,6 +89,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
         logger.info("DELETE /api/users/" + id);
         try {
@@ -97,6 +103,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/functions")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<List<FunctionResponse>>> getFunctionsByUserId(@PathVariable Long userId) {
         logger.info("GET /api/users/" + userId + "/functions");
         try {
@@ -110,6 +117,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/composite-functions")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<List<CompositeFunctionResponse>>> getCompositeFunctionsByUserId(
             @PathVariable Long userId) {
         logger.info("GET /api/users/" + userId + "/composite-functions");
