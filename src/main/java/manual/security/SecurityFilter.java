@@ -1,20 +1,26 @@
 package manual.security;
 
-import manual.DatabaseConnection;
-import manual.entity.UserEntity;
-import manual.repository.RoleRepository;
-import manual.repository.UserRepository;
-
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Base64;
 import java.util.List;
 import java.util.logging.Logger;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import manual.DatabaseConnection;
+import manual.entity.UserEntity;
+import manual.repository.RoleRepository;
+import manual.repository.UserRepository;
 
 @WebFilter(filterName = "SecurityFilter", urlPatterns = "/api/*")
 public class SecurityFilter implements Filter {
@@ -107,7 +113,10 @@ public class SecurityFilter implements Filter {
     }
 
     private boolean isPublicEndpoint(String path, String method) {
-        if (method.equals("POST") && path.endsWith("/api/users")) {
+        if (method.equals("POST") && path.equals("/api/auth/register")) {
+            return true;
+        }
+        if (method.equals("POST") && path.equals("/api/users")) {
             return true;
         }
         if (method.equals("OPTIONS")) {
