@@ -67,14 +67,14 @@ CREATE TABLE IF NOT EXISTS composite_functions (
     FOREIGN KEY (second_function_id) REFERENCES functions(function_id) ON DELETE CASCADE
 );
 
--- Создание пользователя admin
+-- Создание пользователя admin (исправленный INSERT)
 INSERT INTO users (username, password, email) VALUES 
     ('admin', 'admin', 'admin@system.com')
 ON CONFLICT (username) DO NOTHING;
 
--- Назначение роли ADMIN пользователю admin
+-- Назначение роли ADMIN пользователю admin (исправленный INSERT)
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.user_id, r.role_id 
 FROM users u, roles r 
 WHERE u.username = 'admin' AND r.role_name = 'ADMIN'
-ON CONFLICT (user_id, role_id) DO NOTHING;
+ON CONFLICT DO NOTHING;
