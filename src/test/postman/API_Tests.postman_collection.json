@@ -60,6 +60,10 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
@@ -69,9 +73,9 @@
 							"raw": "{\n    \"username\": \"user_{{$timestamp}}\",\n    \"password\": \"password123\",\n    \"email\": \"test{{$timestamp}}@example.com\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/users",
+							"raw": "{{baseUrl}}/api/auth/register",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "users"]
+							"path": ["api", "auth", "register"]
 						}
 					}
 				},
@@ -79,6 +83,12 @@
 					"name": "Get All Users",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/users",
 							"host": ["{{baseUrl}}"],
@@ -90,6 +100,12 @@
 					"name": "Get User By ID",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}",
 							"host": ["{{baseUrl}}"],
@@ -102,6 +118,10 @@
 					"request": {
 						"method": "PUT",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -155,6 +175,10 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
 								"key": "Content-Type", 
 								"value": "application/json"
 							}
@@ -174,6 +198,12 @@
 					"name": "Get All Functions",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions",
 							"host": ["{{baseUrl}}"],
@@ -185,6 +215,12 @@
 					"name": "Get Functions Sorted by Name ASC",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions?sort=name_asc",
 							"host": ["{{baseUrl}}"],
@@ -202,6 +238,12 @@
 					"name": "Get Functions Sorted by Name DESC",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions?sort=name_desc",
 							"host": ["{{baseUrl}}"],
@@ -219,6 +261,12 @@
 					"name": "Get Functions Sorted by X From ASC",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions?sort=x_from_asc",
 							"host": ["{{baseUrl}}"],
@@ -236,6 +284,12 @@
 					"name": "Get Functions Sorted by Type and Name",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions?sort=type_name",
 							"host": ["{{baseUrl}}"],
@@ -253,6 +307,12 @@
 					"name": "Get Function By ID",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
 							"host": ["{{baseUrl}}"],
@@ -265,6 +325,10 @@
 					"request": {
 						"method": "PUT",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -290,6 +354,12 @@
 					"name": "Get Functions By User ID",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}/functions",
 							"host": ["{{baseUrl}}"],
@@ -326,6 +396,10 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
@@ -345,6 +419,12 @@
 					"name": "Get Points By Function ID",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}/points",
 							"host": ["{{baseUrl}}"],
@@ -356,6 +436,12 @@
 					"name": "Get Point By ID",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/points/{{pointId}}",
 							"host": ["{{baseUrl}}"],
@@ -367,6 +453,12 @@
 					"name": "Calculate Function Value",
 					"request": {
 						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}/calculate?x=3.5",
 							"host": ["{{baseUrl}}"],
@@ -385,6 +477,10 @@
 					"request": {
 						"method": "PUT",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -430,6 +526,10 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
@@ -449,6 +549,12 @@
 					"name": "Get Composite Function By ID",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
 							"host": ["{{baseUrl}}"],
@@ -460,6 +566,12 @@
 					"name": "Get Composite Functions By User ID",
 					"request": {
 						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}/composite-functions",
 							"host": ["{{baseUrl}}"],
@@ -472,6 +584,10 @@
 					"request": {
 						"method": "PUT",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -499,6 +615,10 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
@@ -519,6 +639,10 @@
 					"request": {
 						"method": "POST",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -541,6 +665,10 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
@@ -561,6 +689,10 @@
 					"request": {
 						"method": "POST",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -586,6 +718,12 @@
 					"name": "Differentiate Function - MIDDLE",
 					"request": {
 						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=MIDDLE",
 							"host": ["{{baseUrl}}"],
@@ -603,6 +741,12 @@
 					"name": "Differentiate Function - LEFT",
 					"request": {
 						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=LEFT&step=0.1",
 							"host": ["{{baseUrl}}"],
@@ -624,6 +768,12 @@
 					"name": "Differentiate Function - RIGHT",
 					"request": {
 						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=RIGHT&step=0.1",
 							"host": ["{{baseUrl}}"],
@@ -647,10 +797,14 @@
 			"name": "Function Search",
 			"item": [
 				{
-					"name": "Search Functions - QUICK",
+					"name": "Search Functions - Quick",
 					"request": {
 						"method": "POST",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -674,10 +828,14 @@
 					}
 				},
 				{
-					"name": "Search Functions - DEEP",
+					"name": "Search Functions - Deep",
 					"request": {
 						"method": "POST",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -709,6 +867,12 @@
 					"name": "Delete User",
 					"request": {
 						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}",
 							"host": ["{{baseUrl}}"],
@@ -720,6 +884,12 @@
 					"name": "Delete Function",
 					"request": {
 						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
 							"host": ["{{baseUrl}}"],
@@ -731,6 +901,12 @@
 					"name": "Delete Point",
 					"request": {
 						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/points/{{pointId}}",
 							"host": ["{{baseUrl}}"],
@@ -742,6 +918,12 @@
 					"name": "Delete Composite Function",
 					"request": {
 						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
 						"url": {
 							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
 							"host": ["{{baseUrl}}"],
