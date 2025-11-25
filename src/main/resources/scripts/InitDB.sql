@@ -67,14 +67,38 @@ CREATE TABLE IF NOT EXISTS composite_functions (
     FOREIGN KEY (second_function_id) REFERENCES functions(function_id) ON DELETE CASCADE
 );
 
--- Создание пользователя admin (исправленный INSERT)
+-- Создание пользователя admin
 INSERT INTO users (username, password, email) VALUES 
     ('admin', 'admin', 'admin@system.com')
 ON CONFLICT (username) DO NOTHING;
 
--- Назначение роли ADMIN пользователю admin (исправленный INSERT)
+-- Создание пользователя user
+INSERT INTO users (username, password, email) VALUES 
+    ('user', 'user', 'user@system.com')
+ON CONFLICT (username) DO NOTHING;
+
+-- Создание пользователя operator
+INSERT INTO users (username, password, email) VALUES 
+    ('operator', 'operator', 'operator@system.com')
+ON CONFLICT (username) DO NOTHING;
+
+-- Назначение роли ADMIN пользователю admin
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.user_id, r.role_id 
 FROM users u, roles r 
 WHERE u.username = 'admin' AND r.role_name = 'ADMIN'
+ON CONFLICT DO NOTHING;
+
+-- Назначение роли USER пользователю user
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.user_id, r.role_id 
+FROM users u, roles r 
+WHERE u.username = 'user' AND r.role_name = 'USER'
+ON CONFLICT DO NOTHING;
+
+-- Назначение роли OPERATOR пользователю operator
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.user_id, r.role_id 
+FROM users u, roles r 
+WHERE u.username = 'operator' AND r.role_name = 'OPERATOR'
 ON CONFLICT DO NOTHING;
