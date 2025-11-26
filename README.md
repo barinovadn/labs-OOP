@@ -52,7 +52,7 @@
 <br>
 
 ### Тесты <img width="10px" alt="" src="https://i.imgur.com/qFmcbT0.png" /> <img height="50px" alt="emoji" src="https://media.tenor.com/V4_qWWNPQnQAAAAi/floor.gif" />
-- [docker-test.ps1](/docker-test.ps1) - Упрощенные API тесты.
+- [docker-test.ps1](docker-test.ps1) - Упрощенные API тесты.
 - [src/test/postman](src/test/postman/) - Newman тесты.
     - [run-tests.ps1](src/test/postman/run-tests.ps1) - Основные API тесты.
     - [run-performance.ps1](src/test/postman/run-performance.ps1) - Тесты для проверки. производительности, [таблица сравнения](https://github.com/barinovadn/labs-OOP#итоговая-производительность-api).
@@ -60,5 +60,5 @@
 - [src/test/java](src/test/java/) - Java тесты.
 
 ### Дополнительно
-- Результаты производительности для каждой ветки сохраняются в [PERFORMANCE_RESULTS.md](../manual/src/test/postman/results/PERFORMANCE_RESULTS.md).
+- Результаты производительности для каждой ветки сохраняются в [PERFORMANCE_RESULTS.md](src/test/postman/results/PERFORMANCE_RESULTS.md).
 - [Полная документация](https://github.com/barinovadn/labs-OOP#документация).
