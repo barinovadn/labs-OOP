@@ -5,7 +5,7 @@
 **Университет:** [Самарский университет](https://ssau.ru/)   
 **Язык:** Java  
 **Темы:** Функции, интерфейсы, наследование, коллекции, многопоточность, синхронизация  
-**Доки:** [Полная документация](https://github.com/barinovadn/labs-OOP#документация)  
+**Доки:** [Полная документация](https://github.com/barinovadn/labs-OOP#документация-)  
 
 
 <br>
@@ -61,4 +61,4 @@
 
 ### Дополнительно
 - Результаты производительности для каждой ветки сохраняются в [PERFORMANCE_RESULTS.md](src/test/postman/results/PERFORMANCE_RESULTS.md).
-- [Полная документация](https://github.com/barinovadn/labs-OOP#документация).
+- [Полная документация](https://github.com/barinovadn/labs-OOP#документация-).
