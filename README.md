@@ -7,30 +7,31 @@
 **Темы:** Функции, интерфейсы, наследование, коллекции, многопоточность  
 **Содержание:**
 
-- [Отчеты и таблицы](#отчеты-и-таблицы)
-- [Схемы и диаграммы](#схемы-и-диаграммы)
+- [Отчеты и таблицы](#отчеты-и-таблицы-)
+- [Схемы и диаграммы](#схемы-и-диаграммы-)
 - [Документация](#документация-)
 
 
-<br>
-
-## Отчеты и таблицы
+## Отчеты и таблицы <img height="75px" alt="emoji" src="https://media.tenor.com/31JlJ6y8viwAAAAi/ep1c.gif" />
 
 ### Сравнение производительности
 | Операция | [Manual](../../tree/manual) | [Framework](../../tree/framework) | Разница | Ускорение | Операций |
 |----------|--------|-----------|-----------|-----------|----------|
-| **CREATE** | 4630 ms | 436 ms | -4194 ms | **x10.5** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
+| **CREATE** | 4630 ms | 436 ms | -4194 ms | **x10.5** <img height="18px" alt="emoji" src="https://media.tenor.com/KSTj3gSo4CIAAAAi/fire-lit.gif" /> | *10k* |
 | **READ** | 650 ms | 559 ms | -91 ms | **x1.16** | *10k* |
-| **UPDATE** | 3945 ms | 91 ms | -3854 ms | **x43** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
-| **DELETE** | 5794 ms | 76 ms | -5718 ms | **x76** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
+| **UPDATE** | 3945 ms | 91 ms | -3854 ms | **x43** <img height="18px" alt="emoji" src="https://media.tenor.com/KSTj3gSo4CIAAAAi/fire-lit.gif" /> | *10k* |
+| **DELETE** | 5794 ms | 76 ms | -5718 ms | **x76** <img height="18px" alt="emoji" src="https://media.tenor.com/KSTj3gSo4CIAAAAi/fire-lit.gif" /> | *10k* |
 | **SEARCH** | 10302 ms | 6823 ms | -3479 ms | **x1.5** | *1k* |
 
+<img width="175px" height="1px" alt="" src="https://i.imgur.com/qFmcbT0.png" /><img height="75px" alt="emoji" src="https://media.tenor.com/n1-t4E0W_mMAAAAi/cat-chill.gif" />
 
 ### Сравнение производительности сортировки
 | Операция сортировки | [Manual](../../tree/manual) | [Framework](../../tree/framework) | Разница | Ускорение | Записей |
 |---------------------|-------------|-----------|---------|---------|---------|
 | Сортировка по имени | 55 ms | 47 ms | -8 ms | **x1.17** | *10k* |
-| Сортировка по типу и имени | 54 ms | 14 ms | -40 ms | **x3.85** <img height="18px" alt="emoji" src="https://media.tenor.com/5Lfdp0ZDVOQAAAAi/fire.gif" /> | *10k* |
+| Сортировка по типу и имени | 54 ms | 14 ms | -40 ms | **x3.85** <img height="18px" alt="emoji" src="https://media.tenor.com/KSTj3gSo4CIAAAAi/fire-lit.gif" /> | *10k* |
+
+<img width="200px" height="1px" alt="" src="https://i.imgur.com/qFmcbT0.png" /><img height="75px" alt="emoji" src="https://media.tenor.com/C4Y-5KEzplAAAAAi/cat-fire.gif" />
 
 
 <br>
@@ -40,17 +41,17 @@
 #### Overall Coverage Summary
 | Package | Class | Method | Branch | Line |
 |---------|-------|--------|--------|------|
-| all classes |  100% (56/56) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | 100% (218/218) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | 100% (250/250) <img height="18px" alt="emoji" src="https://media.tenor.com/OIrnk2MXyu0AAAAi/tak.gif" /> | <ins>98.1% (728/742)</ins> <img height="18px" alt="emoji" src="https://media.tenor.com/s_gvo82o5Q4AAAAi/sad-depressed.gif" /> |
+| **all classes** |  100% (56/56) <img height="24px" alt="emoji" src="https://media.tenor.com/kwZcJAVUcxkAAAAi/check-yes.gif" /> | 100% (218/218) <img height="24px" alt="emoji" src="https://media.tenor.com/kwZcJAVUcxkAAAAi/check-yes.gif" /> | 100% (250/250) <img height="24px" alt="emoji" src="https://media.tenor.com/kwZcJAVUcxkAAAAi/check-yes.gif" /> | <ins>98.1% (728/742)</ins> <img height="26px" alt="emoji" src="https://media.tenor.com/rlzkgMX4g-wAAAAi/death.gif" /> |
 
 #### Coverage Breakdown
 | Package | Class | Method | Branch | Line |
 |---------|-------|--------|--------|------|
-| **concurrent** | 100% (9/9) | 100% (30/30) | 100% (26/26) | <ins>99% (101/102)</ins> |
-| **exceptions** | 100% (4/4) | 100% (8/8) | - | 100% (8/8) |
-| **functions** | 100% (18/18) | 100% (103/103) | 100% (184/184) | 100% (339/339) |
-| **functions.factory** | 100% (3/3) | 100% (7/7) | - | 100% (7/7) |
-| **io** | 100% (9/9) | 100% (31/31) | 100% (14/14) | <ins>93.8% (195/208)</ins> |
-| **operations** | 100% (13/13) | 100% (39/39) | 100% (26/26) | 100% (78/78) |
+| **concurrent** | 100% (9/9) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (30/30) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (26/26) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | <ins>99% (101/102)</ins> <img height="24px" alt="emoji" src="https://media1.tenor.com/m/Ro_0LtkcR18AAAAC/blue-thing-with-an-eye-looking-shocked-nosolohit.gif" /> |
+| **exceptions** | 100% (4/4) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (8/8) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | - | 100% (8/8) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> |
+| **functions** | 100% (18/18) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (103/103) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (184/184) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (339/339) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> |
+| **functions.factory** | 100% (3/3) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (7/7) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | - | 100% (7/7) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> |
+| **io** | 100% (9/9) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (31/31) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (14/14) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | <ins>93.8% (195/208)</ins> <img height="24px" alt="emoji" src="https://media1.tenor.com/m/H35OFOawLP4AAAAC/hag-monsters-vs-aliens.gif" /> |
+| **operations** | 100% (13/13) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (39/39) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (26/26) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> | 100% (78/78) <img height="24px" alt="emoji" src="https://media.tenor.com/VBB3xGQXDDgAAAAj/emoji-vergonha1123.gif" /> |
 
 *Generated on 2025-10-19*
 
@@ -62,9 +63,9 @@
 |----------------|-----------------|--------------------|------------------|
 | Add Functions | 12 | 8 | x1.50 |
 | Calculate Function Value | 8 | 11 | <ins>x0.73</ins> <img height="18px" alt="emoji" src="https://media.tenor.com/kOwEHJC4SdMAAAAi/loading-small.gif" /> |
-| Create Composite Function | 58 | 26 | **x2.23** |
-| Create Function | 53 | 25 | **x2.12** |
-| Create Point | 15 | 24 | <ins>x0.62</ins>  |
+| Create Composite Function | 58 | 26 | **x2.23** <img height="18px" alt="emoji" src="https://media.tenor.com/GoMzedSeaQIAAAAi/adamjk-emojis.gif" /> |
+| Create Function | 53 | 25 | **x2.12** <img height="18px" alt="emoji" src="https://media.tenor.com/GoMzedSeaQIAAAAi/adamjk-emojis.gif" /> |
+| Create Point | 15 | 24 | <ins>x0.62</ins> <img height="18px" alt="emoji" src="https://media.tenor.com/kOwEHJC4SdMAAAAi/loading-small.gif" />  |
 | Create User | 62 | 45 | x1.38 |
 | Delete Composite Function | 40 | 10 | **x4.00** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
 | Delete Function | 52 | 33 | x1.58 |
@@ -77,9 +78,9 @@
 | Get All Functions | 44 | 9 | **x4.89** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
 | Get All Users | 88 | 12 | **x7.33** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
 | Get Composite Function By ID | 40 | 8 | **x5.00** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
-| Get Composite Functions By User ID | 38 | 10 | **x3.80** |
+| Get Composite Functions By User ID | 38 | 10 | **x3.80** <img height="18px" alt="emoji" src="https://media.tenor.com/GoMzedSeaQIAAAAi/adamjk-emojis.gif" /> |
 | Get Function By ID | 43 | 9 | **x4.78** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
-| Get Functions By User ID | 40 | 12 | **x3.33** |
+| Get Functions By User ID | 40 | 12 | **x3.33** <img height="18px" alt="emoji" src="https://media.tenor.com/GoMzedSeaQIAAAAi/adamjk-emojis.gif" /> |
 | Get Functions Sorted by Name ASC | 70 | 7 | **x10.00** <img height="18px" alt="emoji" src="https://media.tenor.com/2jiJSKfo6ykAAAAj/amplify-amplifyart.gif" /> |
 | Get Functions Sorted by Name DESC | 46 | 8 | **x5.75** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
 | Get Functions Sorted by Type and Name | 52 | 8 | **x6.50** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
@@ -90,16 +91,17 @@
 | Multiply Functions | 14 | 8 | x1.75 |
 | Search Functions - Deep | 41 | 8 | **x5.12** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
 | Search Functions - Quick | 57 | 9 | **x6.33** <img height="18px" alt="emoji" src="https://media.tenor.com/uW2byISIYCUAAAAi/joia-llegal-beleza.gif" /> |
-| Subtract Functions | 11 | 8 | **x1.38** |
-| Update Composite Function | 46 | 19 | **x2.42** |
+| Subtract Functions | 11 | 8 | **x1.38** <img height="18px" alt="emoji" src="https://media.tenor.com/GoMzedSeaQIAAAAi/adamjk-emojis.gif" /> |
+| Update Composite Function | 46 | 19 | **x2.42** <img height="18px" alt="emoji" src="https://media.tenor.com/GoMzedSeaQIAAAAi/adamjk-emojis.gif" /> |
 | Update Function | 38 | 21 | x1.81 |
-| Update Point | 25 | 12 | **x2.08** |
-| Update User | 52 | 15 | **x3.47** |
+| Update Point | 25 | 12 | **x2.08** <img height="18px" alt="emoji" src="https://media.tenor.com/GoMzedSeaQIAAAAi/adamjk-emojis.gif" /> |
+| Update User | 52 | 15 | **x3.47** <img height="18px" alt="emoji" src="https://media.tenor.com/GoMzedSeaQIAAAAi/adamjk-emojis.gif" /> |
 
+<img width="300px" height="1px" alt="" src="https://i.imgur.com/qFmcbT0.png" /><img height="150px" alt="emoji" src="https://media.tenor.com/xWphETwf_40AAAAi/kitty-cult-fire.gif" />
 
 <br>
 
-## Схемы и диаграммы <img width="15px" alt="" src="https://i.imgur.com/qFmcbT0.png" /> <img height="65px" alt="emoji" src="https://media.tenor.com/4CfIDNeonQwAAAAi/postgres.gif" />
+## Схемы и диаграммы <img height="65px" alt="emoji" src="https://media.tenor.com/4CfIDNeonQwAAAAi/postgres.gif" />
 
 ### ER диаграмма
 ```mermaid
@@ -149,8 +151,8 @@ erDiagram
 
 ### Файлы диаграмм
 - Entity-relationship diagram - [ER.puml](ER.puml) <img width="10px" alt="same as above" src="https://media.tenor.com/MUBfaK_k9O8AAAAi/habbo-habbohotel.gif" />
-- Sequence diagram for authentication - [SD_AUTH.puml](SD_AUTH.puml)
-- Sequence diagram for calculations - [SD_CACL.puml](SD_CACL.puml)
+- Sequence diagram for authentication - [SD_AUTH.puml](SD_AUTH.puml) <img width="10px" alt="same as above" src="https://media.tenor.com/KMvIN3R__IkAAAAi/%E9%97%AA%E4%BA%AE.gif" />
+- Sequence diagram for calculations - [SD_CACL.puml](SD_CACL.puml) <img width="10px" alt="same as above" src="https://media.tenor.com/KMvIN3R__IkAAAAi/%E9%97%AA%E4%BA%AE.gif" />
 
 
 <br>
@@ -158,29 +160,29 @@ erDiagram
 ## Документация <img height="32px" alt="Tenor Gif" src="https://media.tenor.com/a2m-Y3dLmD0AAAAi/mona-github-loading-github.gif" />
 
 
-### Единый API контракт
+### Единый API контракт <img width="10px" alt="" src="https://i.imgur.com/qFmcbT0.png" /> <img height="50px" alt="emoji" src="https://media.tenor.com/GpjpezX2PR0AAAAi/books.gif" />
 Для обоих веток реализации - [Framework](../../tree/framework) и [Manual](../../tree/manual).
 
 | Конечная точка | Описание |
 |----------------|----------|
-| `/api/auth/register` | Создать пользователя (без ролей). |
-| `/api/auth/assign-roles` | Выдать роли существующему пользователю. |
-| `/api/users` | Список пользователей. |
-| `/api/users/{id}` | Прочитать, обновить или удалить конкретного пользователя. |
-| `/api/users/{id}/functions` | Получить функции владельца. |
-| `/api/users/{id}/composite-functions` | Получить составные функции владельца. |
-| `/api/functions` | Список функций (поддерживает сортировку) и создание. |
-| `/api/functions/{id}` | Работа с конкретной функцией. |
-| `/api/functions/{id}/calculate` | Посчитать значение функции по точке. |
-| `/api/functions/{id}/differentiate` | Посчитать производную (тип передаётся параметром). |
-| `/api/functions/{id}/points` | Список точек функции / создание точки. |
-| `/api/points/{id}` | Работа с конкретной точкой. |
-| `/api/functions/operations` | Сложение/вычитание/умножение/деление табличных функций. |
-| `/api/functions/search` | Поиск функций по тексту, сортировка, пагинация. |
-| `/api/composite-functions` | Список и создание составных функций. |
-| `/api/composite-functions/{id}` | CRUD по конкретной составной функции. |
-| `/api/roles` | Список ролей и создание новой. |
-| `/api/roles/{id}` | Работа с конкретной ролью. |
+| `/api/auth/register` <img height="18px" alt="emoji" src="https://media.tenor.com/pQ6Mxpz69vkAAAAi/aklo-ordinals.gif" /> | Создать пользователя (без ролей). |
+| `/api/auth/assign-roles` <img height="18px" alt="emoji" src="https://media.tenor.com/l9QWg86fzOUAAAAi/asd.gif" /> | Выдать роли существующему пользователю. |
+| `/api/users` <img height="18px" alt="emoji" src="https://media.tenor.com/dmLTEf-u-KoAAAAj/discord-mod.gif" /> | Список пользователей. |
+| `/api/users/{id}` <img height="18px" alt="emoji" src="https://media.tenor.com/BsB2DmZZxq4AAAAi/aklo-ordinals.gif" /> | Прочитать, обновить или удалить конкретного пользователя. |
+| `/api/users/{id}/functions` <img height="18px" alt="emoji" src="https://media.tenor.com/BsB2DmZZxq4AAAAi/aklo-ordinals.gif" /> | Получить функции владельца. |
+| `/api/users/{id}/composite-functions` <img height="18px" alt="emoji" src="https://media.tenor.com/BsB2DmZZxq4AAAAi/aklo-ordinals.gif" /> | Получить составные функции владельца. |
+| `/api/functions` <img height="18px" alt="emoji" src="https://media.tenor.com/fv45doRJoWgAAAAj/discord-nitro-op.gif" /> | Список функций (поддерживает сортировку) и создание. |
+| `/api/functions/{id}` <img height="18px" alt="emoji" src="https://media.tenor.com/GbTzlneuri0AAAAi/boost-discord.gif" /> | Работа с конкретной функцией. |
+| `/api/functions/{id}/calculate` <img height="18px" alt="emoji" src="https://media.tenor.com/nle4lSQc-bQAAAAi/emojify.gif" /> | Посчитать значение функции по точке. |
+| `/api/functions/{id}/differentiate` <img height="18px" alt="emoji" src="https://media.tenor.com/nle4lSQc-bQAAAAi/emojify.gif" /> | Посчитать производную (тип передаётся параметром). |
+| `/api/functions/{id}/points` <img height="18px" alt="emoji" src="https://media.tenor.com/PgHG_GnGQcMAAAAj/asd.gif" /> | Список точек функции / создание точки. |
+| `/api/functions/operations` <img height="18px" alt="emoji" src="https://media.tenor.com/nle4lSQc-bQAAAAi/emojify.gif" /> | Сложение/вычитание/умножение/деление табличных функций. |
+| `/api/functions/search` <img height="18px" alt="emoji" src="https://media.tenor.com/nle4lSQc-bQAAAAi/emojify.gif" /> | Поиск функций по тексту, сортировка, пагинация. |
+| `/api/composite-functions` <img height="18px" alt="emoji" src="https://media.tenor.com/8wZtCA9STgEAAAAi/asd.gif" /> | Список и создание составных функций. |
+| `/api/composite-functions/{id}` <img height="18px" alt="emoji" src="https://media.tenor.com/8wZtCA9STgEAAAAi/asd.gif" /> | CRUD по конкретной составной функции. |
+| `/api/points/{id}` <img height="18px" alt="emoji" src="https://media.tenor.com/4I0p7iG0usYAAAAi/rules.gif" /> | Работа с конкретной точкой. |
+| `/api/roles` <img height="18px" alt="emoji" src="https://media.tenor.com/oJ_WNeH1PoEAAAAi/discord-mod-discord-bot.gif" /> | Список ролей и создание новой. |
+| `/api/roles/{id}` <img height="18px" alt="emoji" src="https://media.tenor.com/oJ_WNeH1PoEAAAAi/discord-mod-discord-bot.gif" /> | Работа с конкретной ролью. |
 
 #### API
 - Базовый URL: http://localhost:8080.
