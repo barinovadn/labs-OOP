@@ -1,0 +1,1 @@
+DELETE FROM composite_functions WHERE composite_id = ?;

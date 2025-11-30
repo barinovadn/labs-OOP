@@ -1,28 +1,22 @@
 package manual.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import manual.dto.ApiResponse;
-import manual.dto.ErrorResponse;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import manual.security.SecurityContext;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.logging.Logger;
 
 public abstract class BaseServlet extends HttpServlet {
     protected static final Logger logger = Logger.getLogger(BaseServlet.class.getName());
-    protected final ObjectMapper objectMapper = new ObjectMapper();
-
-    protected SecurityContext getSecurityContext(HttpServletRequest request) {
-        return (SecurityContext) request.getAttribute("securityContext");
-    }
-
+    protected final ObjectMapper objectMapper;
+    
     public BaseServlet() {
+        objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
@@ -31,22 +25,16 @@ public abstract class BaseServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(statusCode);
-        
-        PrintWriter out = response.getWriter();
-        objectMapper.writeValue(out, data);
-        out.flush();
+        String json = objectMapper.writeValueAsString(data);
+        response.getWriter().write(json);
     }
 
     protected void sendSuccess(HttpServletRequest request, HttpServletResponse response, Object data) throws IOException {
-        ApiResponse<Object> apiResponse = ApiResponse.success(data);
-        apiResponse.setPath(getRequestPath(request));
-        sendJsonResponse(response, HttpServletResponse.SC_OK, apiResponse);
+        sendJsonResponse(response, HttpServletResponse.SC_OK, new ApiResponse(true, data, null));
     }
 
     protected void sendError(HttpServletRequest request, HttpServletResponse response, int statusCode, String message) throws IOException {
-        ErrorResponse errorResponse = new ErrorResponse(statusCode, 
-            String.valueOf(statusCode), message, getRequestPath(request));
-        sendJsonResponse(response, statusCode, errorResponse);
+        sendJsonResponse(response, statusCode, new ApiResponse(false, null, message));
     }
 
     protected <T> T parseJsonRequest(HttpServletRequest request, Class<T> clazz) throws IOException {
@@ -54,31 +42,37 @@ public abstract class BaseServlet extends HttpServlet {
     }
 
     protected Long parseIdFromPath(String pathInfo) {
-        if (pathInfo == null || pathInfo.isEmpty()) {
+        if (pathInfo == null || pathInfo.length() < 2) {
             return null;
         }
-        String[] parts = pathInfo.split("/");
-        if (parts.length > 0 && !parts[parts.length - 1].isEmpty()) {
+        String[] parts = pathInfo.substring(1).split("/");
+        for (int i = parts.length - 1; i >= 0; i--) {
             try {
-                return Long.parseLong(parts[parts.length - 1]);
+                return Long.parseLong(parts[i]);
             } catch (NumberFormatException e) {
-                return null;
+                continue;
             }
         }
         return null;
     }
 
-    private String getRequestPath(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        if (request.getQueryString() != null) {
-            path += "?" + request.getQueryString();
-        }
-        return path;
+    protected SecurityContext getSecurityContext(HttpServletRequest request) {
+        return (SecurityContext) request.getAttribute("securityContext");
     }
 
     protected void setRequestPath(HttpServletRequest request, HttpServletResponse response) {
-        String path = getRequestPath(request);
-        response.setHeader("Request-Path", path);
+        response.setHeader("Request-Path", request.getRequestURI());
+    }
+
+    private static class ApiResponse {
+        public boolean success;
+        public Object data;
+        public String error;
+
+        public ApiResponse(boolean success, Object data, String error) {
+            this.success = success;
+            this.data = data;
+            this.error = error;
+        }
     }
 }
-

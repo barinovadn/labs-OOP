@@ -1,0 +1,1 @@
+SELECT * FROM functions WHERE user_id = ?;

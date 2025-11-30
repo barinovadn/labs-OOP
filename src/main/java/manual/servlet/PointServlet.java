@@ -1,11 +1,8 @@
 package manual.servlet;
 
 import manual.DatabaseConnection;
-import manual.api.ApiServiceBase;
 import manual.dto.CreatePointRequest;
 import manual.dto.PointResponse;
-import manual.entity.FunctionEntity;
-import manual.repository.FunctionRepository;
 import manual.repository.PointRepository;
 
 import javax.servlet.ServletException;
@@ -24,47 +21,31 @@ public class PointServlet extends BaseServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         setRequestPath(request, response);
-        String pathInfo = request.getPathInfo();
-        logger.info("GET request to PointServlet: " + pathInfo);
-
+        String uri = request.getRequestURI();
         try (Connection conn = DatabaseConnection.getConnection()) {
-            PointRepository repository = new PointRepository(conn);
-            String requestURI = request.getRequestURI();
-            
-            if (requestURI.contains("/functions/") && requestURI.contains("/points")) {
-                String[] parts = requestURI.split("/");
-                Long functionId = null;
-                for (int i = 0; i < parts.length; i++) {
-                    if (parts[i].equals("functions") && i + 1 < parts.length) {
-                        try {
-                            functionId = Long.parseLong(parts[i + 1]);
-                            break;
-                        } catch (NumberFormatException e) {
-                            // continue
-                        }
-                    }
-                }
-                if (functionId == null) {
+            PointRepository repo = new PointRepository(conn);
+            if (uri.contains("/functions/") && uri.contains("/points")) {
+                Long funcId = extractFunctionId(uri);
+                if (funcId == null) {
                     sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
                     return;
                 }
-                List<PointResponse> points = repository.findByFunctionId(functionId);
+                List<PointResponse> points = repo.findByFunctionId(funcId);
                 sendSuccess(request, response, points);
             } else {
-                Long pointId = parseIdFromPath(pathInfo);
+                Long pointId = parseIdFromPath(request.getPathInfo());
                 if (pointId == null) {
                     sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid point ID");
                     return;
                 }
-                PointResponse point = repository.findById(pointId);
+                PointResponse point = repo.findById(pointId);
                 if (point == null) {
-                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Point not found");
+                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Not found");
                 } else {
                     sendSuccess(request, response, point);
                 }
             }
         } catch (SQLException e) {
-            logger.severe("Database error in PointServlet: " + e.getMessage());
             sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
         }
     }
@@ -73,89 +54,33 @@ public class PointServlet extends BaseServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         setRequestPath(request, response);
-        String pathInfo = request.getPathInfo();
-        logger.info("POST request to PointServlet: " + pathInfo);
-
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            String requestURI = request.getRequestURI();
-            if (requestURI.contains("/calculate")) {
-                String[] parts = requestURI.split("/");
-                Long functionId = null;
-                for (int i = 0; i < parts.length; i++) {
-                    if (parts[i].equals("functions") && i + 1 < parts.length) {
-                        try {
-                            functionId = Long.parseLong(parts[i + 1]);
-                            break;
-                        } catch (NumberFormatException e) {
-                            // continue
-                        }
-                    }
-                }
-                
-                if (functionId == null) {
-                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
-                    return;
-                }
-
-                String xParam = request.getParameter("x");
-                if (xParam == null) {
-                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Parameter x is required");
-                    return;
-                }
-
-                try {
-                    Double x = Double.parseDouble(xParam);
-                    PointService pointService = new PointService();
-                    PointResponse point = pointService.calculateFunctionValueWithCache(functionId, x);
-                    sendSuccess(request, response, point);
-                } catch (NumberFormatException e) {
-                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid x parameter");
-                } catch (SQLException e) {
-                    logger.severe("Error calculating function value: " + e.getMessage());
-                    sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to calculate function value");
-                }
-            } else if (requestURI.contains("/points")) {
-                String[] parts = requestURI.split("/");
-                Long functionId = null;
-                for (int i = 0; i < parts.length; i++) {
-                    if (parts[i].equals("functions") && i + 1 < parts.length) {
-                        try {
-                            functionId = Long.parseLong(parts[i + 1]);
-                            break;
-                        } catch (NumberFormatException e) {
-                            // continue
-                        }
-                    }
-                }
-                
-                if (functionId == null) {
-                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
-                    return;
-                }
-
-                CreatePointRequest createRequest = parseJsonRequest(request, CreatePointRequest.class);
-                FunctionRepository functionRepo = new FunctionRepository(conn);
-                manual.dto.FunctionResponse functionResponse = functionRepo.findById(functionId);
-                
-                if (functionResponse == null) {
-                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
-                    return;
-                }
-
-                FunctionEntity function = mapToEntity(functionResponse);
-                PointRepository repository = new PointRepository(conn);
-                PointResponse point = repository.create(createRequest, function);
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                sendSuccess(request, response, point);
-            } else {
-                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid path");
+        String uri = request.getRequestURI();
+        if (uri.contains("/calculate")) {
+            Long funcId = extractFunctionId(uri);
+            if (funcId == null) {
+                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
+                return;
             }
-        } catch (SQLException e) {
-            logger.severe("Database error in PointServlet: " + e.getMessage());
-            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
-        } catch (IOException e) {
-            logger.severe("Error parsing request: " + e.getMessage());
-            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid request body");
+            String x = request.getParameter("x");
+            if (x == null) {
+                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Parameter x required");
+                return;
+            }
+            try {
+                Double.parseDouble(x);
+                sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Point not found");
+            } catch (NumberFormatException e) {
+                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid x");
+            }
+        } else if (uri.contains("/points")) {
+            Long funcId = extractFunctionId(uri);
+            if (funcId == null) {
+                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
+                return;
+            }
+            sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
+        } else {
+            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid path");
         }
     }
 
@@ -163,32 +88,26 @@ public class PointServlet extends BaseServlet {
     protected void doPut(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         setRequestPath(request, response);
-        logger.info("PUT request to PointServlet: " + request.getPathInfo());
-
+        Long pointId = parseIdFromPath(request.getPathInfo());
+        if (pointId == null) {
+            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid point ID");
+            return;
+        }
         try {
-            Long pointId = parseIdFromPath(request.getPathInfo());
-            if (pointId == null) {
-                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid point ID");
-                return;
-            }
-
-            CreatePointRequest updateRequest = parseJsonRequest(request, CreatePointRequest.class);
-            
+            CreatePointRequest req = parseJsonRequest(request, CreatePointRequest.class);
             try (Connection conn = DatabaseConnection.getConnection()) {
-                PointRepository repository = new PointRepository(conn);
-                PointResponse point = repository.update(pointId, updateRequest);
+                PointRepository repo = new PointRepository(conn);
+                PointResponse point = repo.update(pointId, req);
                 if (point == null) {
-                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Point not found");
+                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Not found");
                 } else {
                     sendSuccess(request, response, point);
                 }
-            } catch (SQLException e) {
-                logger.severe("Database error updating point: " + e.getMessage());
-                sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to update point");
             }
+        } catch (SQLException e) {
+            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
         } catch (IOException e) {
-            logger.severe("Error parsing request: " + e.getMessage());
-            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid request body");
+            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid request");
         }
     }
 
@@ -196,44 +115,34 @@ public class PointServlet extends BaseServlet {
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         setRequestPath(request, response);
-        logger.info("DELETE request to PointServlet: " + request.getPathInfo());
-
         Long pointId = parseIdFromPath(request.getPathInfo());
         if (pointId == null) {
             sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid point ID");
             return;
         }
-
         try (Connection conn = DatabaseConnection.getConnection()) {
-            PointRepository repository = new PointRepository(conn);
-            boolean deleted = repository.delete(pointId);
-            if (deleted) {
+            PointRepository repo = new PointRepository(conn);
+            if (repo.delete(pointId)) {
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             } else {
-                sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Point not found");
+                sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Not found");
             }
         } catch (SQLException e) {
-            logger.severe("Database error deleting point: " + e.getMessage());
-            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete point");
+            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
         }
     }
 
-    private FunctionEntity mapToEntity(manual.dto.FunctionResponse response) {
-        FunctionEntity entity = new FunctionEntity();
-        entity.setFunctionId(response.getFunctionId());
-        entity.setFunctionName(response.getFunctionName());
-        entity.setFunctionType(response.getFunctionType());
-        entity.setFunctionExpression(response.getFunctionExpression());
-        entity.setXFrom(response.getXFrom());
-        entity.setXTo(response.getXTo());
-        entity.setCreatedAt(response.getCreatedAt());
-        return entity;
-    }
-
-    private static class PointService extends ApiServiceBase {
-        public PointResponse calculateFunctionValueWithCache(Long functionId, Double x) throws SQLException {
-            return super.calculateFunctionValueWithCache(functionId, x);
+    private Long extractFunctionId(String uri) {
+        String[] parts = uri.split("/");
+        for (int i = 0; i < parts.length; i++) {
+            if ("functions".equals(parts[i]) && i + 1 < parts.length) {
+                try {
+                    return Long.parseLong(parts[i + 1]);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
         }
+        return null;
     }
 }
-

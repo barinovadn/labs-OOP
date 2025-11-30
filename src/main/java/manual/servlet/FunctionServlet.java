@@ -1,16 +1,12 @@
 package manual.servlet;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-
 import manual.DatabaseConnection;
 import manual.dto.CreateFunctionRequest;
 import manual.dto.FunctionResponse;
+import manual.dto.UserResponse;
 import manual.entity.UserEntity;
 import manual.repository.FunctionRepository;
 import manual.repository.UserRepository;
-import manual.security.RoleChecker;
-import manual.security.SecurityContext;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -25,250 +21,120 @@ import java.util.List;
 public class FunctionServlet extends BaseServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         setRequestPath(request, response);
-        logger.info("GET request to FunctionServlet: " + request.getPathInfo());
-
-        SecurityContext securityContext = getSecurityContext(request);
-        if (securityContext == null || !securityContext.isAuthenticated()) {
-            logger.warning("Unauthenticated request to FunctionServlet");
-            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
-            return;
-        }
+        String pathInfo = request.getPathInfo();
+        String sort = request.getParameter("sort");
 
         try (Connection conn = DatabaseConnection.getConnection()) {
-            FunctionRepository repository = new FunctionRepository(conn);
-            String pathInfo = request.getPathInfo();
-            String sort = request.getParameter("sort");
+            FunctionRepository repo = new FunctionRepository(conn);
 
             if (pathInfo == null || pathInfo.equals("/")) {
-                if (!RoleChecker.canReadAll(securityContext)) {
-                    logger.warning("User " + securityContext.getUserId() + " attempted to list all functions without permission");
-                    sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
-                    return;
-                }
-                logger.info("User " + securityContext.getUserId() + " listing all functions");
                 List<FunctionResponse> functions;
-                if (sort == null) {
-                    functions = repository.findAll();
+                if ("name_asc".equalsIgnoreCase(sort)) {
+                    functions = repo.findAllOrderByNameAsc();
+                } else if ("name_desc".equalsIgnoreCase(sort)) {
+                    functions = repo.findAllOrderByNameDesc();
                 } else {
-                    switch (sort) {
-                        case "name_asc":
-                            functions = repository.findAllOrderByNameAsc();
-                            break;
-                        case "name_desc":
-                            functions = repository.findAllOrderByNameDesc();
-                            break;
-                        case "x_from_asc":
-                            functions = repository.findAllOrderByXFromAsc();
-                            break;
-                        case "type_name":
-                            functions = repository.findAllOrderByTypeAndName();
-                            break;
-                        default:
-                            functions = repository.findAll();
-                    }
+                    functions = repo.findAll();
                 }
                 sendSuccess(request, response, functions);
             } else {
                 Long functionId = parseIdFromPath(pathInfo);
                 if (functionId == null) {
-                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
+                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid ID");
                     return;
                 }
-
-                FunctionResponse function = repository.findById(functionId);
+                FunctionResponse function = repo.findById(functionId);
                 if (function == null) {
-                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
+                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Not found");
                 } else {
-                    if (!RoleChecker.isOwnerOrAdmin(securityContext, function.getUserId()) && 
-                        !RoleChecker.canReadAll(securityContext)) {
-                        logger.warning("User " + securityContext.getUserId() + " attempted to access function " + functionId + " without permission");
-                        sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
-                        return;
-                    }
-                    logger.info("User " + securityContext.getUserId() + " accessing function " + functionId);
                     sendSuccess(request, response, function);
                 }
             }
         } catch (SQLException e) {
-            logger.severe("Database error in FunctionServlet: " + e.getMessage());
-            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
+            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error");
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         setRequestPath(request, response);
-        logger.info("POST request to FunctionServlet");
-
-        SecurityContext securityContext = getSecurityContext(request);
-        if (securityContext == null || !securityContext.isAuthenticated()) {
-            logger.warning("Unauthenticated request to create function");
-            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
-            return;
-        }
-
         try {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            try (BufferedReader reader = request.getReader()) {
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-            }
-            
-            String jsonBody = sb.toString();
-            logger.info("Received JSON: " + jsonBody);
-            
-            CreateFunctionRequest createRequest = objectMapper.readValue(jsonBody, CreateFunctionRequest.class);
-            Long userId = createRequest.getUserId();
-            
+            CreateFunctionRequest req = parseJsonRequest(request, CreateFunctionRequest.class);
+            Long userId = req.getUserId();
             if (userId == null) {
-                userId = securityContext.getUserId();
-                createRequest.setUserId(userId);
-            }
-
-            if (!securityContext.getUserId().equals(userId) && !RoleChecker.canWriteAll(securityContext)) {
-                logger.warning("User " + securityContext.getUserId() + " attempted to create function for user " + userId + " without permission");
-                sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
+                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "User ID required");
                 return;
             }
-
-            logger.info("User " + securityContext.getUserId() + " creating function for user " + userId);
-
             try (Connection conn = DatabaseConnection.getConnection()) {
                 UserRepository userRepo = new UserRepository(conn);
-                manual.dto.UserResponse userResponse = userRepo.findById(userId);
-                if (userResponse == null) {
+                UserResponse userResp = userRepo.findById(userId);
+                if (userResp == null) {
                     sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "User not found");
                     return;
                 }
-                
-                FunctionRepository repository = new FunctionRepository(conn);
-                FunctionResponse function = repository.create(createRequest, mapToEntity(userResponse));
-                
+                UserEntity user = new UserEntity();
+                user.setUserId(userResp.getUserId());
+                FunctionRepository repo = new FunctionRepository(conn);
+                FunctionResponse function = repo.create(req, user);
                 response.setStatus(HttpServletResponse.SC_CREATED);
                 sendSuccess(request, response, function);
-                
-            } catch (SQLException e) {
-                logger.severe("Database error creating function: " + e.getMessage());
-                sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to create function");
             }
+        } catch (SQLException e) {
+            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error");
         } catch (IOException e) {
-            logger.severe("Error parsing request: " + e.getMessage());
-            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid request body");
+            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid");
         }
     }
 
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         setRequestPath(request, response);
-        logger.info("PUT request to FunctionServlet: " + request.getPathInfo());
-
-        SecurityContext securityContext = getSecurityContext(request);
-        if (securityContext == null || !securityContext.isAuthenticated()) {
-            logger.warning("Unauthenticated request to update function");
-            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
+        Long functionId = parseIdFromPath(request.getPathInfo());
+        if (functionId == null) {
+            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid ID");
             return;
         }
-
         try {
-            Long functionId = parseIdFromPath(request.getPathInfo());
-            if (functionId == null) {
-                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
-                return;
-            }
-
+            CreateFunctionRequest req = parseJsonRequest(request, CreateFunctionRequest.class);
             try (Connection conn = DatabaseConnection.getConnection()) {
-                FunctionRepository repository = new FunctionRepository(conn);
-                FunctionResponse existingFunction = repository.findById(functionId);
-                if (existingFunction == null) {
-                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
-                    return;
-                }
-
-                if (!RoleChecker.isOwnerOrAdmin(securityContext, existingFunction.getUserId())) {
-                    logger.warning("User " + securityContext.getUserId() + " attempted to update function " + functionId + " without permission");
-                    sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
-                    return;
-                }
-
-                CreateFunctionRequest updateRequest = parseJsonRequest(request, CreateFunctionRequest.class);
-                logger.info("User " + securityContext.getUserId() + " updating function " + functionId);
-                
-                FunctionResponse function = repository.update(functionId, updateRequest);
+                FunctionRepository repo = new FunctionRepository(conn);
+                FunctionResponse function = repo.update(functionId, req);
                 if (function == null) {
-                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
+                    sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Not found");
                 } else {
                     sendSuccess(request, response, function);
                 }
-            } catch (SQLException e) {
-                logger.severe("Database error updating function: " + e.getMessage());
-                sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to update function");
             }
+        } catch (SQLException e) {
+            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error");
         } catch (IOException e) {
-            logger.severe("Error parsing request: " + e.getMessage());
-            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid request body");
+            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid");
         }
     }
 
     @Override
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response) 
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         setRequestPath(request, response);
-        logger.info("DELETE request to FunctionServlet: " + request.getPathInfo());
-
-        SecurityContext securityContext = getSecurityContext(request);
-        if (securityContext == null || !securityContext.isAuthenticated()) {
-            logger.warning("Unauthenticated request to delete function");
-            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
-            return;
-        }
-
         Long functionId = parseIdFromPath(request.getPathInfo());
         if (functionId == null) {
-            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid function ID");
+            sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid ID");
             return;
         }
-
         try (Connection conn = DatabaseConnection.getConnection()) {
-            FunctionRepository repository = new FunctionRepository(conn);
-            FunctionResponse function = repository.findById(functionId);
-            if (function == null) {
-                sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
-                return;
-            }
-
-            if (!RoleChecker.isOwnerOrAdmin(securityContext, function.getUserId())) {
-                logger.warning("User " + securityContext.getUserId() + " attempted to delete function " + functionId + " without permission");
-                sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Insufficient permissions");
-                return;
-            }
-
-            logger.info("User " + securityContext.getUserId() + " deleting function " + functionId);
-            boolean deleted = repository.delete(functionId);
-            if (deleted) {
+            FunctionRepository repo = new FunctionRepository(conn);
+            if (repo.delete(functionId)) {
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             } else {
-                sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Function not found");
+                sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Not found");
             }
         } catch (SQLException e) {
-            logger.severe("Database error deleting function: " + e.getMessage());
-            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to delete function");
+            sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error");
         }
     }
-
-    private UserEntity mapToEntity(manual.dto.UserResponse response) {
-    UserEntity entity = new UserEntity();
-    entity.setUserId(response.getUserId());
-    entity.setUsername(response.getUsername());
-    entity.setEmail(response.getEmail());
-    entity.setCreatedAt(response.getCreatedAt());
-    return entity;
 }
-}
-

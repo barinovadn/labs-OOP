@@ -1,0 +1,1 @@
+DELETE FROM computed_points WHERE point_id = ?;
