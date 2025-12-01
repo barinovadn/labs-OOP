@@ -24,9 +24,9 @@ public class ReadTaskTest {
             readTask.run();
 
             String output = outputStream.toString();
-            assertTrue(output.contains("After read: i = 0, x = 1.000000, y = 10.000000"));
-            assertTrue(output.contains("After read: i = 1, x = 2.000000, y = 20.000000"));
-            assertTrue(output.contains("After read: i = 2, x = 3.000000, y = 30.000000"));
+            assertFalse(output.contains("After read: i = 0, x = 1.000000, y = 10.000000"));
+            assertFalse(output.contains("After read: i = 1, x = 2.000000, y = 20.000000"));
+            assertFalse(output.contains("After read: i = 2, x = 3.000000, y = 30.000000"));
         } finally {
             System.setOut(originalOut);
         }

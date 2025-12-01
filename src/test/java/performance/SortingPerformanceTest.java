@@ -14,7 +14,7 @@ public class SortingPerformanceTest {
     @BeforeEach
     void setup() throws SQLException {
         connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/lab5_oop",
+                "jdbc:postgresql://localhost:5432/labs_oop",
                 "postgres",
                 "admin"
         );
