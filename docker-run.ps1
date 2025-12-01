@@ -8,7 +8,30 @@ Write-Host "Building and starting containers..." -ForegroundColor Yellow
 docker-compose up --build -d --force-recreate
 
 Write-Host "Waiting for application to start..." -ForegroundColor Yellow
-Start-Sleep -Seconds 15
+Write-Host "Waiting for application to be healthy..." -ForegroundColor Yellow
+
+# Wait for container to be healthy
+$maxAttempts = 30
+$attempt = 0
+$isHealthy = $false
+
+while ($attempt -lt $maxAttempts -and -not $isHealthy) {
+    $attempt++
+    Start-Sleep -Seconds 2
+    
+    $health = docker inspect --format='{{.State.Health.Status}}' labs-oop-app 2>$null
+    
+    if ($health -eq "healthy") {
+        $isHealthy = $true
+        Write-Host "Application is healthy!" -ForegroundColor Green
+    } else {
+        Write-Host "Attempt $attempt/$maxAttempts - Status: $health" -ForegroundColor Yellow
+    }
+}
+
+if (-not $isHealthy) {
+    Write-Host "Warning: Application did not become healthy in time" -ForegroundColor Red
+}
 
 Write-Host "`nContainer status:" -ForegroundColor Green
 docker-compose ps
@@ -18,4 +41,4 @@ docker-compose logs --tail=20 app
 
 Write-Host "`nTo view all logs, run: docker-compose logs -f app" -ForegroundColor Cyan
 Write-Host "To stop containers, run: docker-compose down" -ForegroundColor Cyan
-Write-Host "`nApplication should be available at: http://localhost:8080" -ForegroundColor Green
+Write-Host "`nApplication should be available at: http://localhost:8080/labs-oop" -ForegroundColor Green
