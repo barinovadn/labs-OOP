@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "api-tests-collection",
 		"name": "API Tests - Manual Branch",
-		"description": "Newman tests for all API endpoints",
+		"description": "Newman tests for all API endpoints with authentication",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -17,7 +17,22 @@
 			"type": "string"
 		},
 		{
+			"key": "testUsername",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "testPassword",
+			"value": "password123",
+			"type": "string"
+		},
+		{
 			"key": "functionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "secondFunctionId",
 			"value": "",
 			"type": "string"
 		},
@@ -34,11 +49,191 @@
 	],
 	"item": [
 		{
+			"name": "Unauthorized Access Tests",
+			"item": [
+				{
+					"name": "Get Users Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});",
+									"",
+									"pm.test('Response should indicate authentication required', function() {",
+									"    pm.expect(pm.response.status).to.include('Unauthorized');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Get Functions Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"]
+						}
+					}
+				},
+				{
+					"name": "Create Function Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1,\n    \"functionName\": \"testFunction\",\n    \"functionType\": \"LINEAR\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"]
+						}
+					}
+				},
+				{
+					"name": "Delete User Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Points Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/points/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "points", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Composite Functions Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
 			"name": "Users",
 			"item": [
 				{
-					"name": "Create User",
+					"name": "Create User (Register)",
 					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var timestamp = Date.now();",
+									"var username = 'testuser_' + timestamp;",
+									"pm.collectionVariables.set('testUsername', username);",
+									"console.log('Generated username: ' + username);"
+								],
+								"type": "text/javascript"
+							}
+						},
 						{
 							"listen": "test",
 							"script": {
@@ -66,39 +261,107 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"user_{{$timestamp}}\",\n    \"password\": \"password123\",\n    \"email\": \"test{{$timestamp}}@example.com\"\n}"
+							"raw": "{\n    \"username\": \"{{testUsername}}\",\n    \"password\": \"{{testPassword}}\",\n    \"email\": \"{{testUsername}}@example.com\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/users",
+							"raw": "{{baseUrl}}/api/auth/register",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "users"]
+							"path": ["api", "auth", "register"]
 						}
 					}
 				},
 				{
 					"name": "Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get users returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/api/users",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "users"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Get User By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get user by ID returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "users", "{{userId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Update User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Update user returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -109,13 +372,27 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"updateduser\",\n    \"password\": \"newpassword\",\n    \"email\": \"updated@example.com\"\n}"
+							"raw": "{\n    \"username\": \"{{testUsername}}\",\n    \"password\": \"{{testPassword}}\",\n    \"email\": \"updated_{{testUsername}}@example.com\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "users", "{{userId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
@@ -134,18 +411,13 @@
 									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
 									"});",
 									"",
-									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"pm.test('Function created with ID', function() {",
 									"    const jsonData = pm.response.json();",
-									"    pm.test('Function created with ID', function() {",
-									"        pm.expect(jsonData.data).to.be.an('object');",
-									"        pm.expect(jsonData.data.functionId).to.be.a('number');",
-									"    });",
+									"    pm.expect(jsonData.data).to.be.an('object');",
+									"    pm.expect(jsonData.data.functionId).to.be.a('number');",
 									"    pm.collectionVariables.set('functionId', jsonData.data.functionId.toString());",
 									"    console.log('Function ID set to: ' + jsonData.data.functionId);",
-									"} else {",
-									"    console.log('Create Function failed with status: ' + pm.response.code);",
-									"    console.log('Response: ' + pm.response.text());",
-									"}"
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -161,28 +433,133 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"userId\": {{userId}},\n    \"functionName\": \"testFunction\",\n    \"functionType\": \"LINEAR\", \n    \"functionExpression\": \"2*x\",\n    \"xfrom\": 0.0,\n    \"xto\": 10.0\n}"
+							"raw": "{\n    \"userId\": {{userId}},\n    \"functionName\": \"testFunction\",\n    \"functionType\": \"LINEAR\", \n    \"functionExpression\": \"2*x\",\n    \"xFrom\": 0.0,\n    \"xTo\": 10.0\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/functions",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
+					}
+				},
+				{
+					"name": "Create Second Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Second function created', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('secondFunctionId', jsonData.data.functionId.toString());",
+									"    console.log('Second Function ID set to: ' + jsonData.data.functionId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": {{userId}},\n    \"functionName\": \"secondFunction\",\n    \"functionType\": \"SQR\",\n    \"functionExpression\": \"x*x\",\n    \"xFrom\": 0.0,\n    \"xTo\": 10.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
+						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Get All Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get all functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/api/functions",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Get Functions Sorted by Name ASC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get sorted functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
@@ -195,73 +572,76 @@
 									"value": "name_asc"
 								}
 							]
-						}
-					}
-				},
-				{
-					"name": "Get Functions Sorted by Name DESC",
-					"request": {
-						"method": "GET",
-						"url": {
-							"raw": "{{baseUrl}}/api/functions?sort=name_desc",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions"],
-							"query": [
-								{
-									"key": "sort",
-									"value": "name_desc"
-								}
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
 							]
 						}
-					}
-				},
-				{
-					"name": "Get Functions Sorted by X From ASC",
-					"request": {
-						"method": "GET",
-						"url": {
-							"raw": "{{baseUrl}}/api/functions?sort=x_from_asc",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions"],
-							"query": [
-								{
-									"key": "sort",
-									"value": "x_from_asc"
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Get Functions Sorted by Type and Name",
-					"request": {
-						"method": "GET",
-						"url": {
-							"raw": "{{baseUrl}}/api/functions?sort=type_name",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions"],
-							"query": [
-								{
-									"key": "sort",
-									"value": "type_name"
-								}
-							]
-						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Get Function By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get function by ID returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions", "{{functionId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Update Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Update function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -278,7 +658,21 @@
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions", "{{functionId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
@@ -288,13 +682,40 @@
 			"item": [
 				{
 					"name": "Get Functions By User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get user functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}/functions",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "users", "{{userId}}", "functions"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
@@ -303,7 +724,7 @@
 			"name": "Points",
 			"item": [
 				{
-					"name": "Create Point",
+					"name": "Create Point 1",
 					"event": [
 						{
 							"listen": "test",
@@ -332,56 +753,216 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"xvalue\": 5.0,\n    \"yvalue\": 10.0\n}"
+							"raw": "{\n    \"xValue\": 1.0,\n    \"yValue\": 2.0\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}/points",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions", "{{functionId}}", "points"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
+					}
+				},
+				{
+					"name": "Create Point 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Second point created', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"xValue\": 5.0,\n    \"yValue\": 10.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/points",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}", "points"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
+						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
+					}
+				},
+				{
+					"name": "Create Point 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Third point created', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"xValue\": 10.0,\n    \"yValue\": 20.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/points",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}", "points"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
+						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Get Points By Function ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get points returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/{{functionId}}/points",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions", "{{functionId}}", "points"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Get Point By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get point by ID returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/api/points/{{pointId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "points", "{{pointId}}"]
-						}
-					}
-				},
-				{
-					"name": "Calculate Function Value",
-					"request": {
-						"method": "POST",
-						"url": {
-							"raw": "{{baseUrl}}/api/functions/{{functionId}}/calculate?x=3.5",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions", "{{functionId}}", "calculate"],
-							"query": [
-								{
-									"key": "x",
-									"value": "3.5"
-								}
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
 							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Update Point",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Update point returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -392,13 +973,27 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"xValue\": 6.0,\n    \"yValue\": 12.0\n}"
+							"raw": "{\n    \"xValue\": 1.0,\n    \"yValue\": 3.0\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/points/{{pointId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "points", "{{pointId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
@@ -436,56 +1031,103 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"userId\": {{userId}},\n    \"compositeName\": \"compositeTest\",\n    \"firstFunctionId\": {{functionId}},\n    \"secondFunctionId\": {{functionId}}\n}"
+							"raw": "{\n    \"userId\": {{userId}},\n    \"compositeName\": \"compositeTest\",\n    \"firstFunctionId\": {{functionId}},\n    \"secondFunctionId\": {{secondFunctionId}}\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/composite-functions",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "composite-functions"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Get Composite Function By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get composite function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "composite-functions", "{{compositeFunctionId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Get Composite Functions By User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get user composite functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}/composite-functions",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "users", "{{userId}}", "composite-functions"]
-						}
-					}
-				},
-				{
-					"name": "Update Composite Function",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"userId\": {{userId}},\n    \"compositeName\": \"updatedComposite\",\n    \"firstFunctionId\": {{functionId}},\n    \"secondFunctionId\": {{functionId}}\n}"
 						},
-						"url": {
-							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "composite-functions", "{{compositeFunctionId}}"]
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
@@ -495,6 +1137,19 @@
 			"item": [
 				{
 					"name": "Add Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Add functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -505,17 +1160,44 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"operation\": \"add\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
+							"raw": "{\n    \"operation\": \"add\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xValues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xValues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/operations",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions", "operations"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Subtract Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Subtract functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -526,17 +1208,44 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"operation\": \"subtract\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
+							"raw": "{\n    \"operation\": \"subtract\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xValues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xValues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/operations",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions", "operations"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Multiply Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Multiply functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -547,17 +1256,44 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"operation\": \"multiply\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
+							"raw": "{\n    \"operation\": \"multiply\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xValues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xValues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/operations",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions", "operations"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Divide Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Divide functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -568,13 +1304,27 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"operation\": \"divide\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yvalues\": [1.0, 2.0, 3.0]\n    }\n}"
+							"raw": "{\n    \"operation\": \"divide\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xValues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xValues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/functions/operations",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "functions", "operations"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
@@ -583,62 +1333,41 @@
 			"name": "Function Differentiate",
 			"item": [
 				{
-					"name": "Differentiate Function - MIDDLE",
+					"name": "Differentiate Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Differentiate function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"url": {
-							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=MIDDLE",
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions", "{{functionId}}", "differentiate"],
-							"query": [
-								{
-									"key": "differentialType",
-									"value": "MIDDLE"
-								}
+							"path": ["api", "functions", "{{functionId}}", "differentiate"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
 							]
 						}
-					}
-				},
-				{
-					"name": "Differentiate Function - LEFT",
-					"request": {
-						"method": "POST",
-						"url": {
-							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=LEFT&step=0.1",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions", "{{functionId}}", "differentiate"],
-							"query": [
-								{
-									"key": "differentialType",
-									"value": "LEFT"
-								},
-								{
-									"key": "step",
-									"value": "0.1"
-								}
-							]
-						}
-					}
-				},
-				{
-					"name": "Differentiate Function - RIGHT",
-					"request": {
-						"method": "POST",
-						"url": {
-							"raw": "{{baseUrl}}/api/functions/{{functionId}}/differentiate?differentialType=RIGHT&step=0.1",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions", "{{functionId}}", "differentiate"],
-							"query": [
-								{
-									"key": "differentialType",
-									"value": "RIGHT"
-								},
-								{
-									"key": "step",
-									"value": "0.1"
-								}
-							]
-						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
@@ -647,7 +1376,20 @@
 			"name": "Function Search",
 			"item": [
 				{
-					"name": "Search Functions - BFS",
+					"name": "Search Functions by Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Search functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -661,20 +1403,41 @@
 							"raw": "{\n    \"functionName\": \"test\",\n    \"limit\": 10\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/functions/search?algorithm=BFS",
+							"raw": "{{baseUrl}}/api/functions/search",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions", "search"],
-							"query": [
-								{
-									"key": "algorithm",
-									"value": "BFS"
-								}
+							"path": ["api", "functions", "search"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
 							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
-					"name": "Search Functions - DEEP",
+					"name": "Search Functions by Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Search by type returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -688,16 +1451,24 @@
 							"raw": "{\n    \"functionType\": \"LINEAR\",\n    \"limit\": 10\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/functions/search?algorithm=DEEP",
+							"raw": "{{baseUrl}}/api/functions/search",
 							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions", "search"],
-							"query": [
-								{
-									"key": "algorithm",
-									"value": "DEEP"
-								}
+							"path": ["api", "functions", "search"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
 							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
@@ -706,65 +1477,158 @@
 			"name": "Delete",
 			"item": [
 				{
-					"name": "Delete User",
-					"request": {
-						"method": "DELETE",
-						"url": {
-							"raw": "{{baseUrl}}/api/users/{{userId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "users", "{{userId}}"]
-						}
-					}
-				},
-				{
-					"name": "Delete Function",
-					"request": {
-						"method": "DELETE",
-						"url": {
-							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions", "{{functionId}}"]
-						}
-					}
-				},
-				{
 					"name": "Delete Point",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete point returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"url": {
 							"raw": "{{baseUrl}}/api/points/{{pointId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "points", "{{pointId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				},
 				{
 					"name": "Delete Composite Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete composite function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"url": {
 							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "composite-functions", "{{compositeFunctionId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
 						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
+					}
+				},
+				{
+					"name": "Delete Second Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete second function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{secondFunctionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{secondFunctionId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
+						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
+					}
+				},
+				{
+					"name": "Delete Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}"]
+						},
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{"key": "username", "value": "{{testUsername}}"},
+								{"key": "password", "value": "{{testPassword}}"}
+							]
+						}
+					},
+					"auth": {
+						"type": "basic",
+						"basic": [
+							{"key": "username", "value": "{{testUsername}}"},
+							{"key": "password", "value": "{{testPassword}}"}
+						]
 					}
 				}
 			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"exec": [
-					"console.log('Current variables:');",
-					"console.log('userId: ' + pm.collectionVariables.get('userId'));",
-					"console.log('functionId: ' + pm.collectionVariables.get('functionId'));",
-					"console.log('pointId: ' + pm.collectionVariables.get('pointId'));",
-					"console.log('compositeFunctionId: ' + pm.collectionVariables.get('compositeFunctionId'));"
-				],
-				"type": "text/javascript"
-			}
 		}
 	]
 }

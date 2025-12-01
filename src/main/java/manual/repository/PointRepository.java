@@ -54,6 +54,16 @@ public class PointRepository {
             throw e;
         }
     }
+    
+    public PointResponse create(CreatePointRequest request) throws SQLException {
+        Long functionId = request.getFunctionId();
+        if (functionId == null) {
+            throw new SQLException("Function ID is required");
+        }
+        FunctionEntity function = new FunctionEntity();
+        function.setFunctionId(functionId);
+        return create(request, function);
+    }
 
     public PointResponse findById(Long pointId) throws SQLException {
         logger.finest("Finding point by ID: " + pointId);

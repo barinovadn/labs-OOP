@@ -1,5 +1,6 @@
 package manual.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 public class FunctionResponse {
@@ -8,8 +9,13 @@ public class FunctionResponse {
     private String functionName;
     private String functionType;
     private String functionExpression;
+    
+    @JsonProperty("xFrom")
     private Double xFrom;
+    
+    @JsonProperty("xTo")
     private Double xTo;
+    
     private LocalDateTime createdAt;
 
     public FunctionResponse() {}

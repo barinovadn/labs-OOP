@@ -1,11 +1,17 @@
 package manual.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CreateFunctionRequest {
     private Long userId;
     private String functionName;
     private String functionType;
     private String functionExpression;
+    
+    @JsonProperty("xFrom")
     private Double xFrom;
+    
+    @JsonProperty("xTo")
     private Double xTo;
 
     public CreateFunctionRequest() {}

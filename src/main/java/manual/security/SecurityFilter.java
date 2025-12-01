@@ -113,10 +113,11 @@ public class SecurityFilter implements Filter {
     }
 
     private boolean isPublicEndpoint(String path, String method) {
-        if (method.equals("POST") && path.equals("/api/auth/register")) {
+        // Use endsWith to handle context path (e.g., /labs-oop/api/auth/register)
+        if (method.equals("POST") && path.endsWith("/api/auth/register")) {
             return true;
         }
-        if (method.equals("POST") && path.equals("/api/users")) {
+        if (method.equals("POST") && path.endsWith("/api/users")) {
             return true;
         }
         if (method.equals("OPTIONS")) {

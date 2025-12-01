@@ -219,5 +219,144 @@ class SecurityFullTest {
         when(response.getWriter()).thenReturn(pw);
         filter.doFilter(request, response, chain);
     }
+
+    @Test
+    void testSecurityFilterWithRealUser() throws Exception {
+        long ts = System.currentTimeMillis();
+        String username = "sectest" + ts;
+        String password = "pass" + ts;
+        Long userId;
+        
+        try (java.sql.Connection conn = manual.DatabaseConnection.getConnection()) {
+            manual.repository.UserRepository userRepo = new manual.repository.UserRepository(conn);
+            manual.dto.CreateUserRequest req = new manual.dto.CreateUserRequest();
+            req.setUsername(username);
+            req.setPassword(password);
+            req.setEmail("sec" + ts + "@test.com");
+            manual.dto.UserResponse resp = userRepo.create(req);
+            userId = resp.getUserId();
+            
+            manual.repository.RoleRepository roleRepo = new manual.repository.RoleRepository(conn);
+            roleRepo.assignRoleToUser(userId, "USER");
+        }
+
+        SecurityFilter filter = new SecurityFilter();
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+
+        when(request.getRequestURI()).thenReturn("/api/functions");
+        when(request.getMethod()).thenReturn("GET");
+        String creds = java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+        when(request.getHeader("Authorization")).thenReturn("Basic " + creds);
+        lenient().when(response.getWriter()).thenReturn(pw);
+        filter.doFilter(request, response, chain);
+        verify(chain).doFilter(request, response);
+    }
+
+    @Test
+    void testSecurityFilterUserWithNoRoles() throws Exception {
+        long ts = System.currentTimeMillis();
+        String username = "noroles" + ts;
+        String password = "pass" + ts;
+        
+        try (java.sql.Connection conn = manual.DatabaseConnection.getConnection()) {
+            manual.repository.UserRepository userRepo = new manual.repository.UserRepository(conn);
+            manual.dto.CreateUserRequest req = new manual.dto.CreateUserRequest();
+            req.setUsername(username);
+            req.setPassword(password);
+            req.setEmail("noroles" + ts + "@test.com");
+            userRepo.create(req);
+        }
+
+        SecurityFilter filter = new SecurityFilter();
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+
+        when(request.getRequestURI()).thenReturn("/api/functions");
+        when(request.getMethod()).thenReturn("GET");
+        String creds = java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+        when(request.getHeader("Authorization")).thenReturn("Basic " + creds);
+        when(response.getWriter()).thenReturn(pw);
+        filter.doFilter(request, response, chain);
+        verify(response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+    }
+
+    @Test
+    void testCustomUserDetailsAllMethods() {
+        UserEntity user = new UserEntity("test", "pass", "test@test.com");
+        user.setUserId(1L);
+        List<Role> roles = Arrays.asList(Role.USER, Role.OPERATOR);
+        CustomUserDetails details = new CustomUserDetails(user, roles);
+
+        assertEquals(user, details.getUserEntity());
+        assertEquals(1L, details.getUserId());
+        assertEquals("test", details.getUsername());
+        assertEquals("pass", details.getPassword());
+        assertEquals("test@test.com", details.getEmail());
+        assertEquals(roles, details.getRoles());
+        assertTrue(details.hasRole(Role.USER));
+        assertFalse(details.hasRole(Role.ADMIN));
+        assertTrue(details.hasAnyRole(Role.ADMIN, Role.USER));
+        assertFalse(details.hasAnyRole(Role.ADMIN));
+        assertTrue(details.isAccountNonExpired());
+        assertTrue(details.isAccountNonLocked());
+        assertTrue(details.isCredentialsNonExpired());
+        assertTrue(details.isEnabled());
+        assertNotNull(details.getAuthorities());
+        assertNotNull(details.toString());
+
+        CustomUserDetails same = new CustomUserDetails(user, roles);
+        assertEquals(details, same);
+        assertEquals(details.hashCode(), same.hashCode());
+
+        UserEntity user2 = new UserEntity("other", "pass", "other@test.com");
+        user2.setUserId(2L);
+        CustomUserDetails different = new CustomUserDetails(user2, roles);
+        assertNotEquals(details, different);
+
+        assertNotEquals(details, null);
+        assertNotEquals(details, "string");
+        assertEquals(details, details);
+
+        CustomUserDetails nullUser = new CustomUserDetails(null, roles);
+        assertNull(nullUser.getUserId());
+        assertNull(nullUser.getUsername());
+        assertNull(nullUser.getPassword());
+        assertNull(nullUser.getEmail());
+        assertNull(nullUser.getUserEntity());
+
+        CustomUserDetails nullRoles = new CustomUserDetails(user, null);
+        assertFalse(nullRoles.hasRole(Role.USER));
+        assertFalse(nullRoles.hasAnyRole(Role.USER));
+        assertFalse(nullRoles.hasAnyRole());
+        assertNotNull(nullRoles.getRoles());
+
+        CustomUserDetails nullBoth = new CustomUserDetails(null, null);
+        assertNotEquals(nullBoth, details);
+        assertNotEquals(details, nullBoth);
+    }
+
+    @Test
+    void testSecurityContextGetUsername() {
+        UserEntity user = new UserEntity("testuser", "pass", "test@test.com");
+        user.setUserId(1L);
+        SecurityContext ctx = new SecurityContext(user, Arrays.asList(Role.USER));
+        assertEquals("testuser", ctx.getUsername());
+        assertNotNull(ctx.getUserDetails());
+
+        SecurityContext nullCtx = new SecurityContext(null, null);
+        assertNull(nullCtx.getUsername());
+    }
+
+    @Test
+    void testSecurityContextHasAnyRole() {
+        UserEntity user = new UserEntity("test", "pass", "test@test.com");
+        user.setUserId(1L);
+        SecurityContext ctx = new SecurityContext(user, Arrays.asList(Role.USER, Role.OPERATOR));
+        assertTrue(ctx.hasAnyRole(Role.USER));
+        assertTrue(ctx.hasAnyRole(Role.ADMIN, Role.USER));
+        assertFalse(ctx.hasAnyRole(Role.ADMIN));
+        assertFalse(ctx.hasAnyRole());
+    }
 }
 

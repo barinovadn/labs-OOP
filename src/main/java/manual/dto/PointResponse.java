@@ -1,12 +1,18 @@
 package manual.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 
 public class PointResponse {
     private Long pointId;
     private Long functionId;
+    
+    @JsonProperty("xValue")
     private Double xValue;
+    
+    @JsonProperty("yValue")
     private Double yValue;
+    
     private LocalDateTime computedAt;
 
     public PointResponse() {}

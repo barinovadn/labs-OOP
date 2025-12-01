@@ -1,13 +1,23 @@
 package manual.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Arrays;
 
 public class TabulatedFunctionRequest {
     private String type; // "ARRAY"/ "LINKED_LIST"
+    
+    @JsonProperty("xValues")
     private double[] xValues;
+    
+    @JsonProperty("yValues")
     private double[] yValues;
+    
+    @JsonProperty("xFrom")
     private Double xFrom;
+    
+    @JsonProperty("xTo")
     private Double xTo;
+    
     private Integer pointsCount;
     private String mathFunctionType; // "SQR"/ "IDENTITY"/ "CONSTANT"/ "UNIT"/ "ZERO"
     private Double constantValue;

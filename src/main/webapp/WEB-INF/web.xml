@@ -8,6 +8,16 @@
     <description>University OOP laboratory assignments</description>
     <absolute-ordering />
 
+    <!-- Auth Servlet -->
+    <servlet>
+        <servlet-name>AuthServlet</servlet-name>
+        <servlet-class>manual.servlet.AuthServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AuthServlet</servlet-name>
+        <url-pattern>/api/auth/*</url-pattern>
+    </servlet-mapping>
+
     <!-- User Role Servlet -->
     <servlet>
         <servlet-name>UserRoleServlet</servlet-name>
@@ -26,6 +36,26 @@
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
         <url-pattern>/api/users/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- User Function Servlet -->
+    <servlet>
+        <servlet-name>UserFunctionServlet</servlet-name>
+        <servlet-class>manual.servlet.UserFunctionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserFunctionServlet</servlet-name>
+        <url-pattern>/api/users/*/functions</url-pattern>
+    </servlet-mapping>
+
+    <!-- User Composite Function Servlet -->
+    <servlet>
+        <servlet-name>UserCompositeFunctionServlet</servlet-name>
+        <servlet-class>manual.servlet.UserCompositeFunctionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserCompositeFunctionServlet</servlet-name>
+        <url-pattern>/api/users/*/composite-functions</url-pattern>
     </servlet-mapping>
 
     <!-- Point Servlet -->

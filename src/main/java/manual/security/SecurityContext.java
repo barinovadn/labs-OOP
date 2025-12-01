@@ -4,32 +4,42 @@ import manual.entity.UserEntity;
 import java.util.List;
 
 public class SecurityContext {
-    private UserEntity user;
-    private List<Role> roles;
+    private final CustomUserDetails userDetails;
 
     public SecurityContext(UserEntity user, List<Role> roles) {
-        this.user = user;
-        this.roles = roles;
+        this.userDetails = new CustomUserDetails(user, roles);
     }
 
     public UserEntity getUser() {
-        return user;
+        return userDetails.getUserEntity();
     }
 
     public List<Role> getRoles() {
-        return roles;
+        return userDetails.getRoles();
     }
 
     public boolean hasRole(Role role) {
-        return roles != null && roles.contains(role);
+        return userDetails.hasRole(role);
+    }
+
+    public boolean hasAnyRole(Role... roles) {
+        return userDetails.hasAnyRole(roles);
     }
 
     public boolean isAuthenticated() {
-        return user != null;
+        return userDetails.getUserEntity() != null;
     }
 
     public Long getUserId() {
-        return user != null ? user.getUserId() : null;
+        return userDetails.getUserId();
+    }
+
+    public CustomUserDetails getUserDetails() {
+        return userDetails;
+    }
+
+    public String getUsername() {
+        return userDetails.getUsername();
     }
 }
 
