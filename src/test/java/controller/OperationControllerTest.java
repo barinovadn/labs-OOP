@@ -123,7 +123,6 @@ public class OperationControllerTest {
         request.setFunctionAId(1L);
         request.setFunctionBId(1L);
 
-        // Create points with non-zero y values for division
         List<PointEntity> nonZeroPoints = new ArrayList<>();
         PointEntity p1 = new PointEntity(testFunction, 0.0, 1.0);
         p1.setPointId(1L);
@@ -185,7 +184,6 @@ public class OperationControllerTest {
         request.setFunctionAId(1L);
         request.setFunctionBId(1L);
 
-        // Only one point
         List<PointEntity> singlePoint = Arrays.asList(testPoints.get(0));
 
         when(functionRepository.findById(1L)).thenReturn(Optional.of(testFunction));

@@ -732,15 +732,12 @@ public class ControllerTest {
     @Test
     void testCompositeFunctionControllerBasicOperations() {
         CompositeFunctionController compositeController = new CompositeFunctionController();
-        // Controller would need @Autowired injection in real test
-        // This tests the class exists and can be instantiated
         assertNotNull(compositeController);
     }
 
     @Test
     void testOperationControllerBasicOperations() {
         OperationController operationController = new OperationController();
-        // Controller would need @Autowired injection in real test
         assertNotNull(operationController);
     }
 }

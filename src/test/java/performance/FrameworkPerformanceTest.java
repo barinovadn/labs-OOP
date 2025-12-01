@@ -21,22 +21,21 @@ public class FrameworkPerformanceTest {
 
     @BeforeEach
     void cleanupBeforeEachTest() throws SQLException {
-        Connection cleanupConn = getConnection();
-        Statement stmt = cleanupConn.createStatement();
-        stmt.execute("DELETE FROM computed_points");
-        stmt.execute("DELETE FROM composite_functions");
-        stmt.execute("DELETE FROM functions");
-        stmt.execute("DELETE FROM users");
-        stmt.close();
-        cleanupConn.close();
+        cleanupDatabase();
     }
 
-    @Test
-    @Order(1)
-    void testCreatePerformance() throws SQLException {
-        Connection connection = getConnection();
-        long startTime = System.currentTimeMillis();
+    private void cleanupDatabase() throws SQLException {
+        try (Connection cleanupConn = getConnection();
+             Statement stmt = cleanupConn.createStatement()) {
+            cleanupConn.setAutoCommit(true);
+            stmt.execute("DELETE FROM computed_points");
+            stmt.execute("DELETE FROM composite_functions");
+            stmt.execute("DELETE FROM functions");
+            stmt.execute("DELETE FROM users");
+        }
+    }
 
+    private void createTestUsers(Connection connection) throws SQLException {
         String userSql = "INSERT INTO users (username, password, email, created_at) VALUES (?, ?, ?, ?)";
         PreparedStatement userStmt = connection.prepareStatement(userSql);
         for (int i = 0; i < OPERATION_COUNT; i++) {
@@ -49,6 +48,15 @@ public class FrameworkPerformanceTest {
         }
         userStmt.executeBatch();
         userStmt.close();
+    }
+
+    @Test
+    @Order(1)
+    void testCreatePerformance() throws SQLException {
+        Connection connection = getConnection();
+        long startTime = System.currentTimeMillis();
+
+        createTestUsers(connection);
 
         long time = System.currentTimeMillis() - startTime;
         System.out.println("Framework CREATE: " + time + "ms (10000 operations)");
@@ -59,9 +67,8 @@ public class FrameworkPerformanceTest {
     @Test
     @Order(2)
     void testReadPerformance() throws SQLException {
-        testCreatePerformance();
-
         Connection connection = getConnection();
+        createTestUsers(connection);
         long startTime = System.currentTimeMillis();
 
         String userSql = "SELECT * FROM users WHERE user_id = ?";
@@ -83,9 +90,8 @@ public class FrameworkPerformanceTest {
     @Test
     @Order(3)
     void testUpdatePerformance() throws SQLException {
-        testCreatePerformance();
-
         Connection connection = getConnection();
+        createTestUsers(connection);
         long startTime = System.currentTimeMillis();
 
         String userSql = "UPDATE users SET password = ? WHERE user_id = ?";
@@ -108,9 +114,8 @@ public class FrameworkPerformanceTest {
     @Test
     @Order(4)
     void testSearchPerformance() throws SQLException {
-        testCreatePerformance();
-
         Connection connection = getConnection();
+        createTestUsers(connection);
         long startTime = System.currentTimeMillis();
 
         String searchSql = "SELECT * FROM users WHERE username LIKE ?";
@@ -133,9 +138,8 @@ public class FrameworkPerformanceTest {
     @Test
     @Order(5)
     void testDeletePerformance() throws SQLException {
-        testCreatePerformance();
-
         Connection connection = getConnection();
+        createTestUsers(connection);
         long startTime = System.currentTimeMillis();
 
         String userSql = "DELETE FROM users WHERE user_id = ?";

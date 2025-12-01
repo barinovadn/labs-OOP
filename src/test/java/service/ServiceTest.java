@@ -158,23 +158,23 @@ public class ServiceTest {
         
         when(functionRepository.findAll()).thenReturn(Arrays.asList(testFunction, func2));
 
-        // Test sort by name
+        // by name
         List<FunctionResponse> byName = functionService.getAllFunctions("name");
         assertNotNull(byName);
         
-        // Test sort by type
+        // by type
         List<FunctionResponse> byType = functionService.getAllFunctions("type");
         assertNotNull(byType);
         
-        // Test sort by created
+        // by created
         List<FunctionResponse> byCreated = functionService.getAllFunctions("created");
         assertNotNull(byCreated);
         
-        // Test no sort
+        // no sort
         List<FunctionResponse> noSort = functionService.getAllFunctions(null);
         assertNotNull(noSort);
         
-        // Test unknown sort
+        // unknown
         List<FunctionResponse> unknownSort = functionService.getAllFunctions("unknown");
         assertNotNull(unknownSort);
     }
@@ -569,6 +569,12 @@ public class ServiceTest {
         assertEquals("testuser", userDetails.getUsername());
         assertTrue(userDetails.getAuthorities().stream()
             .anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
+        
+        assertTrue(userDetails instanceof security.CustomUserDetails);
+        security.CustomUserDetails customUserDetails = (security.CustomUserDetails) userDetails;
+        assertEquals(testUser.getUserId(), customUserDetails.getUserId());
+        assertEquals(testUser.getEmail(), customUserDetails.getEmail());
+        assertSame(testUser, customUserDetails.getUserEntity());
     }
 
     @Test
@@ -579,9 +585,14 @@ public class ServiceTest {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testuser");
 
         assertNotNull(userDetails);
-        // Should have default USER role
         assertTrue(userDetails.getAuthorities().stream()
             .anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
+        
+        assertTrue(userDetails instanceof security.CustomUserDetails);
+        assertTrue(userDetails.isAccountNonExpired());
+        assertTrue(userDetails.isAccountNonLocked());
+        assertTrue(userDetails.isCredentialsNonExpired());
+        assertTrue(userDetails.isEnabled());
     }
 
     @Test

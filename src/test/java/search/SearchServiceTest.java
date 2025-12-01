@@ -253,7 +253,7 @@ public class SearchServiceTest {
         assertEquals(10, searchResult.getTotalCount());
         assertEquals(1, searchResult.getPage());
         assertEquals(3, searchResult.getSize());
-        assertEquals(4, searchResult.getTotalPages()); // ceil(10/3) = 4
+        assertEquals(4, searchResult.getTotalPages());
     }
 
     @Test
@@ -359,14 +359,14 @@ public class SearchServiceTest {
     @Test
     void testDeepUserHierarchyAlreadyVisited() throws Exception {
         Set<Long> visited = new HashSet<>();
-        visited.add(testUser.getUserId()); // Already visited
+        visited.add(testUser.getUserId());
         List<Object> results = new ArrayList<>();
         
         invokePrivateMethod("deepUserHierarchy", 
             new Class<?>[]{UserEntity.class, String.class, Set.class, List.class},
             testUser, "testuser", visited, results);
         
-        assertTrue(results.isEmpty()); // Should not add since already visited
+        assertTrue(results.isEmpty());
     }
 
     @Test
@@ -404,7 +404,6 @@ public class SearchServiceTest {
             new Class<?>[]{FunctionEntity.class, String.class, Set.class, List.class},
             testFunction, "2.0", visited, results);
         
-        // Should find the point with x=2.0
         assertTrue(results.stream().anyMatch(r -> r instanceof PointEntity));
     }
 
@@ -475,7 +474,7 @@ public class SearchServiceTest {
             new Class<?>[]{Object.class, Queue.class, Set.class},
             testUser, queue, visited);
         
-        assertTrue(queue.isEmpty()); // All already visited
+        assertTrue(queue.isEmpty());
     }
 
     @Test
@@ -487,7 +486,7 @@ public class SearchServiceTest {
             new Class<?>[]{Object.class, Queue.class, Set.class},
             testFunction, queue, visited);
         
-        assertFalse(queue.isEmpty()); // Should add points
+        assertFalse(queue.isEmpty());
     }
 
     @Test
@@ -593,7 +592,7 @@ public class SearchServiceTest {
         when(functionRepository.findByFunctionNameContainingIgnoreCase("test"))
             .thenReturn(Arrays.asList(testFunction));
         when(functionRepository.findByFunctionTypeContainingIgnoreCase("test"))
-            .thenReturn(Arrays.asList(testFunction)); // Same function
+            .thenReturn(Arrays.asList(testFunction));
         when(functionRepository.findByFunctionExpressionContainingIgnoreCase("test"))
             .thenReturn(Collections.emptyList());
         
@@ -601,7 +600,7 @@ public class SearchServiceTest {
             new Class<?>[]{String.class}, "test");
         
         assertNotNull(result);
-        assertEquals(1, result.size()); // Should be distinct
+        assertEquals(1, result.size());
     }
 
     @Test
@@ -677,7 +676,6 @@ public class SearchServiceTest {
             new Class<?>[]{List.class, String.class, boolean.class},
             results, "username", false);
         
-        // First should be "testuser" (comes after "auser" alphabetically, but descending)
         assertEquals("testuser", ((UserEntity) results.get(0)).getUsername());
     }
 
