@@ -34,6 +34,792 @@
 	],
 	"item": [
 		{
+			"name": "Unauthorized Access Tests",
+			"item": [
+				{
+					"name": "Get Users Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});",
+									"",
+									"pm.test('Response should indicate authentication required', function() {",
+									"    pm.expect(pm.response.status).to.include('Unauthorized');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users"]
+						}
+					}
+				},
+				{
+					"name": "Get Functions Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"]
+						}
+					}
+				},
+				{
+					"name": "Create Function Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 1,\n    \"functionName\": \"testFunction\",\n    \"functionType\": \"LINEAR\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"]
+						}
+					}
+				},
+				{
+					"name": "Get Points Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/1/points",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "1", "points"]
+						}
+					}
+				},
+				{
+					"name": "Get Composite Functions Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete User Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Function Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"functionName\": \"updated\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "1"]
+						}
+					}
+				},
+				{
+					"name": "Search Functions Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"functionName\": \"test\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/search",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "search"]
+						}
+					}
+				},
+				{
+					"name": "Function Operations Without Auth - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operation\": \"add\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0],\n        \"yValues\": [1.0, 2.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0],\n        \"yValues\": [1.0, 2.0]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/operations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "operations"]
+						}
+					}
+				},
+				{
+					"name": "Invalid Auth Header - Should Return 401",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 401 Unauthorized for invalid credentials', function() {",
+									"    pm.expect(pm.response.code).to.equal(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic aW52YWxpZDppbnZhbGlk"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Not Found Tests (404)",
+			"item": [
+				{
+					"name": "Get Non-Existent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 404 or error for non-existent user', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "999999"]
+						}
+					}
+				},
+				{
+					"name": "Get Non-Existent Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 404 or error for non-existent function', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "999999"]
+						}
+					}
+				},
+				{
+					"name": "Get Non-Existent Point",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 404 or error for non-existent point', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/points/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "points", "999999"]
+						}
+					}
+				},
+				{
+					"name": "Get Non-Existent Composite Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return 404 or error for non-existent composite function', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions", "999999"]
+						}
+					}
+				},
+				{
+					"name": "Delete Non-Existent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return error for deleting non-existent user', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "999999"]
+						}
+					}
+				},
+				{
+					"name": "Delete Non-Existent Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return error for deleting non-existent function', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "999999"]
+						}
+					}
+				},
+				{
+					"name": "Update Non-Existent Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return error for updating non-existent function', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"functionName\": \"updated\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/999999",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "999999"]
+						}
+					}
+				},
+				{
+					"name": "Get Functions for Non-Existent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should return error for non-existent user functions', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/999999/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "999999", "functions"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Validation Error Tests",
+			"item": [
+				{
+					"name": "Create User With Empty Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should reject empty username', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"\",\n    \"password\": \"password123\",\n    \"email\": \"test@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Create Function With Invalid User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should reject function with invalid user ID', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": 999999,\n    \"functionName\": \"testFunction\",\n    \"functionType\": \"LINEAR\",\n    \"functionExpression\": \"2*x\",\n    \"xfrom\": 0.0,\n    \"xto\": 10.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions"]
+						}
+					}
+				},
+				{
+					"name": "Create Composite With Invalid First Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should reject composite with invalid first function', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": {{userId}},\n    \"compositeName\": \"composite\",\n    \"firstFunctionId\": 999999,\n    \"secondFunctionId\": {{functionId}}\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions"]
+						}
+					}
+				},
+				{
+					"name": "Create Composite With Invalid Second Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should reject composite with invalid second function', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": {{userId}},\n    \"compositeName\": \"composite\",\n    \"firstFunctionId\": {{functionId}},\n    \"secondFunctionId\": 999999\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/composite-functions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "composite-functions"]
+						}
+					}
+				},
+				{
+					"name": "Create Point For Non-Existent Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should reject point for non-existent function', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"xvalue\": 5.0,\n    \"yvalue\": 10.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/999999/points",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "999999", "points"]
+						}
+					}
+				},
+				{
+					"name": "Invalid Operation Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Should handle invalid operation type', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operation\": \"invalid_operation\",\n    \"functionA\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"ARRAY\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/operations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "operations"]
+						}
+					}
+				}
+			]
+		},
+		{
 			"name": "Users",
 			"item": [
 				{
@@ -81,6 +867,24 @@
 				},
 				{
 					"name": "Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get all users returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response is an array or has data property', function() {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data || jsonData).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -98,6 +902,25 @@
 				},
 				{
 					"name": "Get User By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get user by ID returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('User has expected properties', function() {",
+									"    const jsonData = pm.response.json();",
+									"    const user = jsonData.data || jsonData;",
+									"    pm.expect(user).to.have.property('userId');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -115,6 +938,19 @@
 				},
 				{
 					"name": "Update User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Update user returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -129,7 +965,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"updateduser\",\n    \"password\": \"newpassword\",\n    \"email\": \"updated@example.com\"\n}"
+							"raw": "{\n    \"username\": \"updateduser_{{$timestamp}}\",\n    \"password\": \"newpassword\",\n    \"email\": \"updated{{$timestamp}}@example.com\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/users/{{userId}}",
@@ -196,6 +1032,19 @@
 				},
 				{
 					"name": "Get All Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get all functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -213,6 +1062,19 @@
 				},
 				{
 					"name": "Get Functions Sorted by Name ASC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get sorted functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -236,6 +1098,19 @@
 				},
 				{
 					"name": "Get Functions Sorted by Name DESC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get sorted functions DESC returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -259,6 +1134,19 @@
 				},
 				{
 					"name": "Get Functions Sorted by X From ASC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get sorted by X From returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -282,6 +1170,19 @@
 				},
 				{
 					"name": "Get Functions Sorted by Type and Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get sorted by type and name returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -305,6 +1206,25 @@
 				},
 				{
 					"name": "Get Function By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get function by ID returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Function has expected properties', function() {",
+									"    const jsonData = pm.response.json();",
+									"    const func = jsonData.data || jsonData;",
+									"    pm.expect(func).to.have.property('functionId');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -322,6 +1242,19 @@
 				},
 				{
 					"name": "Update Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Update function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -352,6 +1285,19 @@
 			"item": [
 				{
 					"name": "Get Functions By User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get functions by user ID returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -417,6 +1363,19 @@
 				},
 				{
 					"name": "Get Points By Function ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get points by function ID returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -434,6 +1393,19 @@
 				},
 				{
 					"name": "Get Point By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get point by ID returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -451,6 +1423,19 @@
 				},
 				{
 					"name": "Calculate Function Value",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Calculate function value returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -474,6 +1459,19 @@
 				},
 				{
 					"name": "Update Point",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Update point returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -547,6 +1545,19 @@
 				},
 				{
 					"name": "Get Composite Function By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get composite function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -564,6 +1575,19 @@
 				},
 				{
 					"name": "Get Composite Functions By User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get composite functions by user returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [
@@ -581,6 +1605,19 @@
 				},
 				{
 					"name": "Update Composite Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Update composite function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -611,6 +1648,19 @@
 			"item": [
 				{
 					"name": "Add Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Add functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -636,6 +1686,19 @@
 				},
 				{
 					"name": "Subtract Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Subtract functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -661,6 +1724,19 @@
 				},
 				{
 					"name": "Multiply Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Multiply functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -686,6 +1762,19 @@
 				},
 				{
 					"name": "Divide Functions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Divide functions returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -708,6 +1797,44 @@
 							"path": ["api", "functions", "operations"]
 						}
 					}
+				},
+				{
+					"name": "Operations With LinkedList Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('LinkedList operations returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operation\": \"add\",\n    \"functionA\": {\n        \"type\": \"LINKED_LIST\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [2.0, 4.0, 6.0]\n    },\n    \"functionB\": {\n        \"type\": \"LINKED_LIST\",\n        \"xvalues\": [1.0, 2.0, 3.0],\n        \"yValues\": [1.0, 2.0, 3.0]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/operations",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "operations"]
+						}
+					}
 				}
 			]
 		},
@@ -716,6 +1843,19 @@
 			"item": [
 				{
 					"name": "Differentiate Function - MIDDLE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Differentiate MIDDLE returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -739,6 +1879,19 @@
 				},
 				{
 					"name": "Differentiate Function - LEFT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Differentiate LEFT returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -766,6 +1919,19 @@
 				},
 				{
 					"name": "Differentiate Function - RIGHT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Differentiate RIGHT returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -798,6 +1964,19 @@
 			"item": [
 				{
 					"name": "Search Functions - Quick",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Quick search returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -829,6 +2008,19 @@
 				},
 				{
 					"name": "Search Functions - Deep",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Deep search returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -857,6 +2049,94 @@
 							]
 						}
 					}
+				},
+				{
+					"name": "Search Functions - By XRange",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Search by X range returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"xFrom\": 0.0,\n    \"xTo\": 100.0,\n    \"limit\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/search?algorithm=QUICK",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "search"],
+							"query": [
+								{
+									"key": "algorithm",
+									"value": "QUICK"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Functions - Combined Criteria",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Combined search returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"functionName\": \"test\",\n    \"functionType\": \"LINEAR\",\n    \"xFrom\": 0.0,\n    \"xTo\": 20.0,\n    \"limit\": 5\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/search?algorithm=DEEP",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "search"],
+							"query": [
+								{
+									"key": "algorithm",
+									"value": "DEEP"
+								}
+							]
+						}
+					}
 				}
 			]
 		},
@@ -864,41 +2144,20 @@
 			"name": "Delete",
 			"item": [
 				{
-					"name": "Delete User",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authHeader}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/users/{{userId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "users", "{{userId}}"]
-						}
-					}
-				},
-				{
-					"name": "Delete Function",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authHeader}}"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "functions", "{{functionId}}"]
-						}
-					}
-				},
-				{
 					"name": "Delete Point",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete point returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -916,6 +2175,19 @@
 				},
 				{
 					"name": "Delete Composite Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete composite function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -928,6 +2200,66 @@
 							"raw": "{{baseUrl}}/api/composite-functions/{{compositeFunctionId}}",
 							"host": ["{{baseUrl}}"],
 							"path": ["api", "composite-functions", "{{compositeFunctionId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Function",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete function returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/functions/{{functionId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "functions", "{{functionId}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete user returns success', function() {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authHeader}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "{{userId}}"]
 						}
 					}
 				}
