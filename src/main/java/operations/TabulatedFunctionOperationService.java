@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 public class TabulatedFunctionOperationService {
     private static final Logger logger = Logger.getLogger(TabulatedFunctionOperationService.class.getName());
+    private static final double EPSILON = 1e-9;
     private TabulatedFunctionFactory factory;
 
     public TabulatedFunctionOperationService() {
@@ -79,7 +80,7 @@ public class TabulatedFunctionOperationService {
         double[] yValues = new double[count];
 
         for (int i = 0; i < count; i++) {
-            if (pointsA[i].x != pointsB[i].x) {
+            if (Math.abs(pointsA[i].x - pointsB[i].x) > EPSILON) {
                 logger.severe("Ошибка: значения X не совпадают");
                 throw new InconsistentFunctionsException("X values don't match");
             }

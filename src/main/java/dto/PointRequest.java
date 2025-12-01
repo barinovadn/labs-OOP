@@ -1,8 +1,14 @@
 package dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class PointRequest {
     private Long functionId;
+    
+    @JsonProperty("xValue")
     private Double xValue;
+    
+    @JsonProperty("yValue")
     private Double yValue;
 
     public PointRequest() {}

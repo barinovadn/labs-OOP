@@ -1,8 +1,14 @@
 package dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class OperationRequest {
     private String operation; // "add", "subtract", "multiply", "divide"
+    
+    @JsonProperty("functionAId")
     private Long functionAId;
+    
+    @JsonProperty("functionBId")
     private Long functionBId;
 
     public OperationRequest() {}

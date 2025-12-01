@@ -14,7 +14,7 @@ public interface PointRepository extends JpaRepository<PointEntity, Long> {
 
     List<PointEntity> findByFunction(FunctionEntity function);
 
-    @Query("SELECT p FROM PointEntity p WHERE p.function.functionId = :functionId ORDER BY p.xValue")
+    @Query(value = "SELECT * FROM computed_points WHERE function_id = :functionId ORDER BY x_value ASC", nativeQuery = true)
     List<PointEntity> findByFunctionIdOrderByXValue(@Param("functionId") Long functionId);
 
     @Query("SELECT p FROM PointEntity p WHERE p.function.functionId = :functionId AND p.xValue BETWEEN :minX AND :maxX")
