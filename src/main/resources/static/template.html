@@ -1,0 +1,473 @@
+<div class="app-shell">
+  <div v-if="!state.isAuthed" class="auth-hero">
+    <div class="auth-card">
+      <div class="title">{{t('authTitle')}}</div>
+      <p class="muted">{{t('authSubtitle')}}</p>
+
+      <div class="auth-tabs">
+        <button class="btn" :class="state.authMode==='login' ? '' : 'secondary'" @click="state.authMode='login'">{{t('login')}}</button>
+        <button class="btn" :class="state.authMode==='register' ? '' : 'secondary'" @click="state.authMode='register'">{{t('register')}}</button>
+        <button class="btn ghost" @click="openSettings">{{t('settings')}}</button>
+      </div>
+
+      <div v-if="state.authMode==='login'" class="grid">
+        <label class="muted">{{t('nickname')}}
+          <input class="input" v-model="state.credentials.username" autocomplete="username" placeholder="your_nick">
+        </label>
+        <label class="muted">{{t('password')}}
+          <input class="input" type="password" v-model="state.credentials.password" autocomplete="current-password" placeholder="••••••">
+        </label>
+        <button class="btn" @click="tryLogin" :disabled="state.loading">{{t('loginAction')}}</button>
+      </div>
+
+      <div v-else class="grid">
+        <label class="muted">{{t('nickname')}} (3-16, A-Z a-z 0-9 - _)
+          <input class="input" v-model="state.authForm.username" placeholder="your_nick">
+        </label>
+        <label class="muted">{{t('email')}}
+          <input class="input" type="email" v-model="state.authForm.email" placeholder="you@example.com">
+        </label>
+        <label class="muted">{{t('password')}} (A/a/0/спец, 6-128)
+          <input class="input" type="password" v-model="state.authForm.password" placeholder="••••••">
+        </label>
+        <label class="muted">{{t('repeatPassword')}}
+          <input class="input" type="password" v-model="state.authForm.confirm" placeholder="••••••">
+        </label>
+        <button class="btn success" @click="register" :disabled="state.loading">{{t('registerAction')}}</button>
+      </div>
+    </div>
+  </div>
+
+  <div v-else>
+    <div class="header">
+      <div class="row" style="gap:12px; align-items:center;">
+        <img class="brand-logo" :src="brandLogo" alt="logo">
+        <div>
+          <div class="title">{{t('headerTitle')}}</div>
+          <div class="muted">{{t('loggedAs')}} {{state.credentials.username}}</div>
+        </div>
+      </div>
+      <div class="row header-actions desktop-menu">
+        <!-- <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button> -->
+        <button class="btn secondary" @click="openSettings">
+          <span class="btn-icon" v-html="icons.settings"></span><span>{{t('settings')}}</span>
+        </button>
+        <button class="btn secondary" @click="openProfile">
+          <span class="btn-icon" v-html="icons.profile"></span><span>{{t('profile')}}</span>
+        </button>
+        <button class="btn ghost" @click="logout">
+          <span class="btn-icon" v-html="icons.logout"></span><span>{{t('logout')}}</span>
+        </button>
+      </div>
+      <div class="mobile-menu-container">
+        <button :class="['btn','icon-btn','mobile-menu-trigger', {active: mobileMenuOpen}]" @click="toggleMobileMenu" v-html="mobileMenuOpen ? burgerIconOpen : burgerIcon"></button>
+        <div v-if="mobileMenuOpen" class="mobile-menu-popup" @click.self="closeMobileMenu">
+          <!-- <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button> -->
+          <button class="btn secondary" @click="() => { openSettings(); closeMobileMenu(); }">
+            <span class="btn-icon" v-html="icons.settings"></span><span>{{t('settings')}}</span>
+          </button>
+          <button class="btn secondary" @click="() => { openProfile(); closeMobileMenu(); }">
+            <span class="btn-icon" v-html="icons.profile"></span><span>{{t('profile')}}</span>
+          </button>
+          <button class="btn ghost" @click="() => { logout(); closeMobileMenu(); }">
+            <span class="btn-icon" v-html="icons.logout"></span><span>{{t('logout')}}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card grid grid-2">
+      <div>
+        <div class="section-title">{{t('quickActions')}}</div>
+        <div class="row quick-actions">
+          <button class="btn" @click="state.modals.create = true">
+            <span class="btn-icon" v-html="icons.createPoints"></span><span>{{t('createFromPoints')}}</span>
+          </button>
+          <button class="btn secondary" @click="state.modals.math = true">
+            <span class="btn-icon" v-html="icons.createMath"></span><span>{{t('createFromMath')}}</span>
+          </button>
+          <button class="btn" @click="state.modals.composite=true">
+            <span class="btn-icon" v-html="icons.createComposite"></span><span>{{t('createComposite')}}</span>
+          </button>
+          <button class="btn ghost" @click="$refs.importer.click()">
+            <span class="btn-icon" v-html="icons.importJson"></span><span>{{t('importJson')}}</span>
+          </button>
+          <input type="file" ref="importer" accept="application/json" style="display:none" @change="importJson">
+        </div>
+        <p class="muted" v-if="state.ui.lang==='ru'">Все операции выполняются через API с Basic Auth. Ошибки показываются модально.</p>
+        <p class="muted" v-else>All operations go via API with Basic Auth. Errors show in modals.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="column-stack">
+        <div v-if="!state.ads.adBlock && !state.ads.dismissed.functions && state.ads.slots.functions" class="card ad-card">
+          <button class="ad-close" @click="closeAd('functions')" v-html="adCloseIcon" aria-label="Закрыть рекламу"></button>
+          <a class="ad-creative" :href="state.ads.slots.functions.url" target="_blank" rel="noopener">
+            <img class="ad-img" :src="state.ads.slots.functions.image" :alt="state.ui.lang==='en' ? 'Sponsored ad' : 'Реклама'">
+            <span class="ad-badge">
+              <span class="ad-badge-icon" v-html="adBadgeIcon"></span>
+              <span class="ad-badge-icon" v-html="adMuteIcon"></span>
+              <span>{{ state.ui.lang==='en' ? 'Ad' : 'Реклама' }}</span>
+            </span>
+          </a>
+        </div>
+        <div class="card">
+          <div class="section-title">{{t('functions')}}</div>
+          <div class="scroll" style="max-height:420px;">
+            <table class="table">
+              <thead>
+                <tr><th>{{t('name')}}</th><th>{{t('type')}}</th><th colspan="2">{{t('settings')}}</th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="fn in state.functions" :key="fn.functionId"
+                    :class="{'fn-selected': state.selectedFunction?.functionId===fn.functionId}">
+                  <td class="fn-name" :title="fn.functionName">{{fn.functionName}}</td>
+                  <td><span class="pill">{{typeLabel(fn.functionType)}}</span></td>
+                  <td class="fn-actions">
+                    <button class="btn ghost"
+                      :class="{'disabled': state.selectedFunction?.functionId===fn.functionId}"
+                      :disabled="state.selectedFunction?.functionId===fn.functionId"
+                      @click="state.selectedFunction?.functionId!==fn.functionId && loadPoints(fn.functionId)">{{t('open')}}</button>
+                    <button class="btn danger ghost" @click="deleteFunction(fn.functionId)">
+                      <span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span>
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="!state.functions.length"><td colspan="4" class="muted">Нет данных</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="column-stack">
+        <div v-if="!state.ads.adBlock && !state.ads.dismissed.graph && state.ads.slots.graph" class="card ad-card">
+          <button class="ad-close" @click="closeAd('graph')" v-html="adCloseIcon" aria-label="Закрыть рекламу"></button>
+          <a class="ad-creative" :href="state.ads.slots.graph.url" target="_blank" rel="noopener">
+            <img class="ad-img" :src="state.ads.slots.graph.image" :alt="state.ui.lang==='en' ? 'Sponsored ad' : 'Реклама'">
+            <span class="ad-badge">
+              <span class="ad-badge-icon" v-html="adBadgeIcon"></span>
+              <span class="ad-badge-icon" v-html="adMuteIcon"></span>
+              <span>{{ state.ui.lang==='en' ? 'Ad' : 'Реклама' }}</span>
+            </span>
+          </a>
+        </div>
+        <div class="card grid grid-2" style="padding-bottom: 0;">
+          <div>
+            <div class="section-title">{{t('graph')}}</div>
+            <canvas v-if="state.selectedFunction" id="fn-chart" height="240"></canvas>
+            <div v-else class="scroll" style="height:240px; display:grid; place-items:center;">
+              <img src="https://i.pinimg.com/736x/61/d1/ac/61d1ac10c76a23249c5d51048aea8126.jpg" alt="Выберите функцию" style="max-height:220px; max-width:100%; opacity:0.9;">
+            </div>
+            <div class="row appear" style="margin-top:10px;" v-if="state.selectedFunction">
+              <input class="input" style="flex:1" type="number" v-model="state.graph.evalX" :placeholder="t('evalPlaceholder')" @input="evalFunction">
+              <div class="chip" v-if="state.graph.evalResult !== null">y ≈ {{state.graph.evalResult}}</div>
+            </div>
+          </div>
+          <div v-if="state.selectedFunction && !isCompositeSelected()" class="appear">
+            <div class="section-title">{{t('pointsTitle')}}</div>
+            <div class="row points-section-header" style="justify-content: space-between;">
+              <div class="muted">{{ state.selectedFunction?.functionName || (state.ui.lang==='en' ? 'Not selected' : 'Не выбрана') }}</div>
+              <div class="row">
+                <button class="btn ghost" @click="exportJson" :disabled="!state.points.length">
+                  <span class="btn-icon" v-html="icons.export"></span><span>{{t('export')}}</span>
+                </button>
+                <button class="btn secondary" @click="addEmptyPointRow" :disabled="!state.selectedFunction">{{t('addPoint')}}</button>
+                <button class="btn" @click="saveAllPoints" :disabled="!state.selectedFunction || !state.points.length">
+                  <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
+                </button>
+              </div>
+            </div>
+            <div class="scroll">
+              <table class="table">
+                <thead>
+                  <tr><th>x</th><th>y</th><th></th></tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in state.points" :key="p.pointId">
+                    <td><input class="input" type="number" v-model.number="p.xValue" placeholder="x"></td>
+                    <td><input class="input" type="number" v-model.number="p.yValue" placeholder="y"></td>
+                    <td class="row" style="gap:6px;">
+                      <button class="btn danger ghost" style="padding:6px 10px;width:100%;" @click="deletePoint(p)">
+                        <span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="!state.points.length"><td colspan="3" class="muted">Выберите функцию</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- create modal -->
+    <div v-if="state.modals.create" class="modal-backdrop" role="dialog" aria-modal="true" @click.self="state.modals.create=false">
+      <div class="modal">
+        <div class="header">
+          <div class="title" style="font-size:18px;">{{t('modalCreateTitle')}}</div>
+          <button class="btn ghost" @click="state.modals.create=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
+        </div>
+        <div class="grid grid-2">
+          <label class="muted">{{t('name')}}
+            <input class="input" v-model="state.createForm.name" placeholder="f(x)">
+          </label>
+          <label class="muted">{{t('type')}}
+            <input class="input" v-model="state.createForm.type" placeholder="TABULATED">
+          </label>
+          <label class="muted">{{t('xFrom')}}
+            <input class="input" type="number" v-model.number="state.createForm.xFrom">
+          </label>
+          <label class="muted">{{t('xTo')}}
+            <input class="input" type="number" v-model.number="state.createForm.xTo">
+          </label>
+        </div>
+        <div class="section-title">{{t('points')}}</div>
+        <div class="scroll" style="max-height:260px;">
+          <table class="table">
+            <thead><tr><th>x</th><th>y</th><th></th></tr></thead>
+            <tbody>
+              <tr v-for="(p,idx) in state.createForm.points" :key="idx">
+                <td><input class="input" type="number" v-model.number="p.x"></td>
+                <td><input class="input" type="number" v-model.number="p.y"></td>
+                <td><button class="btn danger ghost" @click="removePointRow(idx)"><span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <button class="btn secondary" @click="addPointRow">{{t('addPointRow')}}</button>
+          <button class="btn" @click="createFromTable">
+            <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('create')}}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- math modal -->
+    <div v-if="state.modals.math" class="modal-backdrop" role="dialog" aria-modal="true" @click.self="state.modals.math=false">
+      <div class="modal">
+        <div class="header">
+          <div class="title" style="font-size:18px;">{{t('modalMathTitle')}}</div>
+          <button class="btn ghost" @click="state.modals.math=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
+        </div>
+        <div class="grid grid-2">
+          <label class="muted">{{t('name')}}
+            <input class="input" v-model="state.mathForm.name">
+          </label>
+          <label class="muted">{{t('functionLabel')}}
+            <select class="input" v-model="state.mathForm.mathKey">
+              <option v-for="mf in mathFunctions" :value="mf.key">{{mf.label}}</option>
+            </select>
+          </label>
+          <label class="muted">{{t('xFrom')}}
+            <input class="input" type="number" v-model.number="state.mathForm.xFrom">
+          </label>
+          <label class="muted">{{t('xTo')}}
+            <input class="input" type="number" v-model.number="state.mathForm.xTo">
+          </label>
+          <label class="muted">{{t('pointsCount')}}
+            <input class="input" type="number" v-model.number="state.mathForm.pointsCount">
+          </label>
+          <label class="muted" v-if="state.mathForm.mathKey==='CONSTANT'">{{t('constValue')}}
+            <input class="input" type="number" v-model.number="state.mathForm.constant">
+          </label>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <button class="btn secondary" @click="state.modals.math=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
+          <button class="btn" @click="createFromMath">
+            <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('create')}}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- composite modal -->
+    <div v-if="state.modals.composite" class="modal-backdrop" role="dialog" aria-modal="true" @click.self="state.modals.composite=false">
+      <div class="modal">
+        <div class="header">
+          <div class="title" style="font-size:18px;">{{t('modalCompositeTitle')}}</div>
+          <button class="btn ghost" @click="state.modals.composite=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
+        </div>
+        <div class="grid grid-2">
+          <label class="muted">{{t('name')}}
+            <input class="input" v-model="state.compositeForm.name" placeholder="g∘f">
+          </label>
+          <label class="muted">{{t('firstFn')}}
+            <select class="input" v-model.number="state.compositeForm.a">
+              <option :value="null">—</option>
+              <option v-for="fn in state.functions" :value="fn.functionId">{{fn.functionName}}</option>
+            </select>
+          </label>
+          <label class="muted">{{t('secondFn')}}
+            <select class="input" v-model.number="state.compositeForm.b">
+              <option :value="null">—</option>
+              <option v-for="fn in state.functions" :value="fn.functionId">{{fn.functionName}}</option>
+            </select>
+          </label>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <button class="btn secondary" @click="state.modals.composite=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
+          <button class="btn" @click="saveComposite">
+            <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
+          </button>
+        </div>
+        <p class="muted" style="margin-top:8px;">{{t('complexHint')}}</p>
+      </div>
+    </div>
+  </div>
+  <!-- error modal -->
+  <div v-if="state.modals.error" class="modal-backdrop topmost" role="alertdialog" aria-modal="true" @click.self="state.modals.error=null">
+    <div class="modal">
+      <div class="header">
+        <div class="title" style="font-size:18px; display:flex; align-items:center; gap:8px;">
+          <span class="icon-img"></span>
+          {{state.modals.error.title || t('error')}}
+        </div>
+        <button class="btn ghost" @click="state.modals.error=null">×</button>
+      </div>
+      <p class="muted">{{state.modals.error.message}}</p>
+      <button class="btn" @click="state.modals.error=null">
+        <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('ok')}}</span>
+      </button>
+    </div>
+  </div>
+  <!-- toasts -->
+  <div class="toast-stack">
+    <div v-for="t in state.toasts" :key="t.id" class="toast" :class="[t.type, {'leaving': t.leaving}]">
+      <span class="icon-img" :style="t.icon ? `background-image:url(${t.icon})` : ''"></span>
+      <div>
+        <div class="toast-title">{{t.title}}</div>
+        <div class="toast-desc">{{t.message}}</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-avatars-bar">
+      <div class="footer-avatars">
+        <a class="avatar-link" href="https://github.com/barinovadn" target="_blank" rel="noopener">
+          <img src="https://avatars.githubusercontent.com/u/186514423?v=4" alt="Dasha">
+          <div class="muted no-underline">{{ state.ui.lang === 'ru' ? 'Даша' : 'Dasha' }}</div>
+        </a>
+        <a class="avatar-link" href="https://github.com/daria111222" target="_blank" rel="noopener">
+          <img src="https://avatars.githubusercontent.com/u/164402792?v=4" alt="Dasha">
+          <div class="muted no-underline">{{ state.ui.lang === 'ru' ? 'Даша' : 'Dasha' }}</div>
+        </a>
+      </div>
+    </div>
+    <div class="footer-grid">
+      <div>
+        <div class="muted">{{ state.ui.lang === 'ru' ? 'Ссылки' : 'Links' }}</div>
+        <a href="#" class="link" v-for="(l,idx) in t('footerLinks')" :key="idx">{{l}}</a>
+      </div>
+      <div>
+        <div class="muted">{{t('language')}}</div>
+        <a href="#" class="link" @click.prevent="state.ui.lang='ru'">{{t('langRu')}}</a>
+        <a href="#" class="link" @click.prevent="state.ui.lang='en'">{{t('langEn')}}</a>
+        <a href="#" class="link" @click.prevent="state.ui.inclusive=!state.ui.inclusive">{{t('inclusive')}}</a>
+      </div>
+      <div>
+        <div class="muted">{{t('contact')}}</div>
+        <a href="#" class="link">support@example.com</a>
+        <a href="#" class="link">+1 (555) 010-010</a>
+      </div>
+    </div>
+  </footer>
+  <!-- settings modal -->
+  <div v-if="state.modals.settings" class="modal-backdrop" role="dialog" aria-modal="true" @click.self="state.modals.settings=false">
+    <div class="modal">
+      <div class="header">
+        <div class="title" style="font-size:18px;">{{t('settingsTitle')}}</div>
+        <button class="btn ghost" @click="state.modals.settings=false">×</button>
+      </div>
+      <div class="grid grid-2">
+        <div>
+          <div class="section-title">{{t('theme')}}</div>
+          <div class="theme-grid">
+            <button class="theme-chip" v-for="th in themes" :key="th"
+              :class="{'active': state.ui.theme===th}" @click="state.ui.theme!==th && (state.ui.theme=th)">
+            <span class="swatch icon" v-html="themeIcon(th)"></span><span class="label">{{themeLabel(th)}}</span>
+            </button>
+          </div>
+          <div class="section-title" style="margin-top:10px;">{{t('edges')}}</div>
+          <div class="theme-grid">
+            <button class="theme-chip" v-for="ed in edgeThemes" :key="ed"
+              :class="{'active': state.ui.edges===ed}" @click="state.ui.edges!==ed && (state.ui.edges=ed)">
+            <span class="swatch icon" v-html="edgeIcon(ed)"></span><span class="label">{{edgeLabel(ed)}}</span>
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">{{t('language')}}</div>
+          <select class="input" v-model="state.ui.lang">
+            <option value="ru">{{t('langRu')}}</option>
+            <option value="en">{{t('langEn')}}</option>
+          </select>
+          <div class="section-title extra-margin">{{t('extraFeatures')}}</div>
+          <label class="row muted settings-inline">
+            <input type="checkbox" v-model="state.ui.inclusive"> {{t('inclusive')}}
+          </label>
+          <label class="row muted settings-inline">
+            <input type="checkbox" v-model="state.ads.adBlock"> {{t('adblock')}}
+          </label>
+        </div>
+      </div>
+      <div class="row settings-actions">
+        <button class="btn secondary half force-grid" @click="state.modals.settings=false">
+          <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+        </button>
+        <button class="btn half" @click="saveSettings">
+          <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- profile modal -->
+  <div v-if="state.modals.profile" class="modal-backdrop" role="dialog" aria-modal="true" @click.self="state.modals.profile=false">
+    <div class="modal">
+      <div class="header">
+        <div class="title" style="font-size:18px;">{{t('profile')}}</div>
+        <button class="btn ghost" @click="state.modals.profile=false">×</button>
+      </div>
+      <div class="grid">
+        <label class="muted">{{t('nickname')}}
+          <input class="input" v-model="state.profileForm.username">
+        </label>
+        <label class="muted">{{t('email')}}
+          <input class="input" type="email" v-model="state.profileForm.email">
+        </label>
+        <label class="muted">{{t('passwordNew')}}
+          <input class="input" type="password" v-model="state.profileForm.password" placeholder="••••••">
+        </label>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn secondary" @click="state.modals.profile=false">
+          <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+        </button>
+        <button class="btn" @click="saveProfile">
+          <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('update')}}</span>
+        </button>
+        <button class="btn danger" @click="deleteAccount">
+          <span class="btn-icon" v-html="icons.remove"></span><span>{{t('deleteAccount')}}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- loader -->
+  <div v-if="state.loadingGlobal" class="backdrop">
+    <div class="loader-box">
+      <div class="loader-logo">f(x)</div>
+      <div class="spinner"></div>
+    </div>
+  </div>
+</div>

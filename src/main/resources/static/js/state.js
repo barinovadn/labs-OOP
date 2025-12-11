@@ -1,0 +1,128 @@
+export const mathFunctions = [
+  { key: 'IDENTITY', label: 'f(x)=x' },
+  { key: 'SQR', label: 'f(x)=x²' },
+  { key: 'CUBE', label: 'f(x)=x³' },
+  { key: 'SQRT', label: 'f(x)=√x' },
+  { key: 'CBRT', label: 'f(x)=∛x' },
+  { key: 'RECIP', label: 'f(x)=1/x' },
+  { key: 'ABS', label: 'f(x)=|x|' },
+  { key: 'SIN', label: 'sin(x)' },
+  { key: 'COS', label: 'cos(x)' },
+  { key: 'TAN', label: 'tan(x)' },
+  { key: 'CTG', label: 'ctg(x)' },
+  { key: 'ZERO', label: 'f(x)=0' },
+  { key: 'UNIT', label: 'f(x)=1' },
+  { key: 'CONST', label: 'f(x)=c' },
+  { key: 'LN', label: 'ln(x)' },
+  { key: 'LOG10', label: 'log₁₀(x)' },
+  { key: 'LOGA', label: 'logₐ(x)' },
+];
+
+export const mathEvaluators = {
+  SQR: (x) => x * x,
+  IDENTITY: (x) => x,
+  LINEAR: (x) => x,
+  CONSTANT: (_, c = 0) => c,
+  CONST: (_, c = 0) => c,
+  UNIT: () => 1,
+  ZERO: () => 0,
+  COS: (x) => Math.cos(x),
+  SIN: (x) => Math.sin(x),
+  TAN: (x) => Math.tan(x),
+  CTG: (x) => 1 / Math.tan(x),
+  CUBE: (x) => x * x * x,
+  SQRT: (x) => Math.sqrt(x),
+  CBRT: (x) => Math.cbrt(x),
+  RECIP: (x) => 1 / x,
+  ABS: (x) => Math.abs(x),
+  EXP: (x) => Math.exp(x),
+  LOG: (x) => Math.log(x),
+  LN: (x) => Math.log(x),
+  LOG10: (x) => Math.log10(x),
+  LOGA: (x, a = 10) => Math.log(x) / Math.log(a || 10),
+};
+
+export function createInitialState() {
+  return {
+    isAuthed: false,
+    loading: false,
+    loadingGlobal: false,
+    stageAnimated: false,
+    authMode: 'login',
+    credentials: {
+      username: '',
+      password: '',
+      email: '',
+      userId: null,
+    },
+    authForm: {
+      username: '',
+      email: '',
+      password: '',
+      confirm: '',
+    },
+    functions: [],
+    points: [],
+    selectedFunction: null,
+    graph: {
+      evalX: null,
+      evalResult: null,
+    },
+    ui: {
+      theme: localStorage.getItem('ui-theme') || 'dark',
+      lang: localStorage.getItem('ui-lang') || 'ru',
+      inclusive: localStorage.getItem('ui-inclusive') === 'true',
+      edges: localStorage.getItem('ui-edges') || 'soft',
+    },
+    ads: {
+      adBlock: localStorage.getItem('ui-adblock') === 'true',
+      slots: {
+        functions: null,
+        graph: null,
+      },
+      dismissed: {
+        functions: false,
+        graph: false,
+      },
+    },
+    modals: {
+      create: false,
+      math: false,
+      composite: false,
+      settings: false,
+      profile: false,
+      error: null,
+    },
+    createForm: {
+      name: '',
+      type: 'TABULATED',
+      xFrom: null,
+      xTo: null,
+      points: [
+        { x: 0, y: 0 },
+        { x: 1, y: 1 },
+      ],
+    },
+    mathForm: {
+      name: '',
+      mathKey: 'SQR',
+      xFrom: 0,
+      xTo: 1,
+      pointsCount: 10,
+      constant: 0,
+      tabType: 'ARRAY',
+    },
+    profileForm: {
+      username: '',
+      email: '',
+      password: '',
+    },
+    compositeForm: {
+      name: '',
+      a: null,
+      b: null,
+    },
+    toasts: [],
+  };
+}
+
