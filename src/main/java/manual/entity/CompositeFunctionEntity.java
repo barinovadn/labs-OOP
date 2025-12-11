@@ -32,17 +32,26 @@ public class CompositeFunctionEntity {
     @JoinColumn(name = "second_function_id", nullable = false)
     private FunctionEntity secondFunction;
 
+    @Column(name = "x_from")
+    private Double xFrom;
+
+    @Column(name = "x_to")
+    private Double xTo;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public CompositeFunctionEntity() {}
 
     public CompositeFunctionEntity(UserEntity user, String compositeName,
-                                   FunctionEntity firstFunction, FunctionEntity secondFunction) {
+                                   FunctionEntity firstFunction, FunctionEntity secondFunction,
+                                   Double xFrom, Double xTo) {
         this.user = user;
         this.compositeName = compositeName;
         this.firstFunction = firstFunction;
         this.secondFunction = secondFunction;
+        this.xFrom = xFrom;
+        this.xTo = xTo;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -60,6 +69,12 @@ public class CompositeFunctionEntity {
 
     public FunctionEntity getSecondFunction() { return secondFunction; }
     public void setSecondFunction(FunctionEntity secondFunction) { this.secondFunction = secondFunction; }
+
+    public Double getXFrom() { return xFrom; }
+    public void setXFrom(Double xFrom) { this.xFrom = xFrom; }
+
+    public Double getXTo() { return xTo; }
+    public void setXTo(Double xTo) { this.xTo = xTo; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

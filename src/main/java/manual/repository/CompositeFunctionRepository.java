@@ -39,6 +39,16 @@ public class CompositeFunctionRepository {
             stmt.setString(2, request.getCompositeName());
             stmt.setLong(3, firstFunction.getFunctionId());
             stmt.setLong(4, secondFunction.getFunctionId());
+            if (request.getXFrom() != null) {
+                stmt.setDouble(5, request.getXFrom());
+            } else {
+                stmt.setNull(5, Types.DOUBLE);
+            }
+            if (request.getXTo() != null) {
+                stmt.setDouble(6, request.getXTo());
+            } else {
+                stmt.setNull(6, Types.DOUBLE);
+            }
             stmt.executeUpdate();
 
             ResultSet keys = stmt.getGeneratedKeys();
@@ -94,7 +104,17 @@ public class CompositeFunctionRepository {
             stmt.setString(1, request.getCompositeName());
             stmt.setLong(2, request.getFirstFunctionId());
             stmt.setLong(3, request.getSecondFunctionId());
-            stmt.setLong(4, compositeId);
+            if (request.getXFrom() != null) {
+                stmt.setDouble(4, request.getXFrom());
+            } else {
+                stmt.setNull(4, Types.DOUBLE);
+            }
+            if (request.getXTo() != null) {
+                stmt.setDouble(5, request.getXTo());
+            } else {
+                stmt.setNull(5, Types.DOUBLE);
+            }
+            stmt.setLong(6, compositeId);
             boolean result = stmt.executeUpdate() > 0;
             logger.info("Composite function update " + (result ? "successful" : "failed"));
 
@@ -139,6 +159,12 @@ public class CompositeFunctionRepository {
         FunctionEntity secondFunction = new FunctionEntity();
         secondFunction.setFunctionId(rs.getLong("second_function_id"));
         entity.setSecondFunction(secondFunction);
+
+        Object xFromValue = rs.getObject("x_from");
+        entity.setXFrom(xFromValue != null ? rs.getDouble("x_from") : null);
+
+        Object xToValue = rs.getObject("x_to");
+        entity.setXTo(xToValue != null ? rs.getDouble("x_to") : null);
 
         return entity;
     }

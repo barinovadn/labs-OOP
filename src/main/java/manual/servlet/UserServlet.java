@@ -4,6 +4,8 @@ import manual.DatabaseConnection;
 import manual.dto.CreateUserRequest;
 import manual.dto.UserResponse;
 import manual.repository.UserRepository;
+import manual.security.RoleChecker;
+import manual.security.SecurityContext;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,6 +24,21 @@ public class UserServlet extends BaseServlet {
             throws ServletException, IOException {
         setRequestPath(request, response);
         String pathInfo = request.getPathInfo();
+        if ("/me".equals(pathInfo) || "/me/".equals(pathInfo)) {
+            SecurityContext context = getSecurityContext(request);
+            if (context == null || !context.isAuthenticated()) {
+                sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return;
+            }
+            UserResponse me = new UserResponse(
+                    context.getUserId(),
+                    context.getUsername(),
+                    context.getUser().getEmail(),
+                    context.getUser().getCreatedAt()
+            );
+            sendSuccess(request, response, me);
+            return;
+        }
         
         try (Connection conn = DatabaseConnection.getConnection()) {
             UserRepository repo = new UserRepository(conn);
@@ -55,6 +72,14 @@ public class UserServlet extends BaseServlet {
             CreateUserRequest req = parseJsonRequest(request, CreateUserRequest.class);
             try (Connection conn = DatabaseConnection.getConnection()) {
                 UserRepository repo = new UserRepository(conn);
+                if (repo.existsByUsernameAndUserIdNot(req.getUsername(), null)) {
+                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Username already exists");
+                    return;
+                }
+                if (repo.existsByEmailAndUserIdNot(req.getEmail(), null)) {
+                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Email already exists");
+                    return;
+                }
                 UserResponse user = repo.create(req);
                 response.setStatus(HttpServletResponse.SC_CREATED);
                 sendSuccess(request, response, user);
@@ -79,6 +104,14 @@ public class UserServlet extends BaseServlet {
             CreateUserRequest req = parseJsonRequest(request, CreateUserRequest.class);
             try (Connection conn = DatabaseConnection.getConnection()) {
                 UserRepository repo = new UserRepository(conn);
+                if (repo.existsByUsernameAndUserIdNot(req.getUsername(), userId)) {
+                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Username already exists");
+                    return;
+                }
+                if (repo.existsByEmailAndUserIdNot(req.getEmail(), userId)) {
+                    sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Email already exists");
+                    return;
+                }
                 UserResponse user = repo.update(userId, req);
                 if (user == null) {
                     sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Not found");
@@ -102,6 +135,18 @@ public class UserServlet extends BaseServlet {
             sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid ID");
             return;
         }
+
+        SecurityContext context = getSecurityContext(request);
+        if (context == null || !context.isAuthenticated()) {
+            sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            return;
+        }
+        boolean isAllowed = RoleChecker.isOwnerOrAdmin(context, userId);
+        if (!isAllowed) {
+            sendError(request, response, HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+            return;
+        }
+
         try (Connection conn = DatabaseConnection.getConnection()) {
             UserRepository repo = new UserRepository(conn);
             if (repo.delete(userId)) {

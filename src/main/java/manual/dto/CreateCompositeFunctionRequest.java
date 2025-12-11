@@ -5,15 +5,20 @@ public class CreateCompositeFunctionRequest {
     private String compositeName;
     private Long firstFunctionId;
     private Long secondFunctionId;
+    private Double xFrom;
+    private Double xTo;
 
     public CreateCompositeFunctionRequest() {}
 
     public CreateCompositeFunctionRequest(Long userId, String compositeName,
-                                          Long firstFunctionId, Long secondFunctionId) {
+                                          Long firstFunctionId, Long secondFunctionId,
+                                          Double xFrom, Double xTo) {
         this.userId = userId;
         this.compositeName = compositeName;
         this.firstFunctionId = firstFunctionId;
         this.secondFunctionId = secondFunctionId;
+        this.xFrom = xFrom;
+        this.xTo = xTo;
     }
 
     public Long getUserId() { return userId; }
@@ -27,4 +32,10 @@ public class CreateCompositeFunctionRequest {
 
     public Long getSecondFunctionId() { return secondFunctionId; }
     public void setSecondFunctionId(Long secondFunctionId) { this.secondFunctionId = secondFunctionId; }
+
+    public Double getXFrom() { return xFrom; }
+    public void setXFrom(Double xFrom) { this.xFrom = xFrom; }
+
+    public Double getXTo() { return xTo; }
+    public void setXTo(Double xTo) { this.xTo = xTo; }
 }

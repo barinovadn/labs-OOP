@@ -8,6 +8,10 @@
     <description>University OOP laboratory assignments</description>
     <absolute-ordering />
 
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
     <!-- Auth Servlet -->
     <servlet>
         <servlet-name>AuthServlet</servlet-name>

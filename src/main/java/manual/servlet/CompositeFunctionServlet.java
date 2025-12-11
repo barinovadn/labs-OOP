@@ -10,6 +10,7 @@ import manual.entity.UserEntity;
 import manual.repository.CompositeFunctionRepository;
 import manual.repository.FunctionRepository;
 import manual.repository.UserRepository;
+import manual.security.SecurityContext;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -26,7 +27,25 @@ public class CompositeFunctionServlet extends BaseServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         setRequestPath(request, response);
-        Long id = parseIdFromPath(request.getPathInfo());
+        String pathInfo = request.getPathInfo();
+        // List for current user if no ID provided
+        if (pathInfo == null || "/".equals(pathInfo) || pathInfo.isEmpty()) {
+            SecurityContext context = getSecurityContext(request);
+            if (context == null || !context.isAuthenticated()) {
+                sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return;
+            }
+            try (Connection conn = DatabaseConnection.getConnection()) {
+                CompositeFunctionRepository repo = new CompositeFunctionRepository(conn);
+                sendSuccess(request, response, repo.findByUserId(context.getUserId()));
+                return;
+            } catch (SQLException e) {
+                sendError(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Database error");
+                return;
+            }
+        }
+
+        Long id = parseIdFromPath(pathInfo);
         if (id == null) {
             sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid ID");
             return;
@@ -37,6 +56,21 @@ public class CompositeFunctionServlet extends BaseServlet {
             if (composite == null) {
                 sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "Not found");
             } else {
+                if (pathInfo != null && pathInfo.endsWith("/points")) {
+                    // Return child ids and range for frontend composition
+                    CompositeFunctionResponse payload = new CompositeFunctionResponse(
+                            composite.getCompositeId(),
+                            composite.getUserId(),
+                            composite.getCompositeName(),
+                            composite.getFirstFunctionId(),
+                            composite.getSecondFunctionId(),
+                            composite.getXFrom(),
+                            composite.getXTo(),
+                            composite.getCreatedAt()
+                    );
+                    sendSuccess(request, response, payload);
+                    return;
+                }
                 sendSuccess(request, response, composite);
             }
         } catch (SQLException e) {

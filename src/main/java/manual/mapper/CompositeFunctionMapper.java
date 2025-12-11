@@ -18,7 +18,9 @@ public class CompositeFunctionMapper {
                 user,
                 request.getCompositeName(),
                 firstFunction,
-                secondFunction
+                secondFunction,
+                request.getXFrom(),
+                request.getXTo()
         );
     }
 
@@ -30,6 +32,8 @@ public class CompositeFunctionMapper {
                 entity.getCompositeName(),
                 entity.getFirstFunction().getFunctionId(),
                 entity.getSecondFunction().getFunctionId(),
+                entity.getXFrom(),
+                entity.getXTo(),
                 entity.getCreatedAt()
         );
     }

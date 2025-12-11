@@ -19,6 +19,8 @@ public class UserRepository {
     private final String DELETE_SQL;
     private final String READ_ALL_SQL;
     private final String READ_BY_USERNAME_SQL;
+    private final String EXISTS_USERNAME_EXCEPT_SQL;
+    private final String EXISTS_EMAIL_EXCEPT_SQL;
 
     public UserRepository(Connection connection) {
         this.connection = connection;
@@ -28,6 +30,8 @@ public class UserRepository {
         this.DELETE_SQL = SqlFileReader.readSqlFile("UserDelete");
         this.READ_ALL_SQL = SqlFileReader.readSqlFile("UserReadAll");
         this.READ_BY_USERNAME_SQL = SqlFileReader.readSqlFile("UserReadByUsername");
+        this.EXISTS_USERNAME_EXCEPT_SQL = SqlFileReader.readSqlFile("UserExistsByUsernameNotId");
+        this.EXISTS_EMAIL_EXCEPT_SQL = SqlFileReader.readSqlFile("UserExistsByEmailNotId");
         logger.info("UserRepository initialized with SQL files");
     }
 
@@ -66,6 +70,38 @@ public class UserRepository {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             return rs.next() ? mapToEntity(rs) : null;
+        }
+    }
+
+    public boolean existsByUsernameAndUserIdNot(String username, Long userId) throws SQLException {
+        if (username == null) {
+            return false;
+        }
+        try (PreparedStatement stmt = connection.prepareStatement(EXISTS_USERNAME_EXCEPT_SQL)) {
+            stmt.setString(1, username);
+            if (userId != null) {
+                stmt.setLong(2, userId);
+            } else {
+                stmt.setNull(2, Types.BIGINT);
+            }
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getBoolean(1);
+        }
+    }
+
+    public boolean existsByEmailAndUserIdNot(String email, Long userId) throws SQLException {
+        if (email == null) {
+            return false;
+        }
+        try (PreparedStatement stmt = connection.prepareStatement(EXISTS_EMAIL_EXCEPT_SQL)) {
+            stmt.setString(1, email);
+            if (userId != null) {
+                stmt.setLong(2, userId);
+            } else {
+                stmt.setNull(2, Types.BIGINT);
+            }
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getBoolean(1);
         }
     }
 
