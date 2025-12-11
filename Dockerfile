@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-COPY --from=build /app/target/labs-oop.war /usr/local/tomcat/webapps/labs-oop.war
+# Deploy the app as the ROOT context so it is served at http://localhost:8080/
+COPY --from=build /app/target/labs-oop.war /usr/local/tomcat/webapps/ROOT.war
 COPY --from=build /root/.m2/repository/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar /usr/local/tomcat/lib/
 
 EXPOSE 8080
