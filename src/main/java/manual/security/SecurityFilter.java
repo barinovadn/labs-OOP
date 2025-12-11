@@ -127,7 +127,7 @@ public class SecurityFilter implements Filter {
     }
 
     private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
-        response.setHeader("WWW-Authenticate", "Basic realm=\"API\"");
+        // Do not set WWW-Authenticate to avoid browser Basic Auth popup; return JSON instead.
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
