@@ -40,7 +40,7 @@ export class Api {
 
     const success = response.ok && (payload?.success ?? true);
     if (!success) {
-      const message = payload?.message || response.statusText || 'Неизвестная ошибка';
+      const message = payload?.error || payload?.message || response.statusText || 'Неизвестная ошибка';
       throw new Error(message);
     }
 
