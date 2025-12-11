@@ -41,7 +41,7 @@
   <div v-else>
     <div class="header">
       <div class="row" style="gap:12px; align-items:center;">
-        <img class="brand-logo" src="https://media.tenor.com/RnC4v5oEP34AAAAi/bmw-logo.gif" alt="logo">
+        <img class="brand-logo" :src="brandLogo" alt="logo">
         <div>
           <div class="title">{{t('headerTitle')}}</div>
           <div class="muted">{{t('loggedAs')}} {{state.credentials.username}}</div>
@@ -49,17 +49,29 @@
       </div>
       <div class="row header-actions desktop-menu">
         <!-- <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button> -->
-        <button class="btn secondary" @click="openSettings">{{t('settings')}}</button>
-        <button class="btn secondary" @click="openProfile">{{t('profile')}}</button>
-        <button class="btn ghost" @click="logout">{{t('logout')}}</button>
+        <button class="btn secondary" @click="openSettings">
+          <span class="btn-icon" v-html="icons.settings"></span><span>{{t('settings')}}</span>
+        </button>
+        <button class="btn secondary" @click="openProfile">
+          <span class="btn-icon" v-html="icons.profile"></span><span>{{t('profile')}}</span>
+        </button>
+        <button class="btn ghost" @click="logout">
+          <span class="btn-icon" v-html="icons.logout"></span><span>{{t('logout')}}</span>
+        </button>
       </div>
       <div class="mobile-menu-container">
         <button :class="['btn','icon-btn','mobile-menu-trigger', {active: mobileMenuOpen}]" @click="toggleMobileMenu" v-html="mobileMenuOpen ? burgerIconOpen : burgerIcon"></button>
         <div v-if="mobileMenuOpen" class="mobile-menu-popup" @click.self="closeMobileMenu">
           <!-- <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button> -->
-          <button class="btn secondary" @click="() => { openSettings(); closeMobileMenu(); }">{{t('settings')}}</button>
-          <button class="btn secondary" @click="() => { openProfile(); closeMobileMenu(); }">{{t('profile')}}</button>
-          <button class="btn ghost" @click="() => { logout(); closeMobileMenu(); }">{{t('logout')}}</button>
+          <button class="btn secondary" @click="() => { openSettings(); closeMobileMenu(); }">
+            <span class="btn-icon" v-html="icons.settings"></span><span>{{t('settings')}}</span>
+          </button>
+          <button class="btn secondary" @click="() => { openProfile(); closeMobileMenu(); }">
+            <span class="btn-icon" v-html="icons.profile"></span><span>{{t('profile')}}</span>
+          </button>
+          <button class="btn ghost" @click="() => { logout(); closeMobileMenu(); }">
+            <span class="btn-icon" v-html="icons.logout"></span><span>{{t('logout')}}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -68,10 +80,18 @@
       <div>
         <div class="section-title">{{t('quickActions')}}</div>
         <div class="row quick-actions">
-          <button class="btn" @click="state.modals.create = true">{{t('createFromPoints')}}</button>
-          <button class="btn secondary" @click="state.modals.math = true">{{t('createFromMath')}}</button>
-          <button class="btn" @click="state.modals.composite=true">{{t('createComposite')}}</button>
-          <button class="btn ghost" @click="$refs.importer.click()">{{t('importJson')}}</button>
+          <button class="btn" @click="state.modals.create = true">
+            <span class="btn-icon" v-html="icons.createPoints"></span><span>{{t('createFromPoints')}}</span>
+          </button>
+          <button class="btn secondary" @click="state.modals.math = true">
+            <span class="btn-icon" v-html="icons.createMath"></span><span>{{t('createFromMath')}}</span>
+          </button>
+          <button class="btn" @click="state.modals.composite=true">
+            <span class="btn-icon" v-html="icons.createComposite"></span><span>{{t('createComposite')}}</span>
+          </button>
+          <button class="btn ghost" @click="$refs.importer.click()">
+            <span class="btn-icon" v-html="icons.importJson"></span><span>{{t('importJson')}}</span>
+          </button>
           <input type="file" ref="importer" accept="application/json" style="display:none" @change="importJson">
         </div>
         <p class="muted" v-if="state.ui.lang==='ru'">Все операции выполняются через API с Basic Auth. Ошибки показываются модально.</p>
@@ -109,7 +129,9 @@
                       :class="{'disabled': state.selectedFunction?.functionId===fn.functionId}"
                       :disabled="state.selectedFunction?.functionId===fn.functionId"
                       @click="state.selectedFunction?.functionId!==fn.functionId && loadPoints(fn.functionId)">{{t('open')}}</button>
-                    <button class="btn danger ghost" @click="deleteFunction(fn.functionId)">{{t('delete')}}</button>
+                    <button class="btn danger ghost" @click="deleteFunction(fn.functionId)">
+                      <span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span>
+                    </button>
                   </td>
                 </tr>
                 <tr v-if="!state.functions.length"><td colspan="4" class="muted">Нет данных</td></tr>
@@ -148,9 +170,13 @@
             <div class="row points-section-header" style="justify-content: space-between;">
               <div class="muted">{{ state.selectedFunction?.functionName || (state.ui.lang==='en' ? 'Not selected' : 'Не выбрана') }}</div>
               <div class="row">
-                <button class="btn ghost" @click="exportJson" :disabled="!state.points.length">{{t('export')}}</button>
+                <button class="btn ghost" @click="exportJson" :disabled="!state.points.length">
+                  <span class="btn-icon" v-html="icons.export"></span><span>{{t('export')}}</span>
+                </button>
                 <button class="btn secondary" @click="addEmptyPointRow" :disabled="!state.selectedFunction">{{t('addPoint')}}</button>
-                <button class="btn" @click="saveAllPoints" :disabled="!state.selectedFunction || !state.points.length">{{t('save')}}</button>
+                <button class="btn" @click="saveAllPoints" :disabled="!state.selectedFunction || !state.points.length">
+                  <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
+                </button>
               </div>
             </div>
             <div class="scroll">
@@ -163,7 +189,9 @@
                     <td><input class="input" type="number" v-model.number="p.xValue" placeholder="x"></td>
                     <td><input class="input" type="number" v-model.number="p.yValue" placeholder="y"></td>
                     <td class="row" style="gap:6px;">
-                      <button class="btn danger ghost" style="padding:6px 10px;width:100%;" @click="deletePoint(p)">×</button>
+                      <button class="btn danger ghost" style="padding:6px 10px;width:100%;" @click="deletePoint(p)">
+                        <span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span>
+                      </button>
                     </td>
                   </tr>
                   <tr v-if="!state.points.length"><td colspan="3" class="muted">Выберите функцию</td></tr>
@@ -179,7 +207,9 @@
       <div class="modal">
         <div class="header">
           <div class="title" style="font-size:18px;">{{t('modalCreateTitle')}}</div>
-          <button class="btn ghost" @click="state.modals.create=false">{{t('cancel')}}</button>
+          <button class="btn ghost" @click="state.modals.create=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
         </div>
         <div class="grid grid-2">
           <label class="muted">{{t('name')}}
@@ -203,14 +233,16 @@
               <tr v-for="(p,idx) in state.createForm.points" :key="idx">
                 <td><input class="input" type="number" v-model.number="p.x"></td>
                 <td><input class="input" type="number" v-model.number="p.y"></td>
-                <td><button class="btn danger ghost" @click="removePointRow(idx)">−</button></td>
+                <td><button class="btn danger ghost" @click="removePointRow(idx)"><span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span></button></td>
               </tr>
             </tbody>
           </table>
         </div>
         <div class="row" style="margin-top:12px;">
           <button class="btn secondary" @click="addPointRow">{{t('addPointRow')}}</button>
-          <button class="btn" @click="createFromTable">{{t('create')}}</button>
+          <button class="btn" @click="createFromTable">
+            <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('create')}}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -219,7 +251,9 @@
       <div class="modal">
         <div class="header">
           <div class="title" style="font-size:18px;">{{t('modalMathTitle')}}</div>
-          <button class="btn ghost" @click="state.modals.math=false">{{t('cancel')}}</button>
+          <button class="btn ghost" @click="state.modals.math=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
         </div>
         <div class="grid grid-2">
           <label class="muted">{{t('name')}}
@@ -244,8 +278,12 @@
           </label>
         </div>
         <div class="row" style="margin-top:12px;">
-          <button class="btn secondary" @click="state.modals.math=false">{{t('cancel')}}</button>
-          <button class="btn" @click="createFromMath">{{t('create')}}</button>
+          <button class="btn secondary" @click="state.modals.math=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
+          <button class="btn" @click="createFromMath">
+            <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('create')}}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -254,7 +292,9 @@
       <div class="modal">
         <div class="header">
           <div class="title" style="font-size:18px;">{{t('modalCompositeTitle')}}</div>
-          <button class="btn ghost" @click="state.modals.composite=false">{{t('cancel')}}</button>
+          <button class="btn ghost" @click="state.modals.composite=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
         </div>
         <div class="grid grid-2">
           <label class="muted">{{t('name')}}
@@ -274,8 +314,12 @@
           </label>
         </div>
         <div class="row" style="margin-top:12px;">
-          <button class="btn secondary" @click="state.modals.composite=false">{{t('cancel')}}</button>
-          <button class="btn" @click="saveComposite">{{t('save')}}</button>
+          <button class="btn secondary" @click="state.modals.composite=false">
+            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          </button>
+          <button class="btn" @click="saveComposite">
+            <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
+          </button>
         </div>
         <p class="muted" style="margin-top:8px;">{{t('complexHint')}}</p>
       </div>
@@ -292,7 +336,9 @@
         <button class="btn ghost" @click="state.modals.error=null">×</button>
       </div>
       <p class="muted">{{state.modals.error.message}}</p>
-      <button class="btn" @click="state.modals.error=null">{{t('ok')}}</button>
+      <button class="btn" @click="state.modals.error=null">
+        <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('ok')}}</span>
+      </button>
     </div>
   </div>
   <!-- toasts -->
@@ -311,11 +357,11 @@
       <div class="footer-avatars">
         <a class="avatar-link" href="https://github.com/barinovadn" target="_blank" rel="noopener">
           <img src="https://avatars.githubusercontent.com/u/186514423?v=4" alt="Dasha">
-          <div class="muted">{{ state.ui.lang === 'ru' ? 'Даша' : 'Dasha' }}</div>
+          <div class="muted no-underline">{{ state.ui.lang === 'ru' ? 'Даша' : 'Dasha' }}</div>
         </a>
         <a class="avatar-link" href="https://github.com/daria111222" target="_blank" rel="noopener">
           <img src="https://avatars.githubusercontent.com/u/164402792?v=4" alt="Dasha">
-          <div class="muted">{{ state.ui.lang === 'ru' ? 'Даша' : 'Dasha' }}</div>
+          <div class="muted no-underline">{{ state.ui.lang === 'ru' ? 'Даша' : 'Dasha' }}</div>
         </a>
       </div>
     </div>
@@ -367,19 +413,22 @@
             <option value="ru">{{t('langRu')}}</option>
             <option value="en">{{t('langEn')}}</option>
           </select>
-          <div class="section-title">{{t('inclusive')}}</div>
+          <div class="section-title extra-margin">{{t('extraFeatures')}}</div>
           <label class="row muted settings-inline">
             <input type="checkbox" v-model="state.ui.inclusive"> {{t('inclusive')}}
           </label>
-          <div class="section-title">AdBlock</div>
           <label class="row muted settings-inline">
             <input type="checkbox" v-model="state.ads.adBlock"> {{t('adblock')}}
           </label>
         </div>
       </div>
       <div class="row settings-actions">
-        <button class="btn secondary half" @click="state.modals.settings=false">{{t('cancel')}}</button>
-        <button class="btn half" @click="saveSettings">{{t('save')}}</button>
+        <button class="btn secondary half force-grid" @click="state.modals.settings=false">
+          <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+        </button>
+        <button class="btn half" @click="saveSettings">
+          <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
+        </button>
       </div>
     </div>
   </div>
@@ -402,9 +451,15 @@
         </label>
       </div>
       <div class="row" style="margin-top:12px;">
-        <button class="btn secondary" @click="state.modals.profile=false">{{t('cancel')}}</button>
-        <button class="btn" @click="saveProfile">{{t('update')}}</button>
-        <button class="btn danger" @click="deleteAccount">{{t('deleteAccount')}}</button>
+        <button class="btn secondary" @click="state.modals.profile=false">
+          <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+        </button>
+        <button class="btn" @click="saveProfile">
+          <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('update')}}</span>
+        </button>
+        <button class="btn danger" @click="deleteAccount">
+          <span class="btn-icon" v-html="icons.remove"></span><span>{{t('deleteAccount')}}</span>
+        </button>
       </div>
     </div>
   </div>

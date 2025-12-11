@@ -9,6 +9,13 @@ const STORAGE_KEY = 'labs-oop-ui';
 const AD_FALLBACK_URL = 'https://adryd.co/wits.mp4';
 const themes = ['dark','light','neo','sunset','ocean','forest','candy','mono','cyber'];
 const edgeThemes = ['round','soft','rough'];
+const LIMITS = {
+  NAME_MAX: 128,
+  TYPE_MAX: 16,
+  NUMBER_ABS_MAX: 1_000_000, // на несколько порядков ниже потенциально опасных значений
+  POINTS_MIN: 2,
+  POINTS_MAX: 1000,
+};
 const adInventory = [
   { image: 'https://media1.tenor.com/m/rXvFQlQm87AAAAAC/mc-donalds-big-mac.gif', url: 'https://vkusnoitochka.ru/' },
   { image: 'https://media1.tenor.com/m/khjcfCe2rJQAAAAd/grubhub-grubhub-ad.gif', url: 'https://eda.yandex.ru/moscow?shippingType=delivery' },
@@ -34,13 +41,87 @@ const adInventory = [
   { image: 'https://ssau.ru/storage/carousel/images/file_68f8eead53bba1.39905816.jpg', url: 'https://ssau.ru/' },
   { image: 'https://ssau.ru/storage/carousel/images/file_68f8eead53bba1.39905816.jpg', url: 'https://ssau.ru/' },
   { image: 'https://ssau.ru/storage/carousel/images/file_68f8eead53bba1.39905816.jpg', url: 'https://ssau.ru/' },
-  { image: 'https://ssau.ru/storage/carousel/images/file_68f8eead53bba1.39905816.jpg', url: 'https://ssau.ru/' },
-  { image: 'https://ssau.ru/storage/carousel/images/file_68f8eead53bba1.39905816.jpg', url: 'https://ssau.ru/' },
 ].map((item) => ({
   ...item,
   url: item.url || AD_FALLBACK_URL,
 }));
+
+function ensureSafeNumber(raw, label = 'Значение') {
+  const num = Number(raw);
+  if (!Number.isFinite(num)) throw new Error(`${label}: введите число`);
+  if (Math.abs(num) > LIMITS.NUMBER_ABS_MAX) {
+    throw new Error(`${label}: |значение| должно быть ≤ ${LIMITS.NUMBER_ABS_MAX}`);
+  }
+  return num;
+}
+
+function ensureOptionalNumber(raw, label) {
+  if (raw === null || raw === undefined || raw === '') return null;
+  return ensureSafeNumber(raw, label);
+}
+
+function ensureName(raw, fallback = 'f(x)') {
+  const name = (raw || '').trim();
+  if (name && name.length > LIMITS.NAME_MAX) {
+    throw new Error(`Имя не длиннее ${LIMITS.NAME_MAX} символов`);
+  }
+  return name || fallback;
+}
+
+function ensureType(raw) {
+  const type = (raw || '').trim();
+  if (!type) throw new Error('Укажите тип функции (1-16 символов)');
+  if (type.length < 1 || type.length > LIMITS.TYPE_MAX) {
+    throw new Error(`Тип функции: длина 1-${LIMITS.TYPE_MAX} символов`);
+  }
+  return type;
+}
+
+function ensurePointsCount(raw) {
+  const num = Number(raw);
+  if (!Number.isInteger(num)) throw new Error('Количество точек должно быть целым числом');
+  if (num < LIMITS.POINTS_MIN || num > LIMITS.POINTS_MAX) {
+    throw new Error(`Количество точек: от ${LIMITS.POINTS_MIN} до ${LIMITS.POINTS_MAX}`);
+  }
+  return num;
+}
+
+function sanitizePoints(points = []) {
+  if (!Array.isArray(points) || points.length < LIMITS.POINTS_MIN) {
+    throw new Error(`Нужно минимум ${LIMITS.POINTS_MIN} точки`);
+  }
+  return points.map((p, idx) => ({
+    xValue: ensureSafeNumber(p.xValue ?? p.x, `x[${idx + 1}]`),
+    yValue: ensureSafeNumber(p.yValue ?? p.y, `y[${idx + 1}]`),
+  }));
+}
+const logos = [
+  'https://media.tenor.com/RnC4v5oEP34AAAAi/bmw-logo.gif',
+  'https://media.tenor.com/-GNA5aKsKYwAAAAi/gato-kl-cat.gif',
+  'https://media.tenor.com/mVVfN6bQKfEAAAAi/spinning-rat-stupid-rat.gif',
+  'https://media.tenor.com/surULijyhSsAAAAj/hi-greetings.gif',
+  'https://media.tenor.com/qYSjiwLs2zgAAAAj/fries-spin.gif',
+  'https://media.tenor.com/wkorbIbE7yQAAAAi/peaches-neko.gif',
+  'https://media.tenor.com/HK9yi0doH1QAAAAi/nigiri-tamago-sushi.gif',
+  'https://media.tenor.com/oYw-r_wNvZIAAAAi/duck-flipper.gif',
+  'https://media.tenor.com/qJRMLPlR3_8AAAAi/maxwell-cat.gif',
+  'https://media.tenor.com/FOeod1coD7wAAAAi/neuro-fumo-spin.gif',
+  'https://media.tenor.com/ZRoKjk6MpMsAAAAi/bowling-alley-strike-3d-model.gif',
+  'https://media.tenor.com/LROEAFG0GZMAAAAj/smug-jug-3d.gif',
+  'https://media.tenor.com/g--QPe6ExSEAAAAj/earth-spin.gif',
+  'https://media.tenor.com/mVVfN6bQKfEAAAAj/spinning-rat-stupid-rat.gif',
+  'https://media.tenor.com/zHP9BQROq0AAAAAi/doggo-spin.gif',
+  'https://media.tenor.com/UiXJKFiyeosAAAAj/dog-gerald.gif',
+  'https://media1.tenor.com/m/_rIatT7CqskAAAAd/bird-pigeon.gif',
+  'https://media1.tenor.com/m/_rIatT7CqskAAAAd/bird-pigeon.gif',
+];
 const themeIcons = {
+  ocean: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Beer-loop SVG Icon</title><mask id="lineMdBeerLoop0"><path stroke="#fff" stroke-width="2" d="M18 7C16 7 15 9 13 9C11 9 10 7 8 7C6 7 5 9 3 9C1 9 0 7 -2 7C-4 7 -5 9 -7 9" opacity="0"><animateMotion calcMode="linear" dur="3s" path="M0 0h10" repeatCount="indefinite"/><animate fill="freeze" attributeName="opacity" begin="0.6s" dur="0.5s" values="0;1"/></path></mask><path fill="none" stroke="currentColor" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 3L16 21H7L5 3z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="60;0"/></path><path fill="currentColor" d="M18 3L16 21H7L5 3z" mask="url(#lineMdBeerLoop0)"/></svg>`,
+  candy: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Cake SVG Icon</title><g fill="none" stroke="currentColor" stroke-width="2"><path stroke-dasharray="28" stroke-dashoffset="28" d="M12 10H18C19.1046 10 20 10.8954 20 12V21H12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="28;56"/></path><path stroke-dasharray="28" stroke-dashoffset="28" d="M12 21H4V12C4 10.8954 4.89543 10 6 10H12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="28;0"/></path><path stroke-dasharray="4" stroke-dashoffset="4" stroke-linecap="round" stroke-linejoin="round" d="M12 10V8" opacity="0"><set attributeName="opacity" begin="0.4s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.4s" dur="0.2s" values="4;0"/></path><path stroke-dasharray="20" stroke-dashoffset="20" d="M4 16H5C7 16 8.5 14 8.5 14C8.5 14 10 16 12 16C14 16 15.5 14 15.5 14C15.5 14 17 16 19 16H20" opacity="0"><set attributeName="opacity" begin="0.4s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.4s" values="20;0"/></path></g><path fill="currentColor" d="M14 4C14 5.10457 13.1046 6 12 6C10.8954 6 10 5.10457 10 4C10 2.89543 12 0 12 0C12 0 14 2.89543 14 4Z" opacity="0"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.2s" values="M13 5C13 5.5 12.5 6 12 6C11.5 6 11 5.5 11 5C11 4.5 12 4 12 4C12 4 13 4.5 13 5Z;M14 4C14 5.10457 13.1046 6 12 6C10.8954 6 10 5.10457 10 4C10 2.89543 12 0 12 0C12 0 14 2.89543 14 4Z"/></path></svg>`,
+  cyber: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Lightbulb SVG Icon</title><path fill="none" stroke="currentColor" stroke-dasharray="46" stroke-dashoffset="46" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 17H9V14.1973C7.2066 13.1599 6 11.2208 6 9C6 5.68629 8.68629 3 12 3C15.3137 3 18 5.68629 18 9C18 11.2208 16.7934 13.1599 15 14.1973V17z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="46;0"/></path><rect width="6" height="0" x="9" y="20" fill="currentColor" rx="1"><animate fill="freeze" attributeName="height" begin="0.5s" dur="0.2s" values="0;2"/></rect></svg>`,
+  mono: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Coffee-loop SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="48" stroke-dashoffset="48" d="M17 9v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V9z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="48;0"/></path><path stroke-dasharray="14" stroke-dashoffset="14" d="M17 14H20C20.55 14 21 13.55 21 13V10C21 9.45 20.55 9 20 9H17"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="14;28"/></path></g><mask id="lineMdCoffeeLoop0"><path fill="none" stroke="#fff" stroke-width="2" d="M8 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4M12 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4M16 0c0 2-2 2-2 4s2 2 2 4-2 2-2 4 2 2 2 4"><animateMotion calcMode="linear" dur="3s" path="M0 0v-8" repeatCount="indefinite"/></path></mask><rect width="24" height="0" y="7" fill="currentColor" mask="url(#lineMdCoffeeLoop0)"><animate fill="freeze" attributeName="y" begin="0.8s" dur="0.6s" values="7;2"/><animate fill="freeze" attributeName="height" begin="0.8s" dur="0.6s" values="0;5"/></rect></svg>`,
+  sunset: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Cloud-outline-loop SVG Icon</title><mask id="lineMdCloudOutlineLoop0"><g fill="#fff"><circle cx="12" cy="10" r="6"><animate attributeName="cx" dur="30s" repeatCount="indefinite" values="12;11;12;13;12"/></circle><rect width="9" height="8" x="8" y="12"/><rect width="17" height="12" x="1" y="8" rx="6"><animate attributeName="x" dur="21s" repeatCount="indefinite" values="1;0;1;2;1"/></rect><rect width="17" height="10" x="6" y="10" rx="5"><animate attributeName="x" dur="17s" repeatCount="indefinite" values="6;5;6;7;6"/></rect></g><circle cx="12" cy="10" r="4"><animate attributeName="cx" dur="30s" repeatCount="indefinite" values="12;11;12;13;12"/></circle><rect width="8" height="8" x="8" y="10"><animate attributeName="x" dur="30s" repeatCount="indefinite" values="8;7;8;9;8"/></rect><rect width="11" height="8" x="3" y="10" rx="4"><animate attributeName="x" dur="21s" repeatCount="indefinite" values="3;2;3;4;3"/></rect><rect width="13" height="6" x="8" y="12" rx="3"><animate attributeName="x" dur="17s" repeatCount="indefinite" values="8;7;8;9;8"/></rect></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdCloudOutlineLoop0)"/></svg>`,
+  neo: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Computer SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 21H17M12 21H7"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="6;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 21V17"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="6;0"/></path><path stroke-dasharray="64" stroke-dashoffset="64" d="M12 17H3V5H21V17Z"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.6s" values="64;0"/></path></g></svg>`,
   light: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Sunny-outline-loop SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="34" stroke-dashoffset="34" d="M12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="34;0"/></path><g stroke-dasharray="2" stroke-dashoffset="2"><path d="M0 0"><animate fill="freeze" attributeName="d" begin="0.5s" dur="0.2s" values="M12 19v1M19 12h1M12 5v-1M5 12h-1;M12 21v1M21 12h1M12 3v-1M3 12h-1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.2s" values="2;0"/></path><path d="M0 0"><animate fill="freeze" attributeName="d" begin="0.7s" dur="0.2s" values="M17 17l0.5 0.5M17 7l0.5 -0.5M7 7l-0.5 -0.5M7 17l-0.5 0.5;M18.5 18.5l0.5 0.5M18.5 5.5l0.5 -0.5M5.5 5.5l-0.5 -0.5M5.5 18.5l-0.5 0.5"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="2;0"/></path><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></g></g></svg>`,
   dark: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Sunny-outline-to-moon-alt-loop-transition SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><g stroke-dasharray="2"><path d="M12 21v1M21 12h1M12 3v-1M3 12h-1"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="4;2"/></path><path d="M18.5 18.5l0.5 0.5M18.5 5.5l0.5 -0.5M5.5 5.5l-0.5 -0.5M5.5 18.5l-0.5 0.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.2s" dur="0.2s" values="4;2"/></path></g><path d="M7 6 C7 12.08 11.92 17 18 17 C18.53 17 19.05 16.96 19.56 16.89 C17.95 19.36 15.17 21 12 21 C7.03 21 3 16.97 3 12 C3 8.83 4.64 6.05 7.11 4.44 C7.04 4.95 7 5.47 7 6 Z" opacity="0"><set attributeName="opacity" begin="0.5s" to="1"/></path></g><g fill="none" stroke="currentColor" stroke-dasharray="4" stroke-dashoffset="4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h1.5M13 4h-1.5M13 4v1.5M13 4v-1.5"><animate id="lineMdSunnyOutlineToMoonAltLoopTransition0" fill="freeze" attributeName="stroke-dashoffset" begin="0.6s;lineMdSunnyOutlineToMoonAltLoopTransition0.begin+6s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="lineMdSunnyOutlineToMoonAltLoopTransition0.begin+2s;lineMdSunnyOutlineToMoonAltLoopTransition0.begin+4s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="lineMdSunnyOutlineToMoonAltLoopTransition0.begin+1.2s;lineMdSunnyOutlineToMoonAltLoopTransition0.begin+3.2s;lineMdSunnyOutlineToMoonAltLoopTransition0.begin+5.2s" dur="0.4s" values="0;4"/><set attributeName="d" begin="lineMdSunnyOutlineToMoonAltLoopTransition0.begin+1.8s" to="M12 5h1.5M12 5h-1.5M12 5v1.5M12 5v-1.5"/><set attributeName="d" begin="lineMdSunnyOutlineToMoonAltLoopTransition0.begin+3.8s" to="M12 4h1.5M12 4h-1.5M12 4v1.5M12 4v-1.5"/><set attributeName="d" begin="lineMdSunnyOutlineToMoonAltLoopTransition0.begin+5.8s" to="M13 4h1.5M13 4h-1.5M13 4v1.5M13 4v-1.5"/></path><path d="M19 11h1.5M19 11h-1.5M19 11v1.5M19 11v-1.5"><animate id="lineMdSunnyOutlineToMoonAltLoopTransition1" fill="freeze" attributeName="stroke-dashoffset" begin="1s;lineMdSunnyOutlineToMoonAltLoopTransition1.begin+6s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="lineMdSunnyOutlineToMoonAltLoopTransition1.begin+2s;lineMdSunnyOutlineToMoonAltLoopTransition1.begin+4s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="lineMdSunnyOutlineToMoonAltLoopTransition1.begin+1.2s;lineMdSunnyOutlineToMoonAltLoopTransition1.begin+3.2s;lineMdSunnyOutlineToMoonAltLoopTransition1.begin+5.2s" dur="0.4s" values="0;4"/><set attributeName="d" begin="lineMdSunnyOutlineToMoonAltLoopTransition1.begin+1.8s" to="M17 11h1.5M17 11h-1.5M17 11v1.5M17 11v-1.5"/><set attributeName="d" begin="lineMdSunnyOutlineToMoonAltLoopTransition1.begin+3.8s" to="M18 12h1.5M18 12h-1.5M18 12v1.5M18 12v-1.5"/><set attributeName="d" begin="lineMdSunnyOutlineToMoonAltLoopTransition1.begin+5.8s" to="M19 11h1.5M19 11h-1.5M19 11v1.5M19 11v-1.5"/></path><path d="M19 4h1.5M19 4h-1.5M19 4v1.5M19 4v-1.5"><animate id="lineMdSunnyOutlineToMoonAltLoopTransition2" fill="freeze" attributeName="stroke-dashoffset" begin="2.8s;lineMdSunnyOutlineToMoonAltLoopTransition2.begin+6s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="lineMdSunnyOutlineToMoonAltLoopTransition2.begin+2s" dur="0.4s" values="4;0"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="lineMdSunnyOutlineToMoonAltLoopTransition2.begin+1.2s;lineMdSunnyOutlineToMoonAltLoopTransition2.begin+3.2s" dur="0.4s" values="0;4"/><set attributeName="d" begin="lineMdSunnyOutlineToMoonAltLoopTransition2.begin+1.8s" to="M20 5h1.5M20 5h-1.5M20 5v1.5M20 5v-1.5"/><set attributeName="d" begin="lineMdSunnyOutlineToMoonAltLoopTransition2.begin+5.8s" to="M19 4h1.5M19 4h-1.5M19 4v1.5M19 4v-1.5"/></path></g><mask id="lineMdSunnyOutlineToMoonAltLoopTransition3"><circle cx="12" cy="12" r="12" fill="#fff"/><circle cx="12" cy="12" r="4"><animate fill="freeze" attributeName="r" begin="0.1s" dur="0.4s" values="4;8"/></circle><circle cx="22" cy="2" r="3" fill="#fff"><animate fill="freeze" attributeName="cx" begin="0.1s" dur="0.4s" values="22;18"/><animate fill="freeze" attributeName="cy" begin="0.1s" dur="0.4s" values="2;6"/><animate fill="freeze" attributeName="r" begin="0.1s" dur="0.4s" values="3;12"/></circle><circle cx="22" cy="2" r="1"><animate fill="freeze" attributeName="cx" begin="0.1s" dur="0.4s" values="22;18"/><animate fill="freeze" attributeName="cy" begin="0.1s" dur="0.4s" values="2;6"/><animate fill="freeze" attributeName="r" begin="0.1s" dur="0.4s" values="1;10"/></circle></mask><circle cx="12" cy="12" r="6" fill="currentColor" mask="url(#lineMdSunnyOutlineToMoonAltLoopTransition3)"><set attributeName="opacity" begin="0.5s" to="0"/><animate fill="freeze" attributeName="r" begin="0.1s" dur="0.4s" values="6;10"/></circle></svg>`,
   default: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Paint-drop SVG Icon</title><path fill="none" stroke="currentColor" stroke-dasharray="28" stroke-dashoffset="28" stroke-linecap="round" stroke-width="2" d="M12 3C12 3 19 9 19 15C19 17 18 21 12 21M12 3C12 3 5 9 5 15C5 17 6 21 12 21"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="28;0"/></path></svg>`,
@@ -53,6 +134,18 @@ const edgeIcons = {
 const adCloseIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="384" height="512" viewBox="0 0 384 512"><title>Xmark SVG Icon</title><path fill="currentColor" d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7L86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256L41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3l105.4 105.3c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256z"/></svg>`;
 const adBadgeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="576" height="512" viewBox="0 0 576 512"><title>Audio-description SVG Icon</title><path fill="currentColor" d="M64 32C28.7 32 0 60.7 0 96v320c0 35.3 28.7 64 64 64h448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64zm149.5 141.3l72 144c5.9 11.9 1.1 26.3-10.7 32.2s-26.3 1.1-32.2-10.7l-9.4-18.9h-82.3l-9.4 18.9c-5.9 11.9-20.3 16.7-32.2 10.7s-16.7-20.3-10.7-32.2l72-144c4.1-8.1 12.4-13.3 21.5-13.3s17.4 5.1 21.5 13.3zm-.4 106.6L192 237.7l-21.1 42.2zM304 184c0-13.3 10.7-24 24-24h56c53 0 96 43 96 96s-43 96-96 96h-56c-13.3 0-24-10.7-24-24zm48 24v96h32c26.5 0 48-21.5 48-48s-21.5-48-48-48z"/></svg>`;
 const adMuteIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="576" height="512" viewBox="0 0 576 512"><title>Volume-xmark SVG Icon</title><path fill="currentColor" d="M301.1 34.8C312.6 40 320 51.4 320 64v384c0 12.6-7.4 24-18.9 29.2s-25 3.1-34.4-5.3L131.8 352H64c-35.3 0-64-28.7-64-64v-64c0-35.3 28.7-64 64-64h67.8L266.7 40.1c9.4-8.4 22.9-10.4 34.4-5.3M425 167l55 55l55-55c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-55 55l55 55c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-55-55l-55 55c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l55-55l-55-55c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0"/></svg>`;
+const actionIcons = {
+  settings: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Cog-loop SVG Icon</title><defs><symbol id="lineMdCogLoop0"><path fill="none" stroke-width="2" d="M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.6 7.4 16.8 7.61 16.99 7.83C17.46 8.4 17.85 9.05 18.11 9.77C18.2 10.03 18.28 10.31 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12"><animate fill="freeze" attributeName="d" begin="0.8s" dur="0.2s" values="M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.6 7.4 16.8 7.61 16.99 7.83C17.46 8.4 17.85 9.05 18.11 9.77C18.2 10.03 18.28 10.31 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12;M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.38 7.2 19 6.12 19.01 6.14C19.01 6.14 20.57 8.84 20.57 8.84C20.58 8.87 18.35 10.59 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12"/></path></symbol></defs><g fill="none" stroke="currentColor" stroke-width="2"><g stroke-linecap="round" stroke-linejoin="round"><path stroke-dasharray="42" stroke-dashoffset="42" d="M12 5.5C15.59 5.5 18.5 8.41 18.5 12C18.5 15.59 15.59 18.5 12 18.5C8.41 18.5 5.5 15.59 5.5 12C5.5 8.41 8.41 5.5 12 5.5z" opacity="0"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.2s" dur="0.5s" values="42;0"/><set attributeName="opacity" begin="0.2s" to="1"/><set attributeName="opacity" begin="0.7s" to="0"/></path><path stroke-dasharray="20" stroke-dashoffset="20" d="M12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15C10.34 15 9 13.66 9 12C9 10.34 10.34 9 12 9z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="20;0"/></path></g><g opacity="0"><use href="#lineMdCogLoop0"/><use href="#lineMdCogLoop0" transform="rotate(60 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(120 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(180 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(240 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(300 12 12)"/><set attributeName="opacity" begin="0.7s" to="1"/><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></g></g></svg>`,
+  profile: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Person SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="20" stroke-dashoffset="20" d="M12 5C13.66 5 15 6.34 15 8C15 9.65685 13.6569 11 12 11C10.3431 11 9 9.65685 9 8C9 6.34315 10.3431 5 12 5z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="20;0"/></path><path stroke-dasharray="36" stroke-dashoffset="36" d="M12 14C16 14 19 16 19 17V19H5V17C5 16 8 14 12 14z" opacity="0"><set attributeName="opacity" begin="0.5s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.4s" values="36;0"/></path></g></svg>`,
+  logout: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Compass SVG Icon</title><mask id="lineMdCompass0"><path fill="none" stroke="#fff" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-width="2" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path fill="#fff" d="M11 11L12 12L13 13L12 12z"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.3s" values="M11 11L12 12L13 13L12 12z;M10.2 10.2L17 7L13.8 13.8L7 17z"/><animateTransform attributeName="transform" begin="0.5s" dur="0.5s" type="rotate" values="-180 12 12;0 12 12"/></path><circle cx="12" cy="12" r="1" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.3s" values="0;1"/></circle></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdCompass0)"/></svg>`,
+  createPoints: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>My-location-loop SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="56" stroke-dashoffset="56" d="M12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="56;0"/></path><path d="M12 4v0M20 12h0M12 20v0M4 12h0" opacity="0"><set attributeName="opacity" begin="0.9s" to="1"/><animate fill="freeze" attributeName="d" begin="0.9s" dur="0.2s" values="M12 4v0M20 12h0M12 20v0M4 12h0;M12 4v-2M20 12h2M12 20v2M4 12h-2"/><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g><circle cx="12" cy="12" r="0" fill="currentColor" fill-opacity="0"><set attributeName="fill-opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="r" begin="0.6s" dur="0.2s" values="0;4"/></circle></svg>`,
+  createMath: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Text-box-multiple SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="62" stroke-dashoffset="62" d="M22 4V3C22 2.45 21.55 2 21 2H7C6.45 2 6 2.45 6 3V17C6 17.55 6.45 18 7 18H21C21.55 18 22 17.55 22 17z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="62;124"/></path><g stroke-dasharray="10" stroke-dashoffset="10"><path d="M10 6h8"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="10;0"/></path><path d="M10 10h8"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.9s" dur="0.2s" values="10;0"/></path></g><path stroke-dasharray="7" stroke-dashoffset="7" d="M10 14h5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.1s" dur="0.2s" values="7;0"/></path><path stroke-dasharray="34" stroke-dashoffset="34" d="M2 6V21C2 21.55 2.45 22 3 22H18"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.4s" dur="0.4s" values="34;68"/></path></g></svg>`,
+  createComposite: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Arrows-horizontal SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="12" stroke-dashoffset="12" d="M15 7H3.5M9 17H20.5"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="12;0"/></path><path stroke-dasharray="8" stroke-dashoffset="8" d="M3 7L7 11M3 7L7 3M21 17L17 21M21 17L17 13"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.2s" values="8;0"/></path></g></svg>`,
+  importJson: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Document-list SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><g stroke-width="2"><path stroke-dasharray="64" stroke-dashoffset="64" d="M13 3L19 9V21H5V3H13"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="64;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M9 13H13"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1s" dur="0.2s" values="6;0"/></path><path stroke-dasharray="8" stroke-dashoffset="8" d="M9 16H15"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.2s" dur="0.2s" values="8;0"/></path></g><path stroke-dasharray="14" stroke-dashoffset="14" d="M12.5 3V8.5H19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="14;0"/></path></g></svg>`,
+  export: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Downloading-loop SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="2 4" stroke-dashoffset="6" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21"><animate attributeName="stroke-dashoffset" dur="0.6s" repeatCount="indefinite" values="6;0"/></path><path stroke-dasharray="30" stroke-dashoffset="30" d="M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.1s" dur="0.3s" values="30;0"/></path><path stroke-dasharray="10" stroke-dashoffset="10" d="M12 8v7.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.2s" values="10;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 15.5l3.5 -3.5M12 15.5l-3.5 -3.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="6;0"/></path></g></svg>`,
+  confirm: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Confirm SVG Icon</title><path fill="none" stroke="currentColor" stroke-dasharray="24" stroke-dashoffset="24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11L11 17L21 7"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="24;0"/></path></svg>`,
+  remove: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"/></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"/></path></g></svg>`,
+};
 
 const i18n = {
   ru: {
@@ -105,7 +198,8 @@ const i18n = {
     theme: 'Тема',
     edges: 'Скругление',
     language: 'Язык',
-    inclusive: 'Супер-контраст и крупный текст',
+    extraFeatures: 'Специальные возможности',
+    inclusive: 'Контраст и крупный текст',
     adblock: 'AdBlock',
     successLabel: 'Успешно',
     warningLabel: 'Предупреждение',
@@ -123,12 +217,13 @@ const i18n = {
       cyber: 'Кибер',
     },
     edgesDict: {
-      round: 'Круглые края',
-      soft: 'Мягкие края',
-      rough: 'Прямые края',
+      round: 'Кругло',
+      soft: 'Мягко',
+      rough: 'Остро',
     },
     error: 'Ошибка',
     ok: 'Понятно',
+    contact: 'Контакты',
     footerLinks: ['Документация','Поддержка','Политика','Контакты','О проекте','Помощь','API','Скачать'],
     langRu: 'Русский',
     langEn: 'English',
@@ -215,7 +310,8 @@ const i18n = {
     theme: 'Theme',
     edges: 'Corner style',
     language: 'Language',
-    inclusive: 'High contrast & large text',
+    extraFeatures: 'Accessability & Extra features',
+    inclusive: 'High contrast mode',
     adblock: 'AdBlock',
     successLabel: 'Success',
     warningLabel: 'Warning',
@@ -233,12 +329,13 @@ const i18n = {
       cyber: 'Cyber'
     },
     edgesDict: {
-      round: 'Round edges',
-      soft: 'Soft edges',
-      rough: 'Sharp edges',
+      round: 'Round',
+      soft: 'Soft',
+      rough: 'Sharp',
     },
     error: 'Error',
     ok: 'Got it',
+    contact: 'Contact',
     footerLinks: ['Docs','Support','Policy','Contacts','About','Help','API','Download'],
     langRu: 'Russian',
     langEn: 'English',
@@ -327,6 +424,12 @@ function pickRandomAds(count = 2) {
     if (picked) result.push(picked);
   }
   return result;
+}
+
+function pickRandomLogo() {
+  if (!logos.length) return 'https://media.tenor.com/RnC4v5oEP34AAAAi/bmw-logo.gif';
+  const idx = Math.floor(Math.random() * logos.length);
+  return logos[idx] || 'https://media.tenor.com/RnC4v5oEP34AAAAi/bmw-logo.gif';
 }
 
 async function fetchPointsNormalized(functionId, depth = 0) {
@@ -549,7 +652,9 @@ function synthesizePointsFromFunction(fn, count = 25) {
         themes,
         edgeThemes,
         i18n,
+        icons: actionIcons,
         mobileMenuOpen: false,
+        brandLogo: pickRandomLogo(),
         adCloseIcon,
         adBadgeIcon,
         adMuteIcon,
@@ -1000,44 +1105,47 @@ function synthesizePointsFromFunction(fn, count = 25) {
         if (!this.state.credentials.userId) {
           throw new Error('Не удалось определить userId. Перелогиньтесь.');
         }
-        if (!points || points.length < 2) {
-          throw new Error('Нужно минимум 2 точки');
-        }
+        const safeName = ensureName(name || 'f(x)');
+        const safeType = ensureType(type || 'TABULATED');
+        const safeXFrom = ensureOptionalNumber(xFrom, 'xFrom');
+        const safeXTo = ensureOptionalNumber(xTo, 'xTo');
+        const safePoints = sanitizePoints(points);
 
         const payload = {
           userId: Number(this.state.credentials.userId),
-          functionName: name || 'f(x)',
-          functionType: type || 'TABULATED',
-          xFrom: xFrom ?? null,
-          xTo: xTo ?? null,
+          functionName: safeName,
+          functionType: safeType,
+          xFrom: safeXFrom,
+          xTo: safeXTo,
         };
 
         const fn = await api.post('/functions', payload);
-        for (const p of points) {
+        for (const p of safePoints) {
           await api.post(`/functions/${fn.functionId}/points`, {
-            xValue: Number(p.xValue ?? p.x),
-            yValue: Number(p.yValue ?? p.y),
+            xValue: p.xValue,
+            yValue: p.yValue,
           });
         }
-        this.state.points = points.map((p, idx) => ({
+        this.state.points = safePoints.map((p, idx) => ({
           pointId: `local-${idx}`,
           functionId: fn.functionId,
-          xValue: Number(p.xValue ?? p.x),
-          yValue: Number(p.yValue ?? p.y),
+          xValue: p.xValue,
+          yValue: p.yValue,
         }));
         return fn;
       },
       async createFromTable() {
         try {
-          const points = this.state.createForm.points.map((p) => ({
-            xValue: Number(p.x),
-            yValue: Number(p.y),
-          }));
+          const name = ensureName(this.state.createForm.name || 'f(x)');
+          const type = ensureType(this.state.createForm.type || 'TABULATED');
+          const xFrom = ensureOptionalNumber(this.state.createForm.xFrom, 'xFrom');
+          const xTo = ensureOptionalNumber(this.state.createForm.xTo, 'xTo');
+          const points = sanitizePoints(this.state.createForm.points);
           const fn = await this.createFunctionWithPoints({
-            name: this.state.createForm.name,
-            type: this.state.createForm.type,
-            xFrom: this.state.createForm.xFrom,
-            xTo: this.state.createForm.xTo,
+            name,
+            type,
+            xFrom,
+            xTo,
             points,
           });
           this.toast('Функция сохранена');
@@ -1051,17 +1159,25 @@ function synthesizePointsFromFunction(fn, count = 25) {
       },
       async createFromMath() {
         try {
-          const { xFrom, xTo, pointsCount, mathKey, constant, name } = this.state.mathForm;
-          if (pointsCount < 2) throw new Error('Минимум 2 точки');
+          const { mathKey } = this.state.mathForm;
+          const xFrom = ensureSafeNumber(this.state.mathForm.xFrom, 'xFrom');
+          const xTo = ensureSafeNumber(this.state.mathForm.xTo, 'xTo');
+          const pointsCount = ensurePointsCount(this.state.mathForm.pointsCount);
+          const constant = ensureOptionalNumber(this.state.mathForm.constant, 'const');
           const label = (mathFunctions.find((m) => m.key === mathKey)?.label) || 'f(x)';
-          const finalName = name && name.trim() ? name : label;
+          const finalName = ensureName(this.state.mathForm.name || label, label);
           const step = (xTo - xFrom) / (pointsCount - 1);
           const evalFn = mathEvaluators[mathKey];
-          const points = Array.from({ length: pointsCount }, (_, idx) => {
+          const pointsRaw = Array.from({ length: pointsCount }, (_, idx) => {
             const x = xFrom + idx * step;
             const y = evalFn ? evalFn(x, constant) : 0;
             return { xValue: x, yValue: y };
           });
+          const exceeds = pointsRaw.find((p) => Math.abs(p.yValue) > LIMITS.NUMBER_ABS_MAX);
+          if (exceeds) {
+            throw new Error(`Рассчитанные y превышают лимит ±${LIMITS.NUMBER_ABS_MAX}. Уменьшите диапазон или выберите другую функцию.`);
+          }
+          const points = sanitizePoints(pointsRaw);
           const fn = await this.createFunctionWithPoints({
             name: finalName,
             type: 'MATH',
@@ -1081,7 +1197,8 @@ function synthesizePointsFromFunction(fn, count = 25) {
       async saveComposite() {
         try {
           if (!this.state.credentials.userId) throw new Error('Укажите userId');
-          const { name, a, b } = this.state.compositeForm;
+          const { a, b } = this.state.compositeForm;
+          const name = ensureName(this.state.compositeForm.name, 'composite');
           if (!name || !a || !b) throw new Error('Заполните имя и выберите обе функции');
           await api.post('/composite-functions', {
             userId: Number(this.state.credentials.userId),
@@ -1237,6 +1354,11 @@ function synthesizePointsFromFunction(fn, count = 25) {
         }
         try {
           const fnId = this.state.selectedFunction.functionId;
+          this.state.points = this.state.points.map((p, idx) => ({
+            ...p,
+            xValue: ensureSafeNumber(p.xValue, `x[${idx + 1}]`),
+            yValue: ensureSafeNumber(p.yValue, `y[${idx + 1}]`),
+          }));
           for (const p of this.state.points) {
             const isPersisted = Number.isFinite(Number(p.pointId));
             if (isPersisted) {
