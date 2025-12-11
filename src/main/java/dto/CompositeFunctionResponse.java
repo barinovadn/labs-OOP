@@ -9,6 +9,8 @@ public class CompositeFunctionResponse {
     private Long firstFunctionId;
     private Long secondFunctionId;
     private LocalDateTime createdAt;
+    private Double xFrom;
+    private Double xTo;
 
     public CompositeFunctionResponse() {}
 
@@ -29,5 +31,11 @@ public class CompositeFunctionResponse {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Double getXFrom() { return xFrom; }
+    public void setXFrom(Double xFrom) { this.xFrom = xFrom; }
+
+    public Double getXTo() { return xTo; }
+    public void setXTo(Double xTo) { this.xTo = xTo; }
 }
 

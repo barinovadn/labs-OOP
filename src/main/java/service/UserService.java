@@ -69,6 +69,13 @@ public class UserService {
         return toResponse(user);
     }
 
+    public UserResponse getCurrentUser(UserEntity user) {
+        if (user == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        return toResponse(user);
+    }
+
     public List<UserResponse> getAllUsers() {
         logger.info("Getting all users");
         return userRepository.findAll().stream()
@@ -80,6 +87,13 @@ public class UserService {
         logger.info("Updating user with ID: " + id);
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        if (request.getUsername() != null && userRepository.existsByUsernameAndUserIdNot(request.getUsername(), id)) {
+            throw new RuntimeException("Username already exists: " + request.getUsername());
+        }
+        if (request.getEmail() != null && userRepository.existsByEmailAndUserIdNot(request.getEmail(), id)) {
+            throw new RuntimeException("Email already exists: " + request.getEmail());
+        }
         
         user.setUsername(request.getUsername());
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {

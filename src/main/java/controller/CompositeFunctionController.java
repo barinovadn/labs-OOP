@@ -3,6 +3,7 @@ package controller;
 import dto.ApiResponse;
 import dto.CompositeFunctionRequest;
 import dto.CompositeFunctionResponse;
+import dto.CompositeFunctionPointResponse;
 import service.CompositeFunctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,33 @@ public class CompositeFunctionController {
         } catch (Exception e) {
             logger.severe("Error creating composite function: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{id}/points")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<ApiResponse<CompositeFunctionPointResponse>> getCompositePointsMeta(@PathVariable Long id) {
+        try {
+            CompositeFunctionPointResponse response = compositeFunctionService.getCompositeFunctionPointInfo(id);
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            logger.severe("Error getting composite points meta: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<ApiResponse<List<CompositeFunctionResponse>>> getAllCompositeFunctions() {
+        logger.info("GET /api/composite-functions");
+        try {
+            List<CompositeFunctionResponse> response = compositeFunctionService.getAllCompositeFunctions();
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            logger.severe("Error getting composite functions: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));
         }
     }

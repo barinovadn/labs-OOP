@@ -3,11 +3,15 @@ package config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +29,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private CustomUserDetailsService userDetailsService;
 
     @Override
+    public void configure(WebSecurity web) {
+        web.ignoring().antMatchers(
+                "/",
+                "/index.html",
+                "/template.html",
+                "/favicon.ico",
+                "/static/**",
+                "/css/**",
+                "/js/**",
+                "/images/**",
+                "/**/*.css",
+                "/**/*.html",
+                "/**/*.js",
+                "/**/*.png",
+                "/**/*.jpg",
+                "/**/*.svg",
+                "/webjars/**",
+                "/error"
+        );
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         logger.info("Configuring Spring Security with Basic Authentication");
         
@@ -33,25 +59,38 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
+                // Static UI - public
+                .antMatchers("/", "/index.html", "/template.html", "/**/*.html",
+                        "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Public endpoints
                 .antMatchers("/api/auth/register").permitAll()
                 // Admin only
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
                 .antMatchers("/api/roles/**").hasRole("ADMIN")
-                // User management - requires authentication
+                // User management - Auth
                 .antMatchers("/api/users/**").hasAnyRole("ADMIN", "USER")
-                // Functions - authenticated users
+                // Functions - Auth
                 .antMatchers("/api/functions/**").hasAnyRole("ADMIN", "USER")
                 .antMatchers("/api/points/**").hasAnyRole("ADMIN", "USER")
                 .antMatchers("/api/composite-functions/**").hasAnyRole("ADMIN", "USER")
-                // All other requests require authentication
+                // Auth only
                 .anyRequest().authenticated()
             .and()
-            .httpBasic()
+            .httpBasic().authenticationEntryPoint(restAuthenticationEntryPoint())
             .and()
             .userDetailsService(userDetailsService);
         
         logger.info("Spring Security configuration completed");
+    }
+
+    @Bean
+    public AuthenticationEntryPoint restAuthenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.getWriter().write("{\"success\":false,\"message\":\"Unauthorized\"}");
+        };
     }
 
     @Bean

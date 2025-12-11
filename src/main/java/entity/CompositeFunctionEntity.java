@@ -33,6 +33,12 @@ public class CompositeFunctionEntity {
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "x_from")
+    private Double xFrom;
+
+    @Column(name = "x_to")
+    private Double xTo;
     
     public CompositeFunctionEntity() {}
     
@@ -62,4 +68,10 @@ public class CompositeFunctionEntity {
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Double getXFrom() { return xFrom; }
+    public void setXFrom(Double xFrom) { this.xFrom = xFrom; }
+
+    public Double getXTo() { return xTo; }
+    public void setXTo(Double xTo) { this.xTo = xTo; }
 }

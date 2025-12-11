@@ -2,6 +2,7 @@ package service;
 
 import dto.CompositeFunctionRequest;
 import dto.CompositeFunctionResponse;
+import dto.CompositeFunctionPointResponse;
 import entity.CompositeFunctionEntity;
 import entity.FunctionEntity;
 import entity.UserEntity;
@@ -47,6 +48,8 @@ public class CompositeFunctionService {
                 firstFunction,
                 secondFunction
         );
+        composite.setXFrom(request.getXFrom());
+        composite.setXTo(request.getXTo());
 
         composite = compositeFunctionRepository.save(composite);
         logger.info("Composite function created with ID: " + composite.getCompositeId());
@@ -58,6 +61,24 @@ public class CompositeFunctionService {
         CompositeFunctionEntity composite = compositeFunctionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Composite function not found with id: " + id));
         return toResponse(composite);
+    }
+
+    public CompositeFunctionPointResponse getCompositeFunctionPointInfo(Long id) {
+        CompositeFunctionEntity composite = compositeFunctionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Composite function not found with id: " + id));
+        CompositeFunctionPointResponse resp = new CompositeFunctionPointResponse();
+        resp.setCompositeId(composite.getCompositeId());
+        resp.setUserId(composite.getUser().getUserId());
+        resp.setFirstFunctionId(composite.getFirstFunction().getFunctionId());
+        resp.setSecondFunctionId(composite.getSecondFunction().getFunctionId());
+        return resp;
+    }
+
+    public List<CompositeFunctionResponse> getAllCompositeFunctions() {
+        logger.info("Getting all composite functions");
+        return compositeFunctionRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     public List<CompositeFunctionResponse> getCompositeFunctionsByUserId(Long userId) {
@@ -83,6 +104,8 @@ public class CompositeFunctionService {
         composite.setCompositeName(request.getCompositeName());
         composite.setFirstFunction(firstFunction);
         composite.setSecondFunction(secondFunction);
+        composite.setXFrom(request.getXFrom());
+        composite.setXTo(request.getXTo());
 
         composite = compositeFunctionRepository.save(composite);
         logger.info("Composite function updated: " + id);
@@ -106,6 +129,8 @@ public class CompositeFunctionService {
         response.setFirstFunctionId(composite.getFirstFunction().getFunctionId());
         response.setSecondFunctionId(composite.getSecondFunction().getFunctionId());
         response.setCreatedAt(composite.getCreatedAt());
+        response.setXFrom(composite.getXFrom());
+        response.setXTo(composite.getXTo());
         return response;
     }
 }

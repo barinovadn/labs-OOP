@@ -5,14 +5,17 @@ import dto.CompositeFunctionResponse;
 import dto.FunctionResponse;
 import dto.UserRequest;
 import dto.UserResponse;
-import service.CompositeFunctionService;
-import service.FunctionService;
-import service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import security.CustomUserDetails;
+import service.CompositeFunctionService;
+import service.FunctionService;
+import service.UserService;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -22,6 +25,15 @@ import java.util.logging.Logger;
 public class UserController {
     private static final Logger logger = Logger.getLogger(UserController.class.getName());
 
+    private CustomUserDetails currentUserDetails() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = auth != null ? auth.getPrincipal() : null;
+        if (principal instanceof CustomUserDetails) {
+            return (CustomUserDetails) principal;
+        }
+        return null;
+    }
+
     @Autowired
     private UserService userService;
 
@@ -30,6 +42,22 @@ public class UserController {
 
     @Autowired
     private CompositeFunctionService compositeFunctionService;
+
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<ApiResponse<UserResponse>> currentUser() {
+        try {
+            CustomUserDetails details = currentUserDetails();
+            if (details == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Unauthorized"));
+            }
+            UserResponse response = userService.getUserById(details.getUserId());
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            logger.severe("Error getting current user: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error(e.getMessage()));
+        }
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -89,10 +117,17 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id) {
         logger.info("DELETE /api/users/" + id);
         try {
+            CustomUserDetails me = currentUserDetails();
+            boolean isAdmin = me != null && me.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!isAdmin && (me == null || !id.equals(me.getUserId()))) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ApiResponse.error("Forbidden: can delete only own account"));
+            }
             userService.deleteUser(id);
             return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
         } catch (Exception e) {
