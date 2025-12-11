@@ -74,6 +74,17 @@ export function createInitialState() {
       inclusive: localStorage.getItem('ui-inclusive') === 'true',
       edges: localStorage.getItem('ui-edges') || 'soft',
     },
+    ads: {
+      adBlock: localStorage.getItem('ui-adblock') === 'true',
+      slots: {
+        functions: null,
+        graph: null,
+      },
+      dismissed: {
+        functions: false,
+        graph: false,
+      },
+    },
     modals: {
       create: false,
       math: false,

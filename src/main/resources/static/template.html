@@ -47,18 +47,27 @@
           <div class="muted">{{t('loggedAs')}} {{state.credentials.username}}</div>
         </div>
       </div>
-      <div class="row">
-        <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button>
+      <div class="row header-actions desktop-menu">
+        <!-- <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button> -->
         <button class="btn secondary" @click="openSettings">{{t('settings')}}</button>
         <button class="btn secondary" @click="openProfile">{{t('profile')}}</button>
         <button class="btn ghost" @click="logout">{{t('logout')}}</button>
+      </div>
+      <div class="mobile-menu-container">
+        <button :class="['btn','icon-btn','mobile-menu-trigger', {active: mobileMenuOpen}]" @click="toggleMobileMenu" v-html="mobileMenuOpen ? burgerIconOpen : burgerIcon"></button>
+        <div v-if="mobileMenuOpen" class="mobile-menu-popup" @click.self="closeMobileMenu">
+          <!-- <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button> -->
+          <button class="btn secondary" @click="() => { openSettings(); closeMobileMenu(); }">{{t('settings')}}</button>
+          <button class="btn secondary" @click="() => { openProfile(); closeMobileMenu(); }">{{t('profile')}}</button>
+          <button class="btn ghost" @click="() => { logout(); closeMobileMenu(); }">{{t('logout')}}</button>
+        </div>
       </div>
     </div>
 
     <div class="card grid grid-2">
       <div>
         <div class="section-title">{{t('quickActions')}}</div>
-        <div class="row">
+        <div class="row quick-actions">
           <button class="btn" @click="state.modals.create = true">{{t('createFromPoints')}}</button>
           <button class="btn secondary" @click="state.modals.math = true">{{t('createFromMath')}}</button>
           <button class="btn" @click="state.modals.composite=true">{{t('createComposite')}}</button>
@@ -71,70 +80,96 @@
     </div>
 
     <div class="grid grid-2">
-      <div class="card">
-        <div class="section-title">{{t('functions')}}</div>
-        <div class="scroll" style="max-height:420px;">
-          <table class="table">
-            <thead>
-              <tr><th>{{t('name')}}</th><th>{{t('type')}}</th><th colspan="2">{{t('settings')}}</th></tr>
-            </thead>
-            <tbody>
-              <tr v-for="fn in state.functions" :key="fn.functionId"
-                  :class="{'fn-selected': state.selectedFunction?.functionId===fn.functionId}">
-                <td class="fn-name" :title="fn.functionName">{{fn.functionName}}</td>
-                <td><span class="pill">{{typeLabel(fn.functionType)}}</span></td>
-                <td class="fn-actions">
-                  <button class="btn ghost"
-                    :class="{'disabled': state.selectedFunction?.functionId===fn.functionId}"
-                    :disabled="state.selectedFunction?.functionId===fn.functionId"
-                    @click="state.selectedFunction?.functionId!==fn.functionId && loadPoints(fn.functionId)">{{t('open')}}</button>
-                  <button class="btn danger ghost" @click="deleteFunction(fn.functionId)">{{t('delete')}}</button>
-                </td>
-              </tr>
-              <tr v-if="!state.functions.length"><td colspan="4" class="muted">Нет данных</td></tr>
-            </tbody>
-          </table>
+      <div class="column-stack">
+        <div v-if="!state.ads.adBlock && !state.ads.dismissed.functions && state.ads.slots.functions" class="card ad-card">
+          <button class="ad-close" @click="closeAd('functions')" v-html="adCloseIcon" aria-label="Закрыть рекламу"></button>
+          <a class="ad-creative" :href="state.ads.slots.functions.url" target="_blank" rel="noopener">
+            <img class="ad-img" :src="state.ads.slots.functions.image" :alt="state.ui.lang==='en' ? 'Sponsored ad' : 'Реклама'">
+            <span class="ad-badge">
+              <span class="ad-badge-icon" v-html="adBadgeIcon"></span>
+              <span class="ad-badge-icon" v-html="adMuteIcon"></span>
+              <span>{{ state.ui.lang==='en' ? 'Ad' : 'Реклама' }}</span>
+            </span>
+          </a>
+        </div>
+        <div class="card">
+          <div class="section-title">{{t('functions')}}</div>
+          <div class="scroll" style="max-height:420px;">
+            <table class="table">
+              <thead>
+                <tr><th>{{t('name')}}</th><th>{{t('type')}}</th><th colspan="2">{{t('settings')}}</th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="fn in state.functions" :key="fn.functionId"
+                    :class="{'fn-selected': state.selectedFunction?.functionId===fn.functionId}">
+                  <td class="fn-name" :title="fn.functionName">{{fn.functionName}}</td>
+                  <td><span class="pill">{{typeLabel(fn.functionType)}}</span></td>
+                  <td class="fn-actions">
+                    <button class="btn ghost"
+                      :class="{'disabled': state.selectedFunction?.functionId===fn.functionId}"
+                      :disabled="state.selectedFunction?.functionId===fn.functionId"
+                      @click="state.selectedFunction?.functionId!==fn.functionId && loadPoints(fn.functionId)">{{t('open')}}</button>
+                    <button class="btn danger ghost" @click="deleteFunction(fn.functionId)">{{t('delete')}}</button>
+                  </td>
+                </tr>
+                <tr v-if="!state.functions.length"><td colspan="4" class="muted">Нет данных</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <div class="card grid grid-2" style="margin-top:16px; padding-bottom: 0;">
-        <div>
-          <div class="section-title">{{t('graph')}}</div>
-          <canvas v-if="state.selectedFunction" id="fn-chart" height="240"></canvas>
-          <div v-else class="scroll" style="height:240px; display:grid; place-items:center;">
-            <img src="https://i.pinimg.com/736x/61/d1/ac/61d1ac10c76a23249c5d51048aea8126.jpg" alt="Выберите функцию" style="max-height:220px; max-width:100%; opacity:0.9;">
-          </div>
-          <div class="row appear" style="margin-top:10px;" v-if="state.selectedFunction">
-            <input class="input" style="flex:1" type="number" v-model="state.graph.evalX" :placeholder="t('evalPlaceholder')" @input="evalFunction">
-            <div class="chip" v-if="state.graph.evalResult !== null">y ≈ {{state.graph.evalResult}}</div>
-          </div>
+      <div class="column-stack">
+        <div v-if="!state.ads.adBlock && !state.ads.dismissed.graph && state.ads.slots.graph" class="card ad-card">
+          <button class="ad-close" @click="closeAd('graph')" v-html="adCloseIcon" aria-label="Закрыть рекламу"></button>
+          <a class="ad-creative" :href="state.ads.slots.graph.url" target="_blank" rel="noopener">
+            <img class="ad-img" :src="state.ads.slots.graph.image" :alt="state.ui.lang==='en' ? 'Sponsored ad' : 'Реклама'">
+            <span class="ad-badge">
+              <span class="ad-badge-icon" v-html="adBadgeIcon"></span>
+              <span class="ad-badge-icon" v-html="adMuteIcon"></span>
+              <span>{{ state.ui.lang==='en' ? 'Ad' : 'Реклама' }}</span>
+            </span>
+          </a>
         </div>
-        <div v-if="state.selectedFunction" class="appear">
-          <div class="section-title">{{t('pointsTitle')}}</div>
-          <div class="row points-section-header" style="justify-content: space-between;">
-            <div class="muted">{{ state.selectedFunction?.functionName || (state.ui.lang==='en' ? 'Not selected' : 'Не выбрана') }}</div>
-            <div class="row">
-              <button class="btn ghost" @click="exportJson" :disabled="!state.points.length">{{t('export')}}</button>
-              <button class="btn secondary" @click="addEmptyPointRow" :disabled="!state.selectedFunction">{{t('addPoint')}}</button>
-              <button class="btn" @click="saveAllPoints" :disabled="!state.selectedFunction || !state.points.length">{{t('save')}}</button>
+        <div class="card grid grid-2" style="padding-bottom: 0;">
+          <div>
+            <div class="section-title">{{t('graph')}}</div>
+            <canvas v-if="state.selectedFunction" id="fn-chart" height="240"></canvas>
+            <div v-else class="scroll" style="height:240px; display:grid; place-items:center;">
+              <img src="https://i.pinimg.com/736x/61/d1/ac/61d1ac10c76a23249c5d51048aea8126.jpg" alt="Выберите функцию" style="max-height:220px; max-width:100%; opacity:0.9;">
+            </div>
+            <div class="row appear" style="margin-top:10px;" v-if="state.selectedFunction">
+              <input class="input" style="flex:1" type="number" v-model="state.graph.evalX" :placeholder="t('evalPlaceholder')" @input="evalFunction">
+              <div class="chip" v-if="state.graph.evalResult !== null">y ≈ {{state.graph.evalResult}}</div>
             </div>
           </div>
-          <div class="scroll">
-            <table class="table">
-              <thead>
-                <tr><th>x</th><th>y</th><th></th></tr>
-              </thead>
-              <tbody>
-                <tr v-for="p in state.points" :key="p.pointId">
-                  <td><input class="input" type="number" v-model.number="p.xValue" placeholder="x"></td>
-                  <td><input class="input" type="number" v-model.number="p.yValue" placeholder="y"></td>
-                  <td class="row" style="gap:6px;">
-                    <button class="btn danger ghost" style="padding:6px 10px;width:100%;" @click="deletePoint(p)">×</button>
-                  </td>
-                </tr>
-                <tr v-if="!state.points.length"><td colspan="3" class="muted">Выберите функцию</td></tr>
-              </tbody>
-            </table>
+          <div v-if="state.selectedFunction && !isCompositeSelected()" class="appear">
+            <div class="section-title">{{t('pointsTitle')}}</div>
+            <div class="row points-section-header" style="justify-content: space-between;">
+              <div class="muted">{{ state.selectedFunction?.functionName || (state.ui.lang==='en' ? 'Not selected' : 'Не выбрана') }}</div>
+              <div class="row">
+                <button class="btn ghost" @click="exportJson" :disabled="!state.points.length">{{t('export')}}</button>
+                <button class="btn secondary" @click="addEmptyPointRow" :disabled="!state.selectedFunction">{{t('addPoint')}}</button>
+                <button class="btn" @click="saveAllPoints" :disabled="!state.selectedFunction || !state.points.length">{{t('save')}}</button>
+              </div>
+            </div>
+            <div class="scroll">
+              <table class="table">
+                <thead>
+                  <tr><th>x</th><th>y</th><th></th></tr>
+                </thead>
+                <tbody>
+                  <tr v-for="p in state.points" :key="p.pointId">
+                    <td><input class="input" type="number" v-model.number="p.xValue" placeholder="x"></td>
+                    <td><input class="input" type="number" v-model.number="p.yValue" placeholder="y"></td>
+                    <td class="row" style="gap:6px;">
+                      <button class="btn danger ghost" style="padding:6px 10px;width:100%;" @click="deletePoint(p)">×</button>
+                    </td>
+                  </tr>
+                  <tr v-if="!state.points.length"><td colspan="3" class="muted">Выберите функцию</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -272,22 +307,34 @@
   </div>
 
   <footer class="footer">
-    <div>
-      <div class="logo-slot">F</div>
-      <div class="muted">{{t('appTitle')}}</div>
+    <div class="footer-avatars-bar">
+      <div class="footer-avatars">
+        <a class="avatar-link" href="https://github.com/barinovadn" target="_blank" rel="noopener">
+          <img src="https://avatars.githubusercontent.com/u/186514423?v=4" alt="Dasha">
+          <div class="muted">{{ state.ui.lang === 'ru' ? 'Даша' : 'Dasha' }}</div>
+        </a>
+        <a class="avatar-link" href="https://github.com/daria111222" target="_blank" rel="noopener">
+          <img src="https://avatars.githubusercontent.com/u/164402792?v=4" alt="Dasha">
+          <div class="muted">{{ state.ui.lang === 'ru' ? 'Даша' : 'Dasha' }}</div>
+        </a>
+      </div>
     </div>
-    <div>
-      <a href="#" class="link" v-for="(l,idx) in t('footerLinks')" :key="idx">{{l}}</a>
-    </div>
-    <div>
-      <a href="#" class="link" @click.prevent="state.ui.lang='ru'">{{t('langRu')}}</a>
-      <a href="#" class="link" @click.prevent="state.ui.lang='en'">{{t('langEn')}}</a>
-      <a href="#" class="link" @click.prevent="state.ui.inclusive=!state.ui.inclusive">{{t('inclusive')}}</a>
-    </div>
-    <div>
-      <div class="muted">{{t('contact')}}</div>
-      <a href="#" class="link">support@example.com</a>
-      <a href="#" class="link">+1 (555) 010-010</a>
+    <div class="footer-grid">
+      <div>
+        <div class="muted">{{ state.ui.lang === 'ru' ? 'Ссылки' : 'Links' }}</div>
+        <a href="#" class="link" v-for="(l,idx) in t('footerLinks')" :key="idx">{{l}}</a>
+      </div>
+      <div>
+        <div class="muted">{{t('language')}}</div>
+        <a href="#" class="link" @click.prevent="state.ui.lang='ru'">{{t('langRu')}}</a>
+        <a href="#" class="link" @click.prevent="state.ui.lang='en'">{{t('langEn')}}</a>
+        <a href="#" class="link" @click.prevent="state.ui.inclusive=!state.ui.inclusive">{{t('inclusive')}}</a>
+      </div>
+      <div>
+        <div class="muted">{{t('contact')}}</div>
+        <a href="#" class="link">support@example.com</a>
+        <a href="#" class="link">+1 (555) 010-010</a>
+      </div>
     </div>
   </footer>
   <!-- settings modal -->
@@ -321,12 +368,18 @@
             <option value="en">{{t('langEn')}}</option>
           </select>
           <div class="section-title">{{t('inclusive')}}</div>
-          <label class="row muted"><input type="checkbox" v-model="state.ui.inclusive"> {{t('inclusive')}}</label>
+          <label class="row muted settings-inline">
+            <input type="checkbox" v-model="state.ui.inclusive"> {{t('inclusive')}}
+          </label>
+          <div class="section-title">AdBlock</div>
+          <label class="row muted settings-inline">
+            <input type="checkbox" v-model="state.ads.adBlock"> {{t('adblock')}}
+          </label>
         </div>
       </div>
-      <div class="row" style="margin-top:12px;">
-        <button class="btn secondary" @click="state.modals.settings=false">{{t('cancel')}}</button>
-        <button class="btn" @click="saveSettings">{{t('save')}}</button>
+      <div class="row settings-actions">
+        <button class="btn secondary half" @click="state.modals.settings=false">{{t('cancel')}}</button>
+        <button class="btn half" @click="saveSettings">{{t('save')}}</button>
       </div>
     </div>
   </div>
