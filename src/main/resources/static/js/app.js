@@ -138,19 +138,30 @@ const actionIcons = {
   settings: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Cog-loop SVG Icon</title><defs><symbol id="lineMdCogLoop0"><path fill="none" stroke-width="2" d="M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.6 7.4 16.8 7.61 16.99 7.83C17.46 8.4 17.85 9.05 18.11 9.77C18.2 10.03 18.28 10.31 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12"><animate fill="freeze" attributeName="d" begin="0.8s" dur="0.2s" values="M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.6 7.4 16.8 7.61 16.99 7.83C17.46 8.4 17.85 9.05 18.11 9.77C18.2 10.03 18.28 10.31 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12;M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.38 7.2 19 6.12 19.01 6.14C19.01 6.14 20.57 8.84 20.57 8.84C20.58 8.87 18.35 10.59 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12"/></path></symbol></defs><g fill="none" stroke="currentColor" stroke-width="2"><g stroke-linecap="round" stroke-linejoin="round"><path stroke-dasharray="42" stroke-dashoffset="42" d="M12 5.5C15.59 5.5 18.5 8.41 18.5 12C18.5 15.59 15.59 18.5 12 18.5C8.41 18.5 5.5 15.59 5.5 12C5.5 8.41 8.41 5.5 12 5.5z" opacity="0"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.2s" dur="0.5s" values="42;0"/><set attributeName="opacity" begin="0.2s" to="1"/><set attributeName="opacity" begin="0.7s" to="0"/></path><path stroke-dasharray="20" stroke-dashoffset="20" d="M12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15C10.34 15 9 13.66 9 12C9 10.34 10.34 9 12 9z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="20;0"/></path></g><g opacity="0"><use href="#lineMdCogLoop0"/><use href="#lineMdCogLoop0" transform="rotate(60 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(120 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(180 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(240 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(300 12 12)"/><set attributeName="opacity" begin="0.7s" to="1"/><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></g></g></svg>`,
   profile: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Person SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="20" stroke-dashoffset="20" d="M12 5C13.66 5 15 6.34 15 8C15 9.65685 13.6569 11 12 11C10.3431 11 9 9.65685 9 8C9 6.34315 10.3431 5 12 5z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="20;0"/></path><path stroke-dasharray="36" stroke-dashoffset="36" d="M12 14C16 14 19 16 19 17V19H5V17C5 16 8 14 12 14z" opacity="0"><set attributeName="opacity" begin="0.5s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.4s" values="36;0"/></path></g></svg>`,
   logout: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Compass SVG Icon</title><mask id="lineMdCompass0"><path fill="none" stroke="#fff" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-width="2" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path fill="#fff" d="M11 11L12 12L13 13L12 12z"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.3s" values="M11 11L12 12L13 13L12 12z;M10.2 10.2L17 7L13.8 13.8L7 17z"/><animateTransform attributeName="transform" begin="0.5s" dur="0.5s" type="rotate" values="-180 12 12;0 12 12"/></path><circle cx="12" cy="12" r="1" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.3s" values="0;1"/></circle></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdCompass0)"/></svg>`,
+  logout2: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Logout SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="32" stroke-dashoffset="32" d="M12 4H5C4.44772 4 4 4.44772 4 5V19C4 19.5523 4.44772 20 5 20H12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="32;0"/></path><path stroke-dasharray="12" stroke-dashoffset="12" d="M9 12h11.5" opacity="0"><set attributeName="opacity" begin="0.5s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.2s" values="12;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M20.5 12l-3.5 -3.5M20.5 12l-3.5 3.5" opacity="0"><set attributeName="opacity" begin="0.7s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="6;0"/></path></g></svg>`,
   createPoints: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>My-location-loop SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="56" stroke-dashoffset="56" d="M12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="56;0"/></path><path d="M12 4v0M20 12h0M12 20v0M4 12h0" opacity="0"><set attributeName="opacity" begin="0.9s" to="1"/><animate fill="freeze" attributeName="d" begin="0.9s" dur="0.2s" values="M12 4v0M20 12h0M12 20v0M4 12h0;M12 4v-2M20 12h2M12 20v2M4 12h-2"/><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g><circle cx="12" cy="12" r="0" fill="currentColor" fill-opacity="0"><set attributeName="fill-opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="r" begin="0.6s" dur="0.2s" values="0;4"/></circle></svg>`,
   createMath: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Text-box-multiple SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="62" stroke-dashoffset="62" d="M22 4V3C22 2.45 21.55 2 21 2H7C6.45 2 6 2.45 6 3V17C6 17.55 6.45 18 7 18H21C21.55 18 22 17.55 22 17z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="62;124"/></path><g stroke-dasharray="10" stroke-dashoffset="10"><path d="M10 6h8"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="10;0"/></path><path d="M10 10h8"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.9s" dur="0.2s" values="10;0"/></path></g><path stroke-dasharray="7" stroke-dashoffset="7" d="M10 14h5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.1s" dur="0.2s" values="7;0"/></path><path stroke-dasharray="34" stroke-dashoffset="34" d="M2 6V21C2 21.55 2.45 22 3 22H18"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.4s" dur="0.4s" values="34;68"/></path></g></svg>`,
   createComposite: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Arrows-horizontal SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="12" stroke-dashoffset="12" d="M15 7H3.5M9 17H20.5"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="12;0"/></path><path stroke-dasharray="8" stroke-dashoffset="8" d="M3 7L7 11M3 7L7 3M21 17L17 21M21 17L17 13"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.2s" values="8;0"/></path></g></svg>`,
   importJson: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Document-list SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><g stroke-width="2"><path stroke-dasharray="64" stroke-dashoffset="64" d="M13 3L19 9V21H5V3H13"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="64;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M9 13H13"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1s" dur="0.2s" values="6;0"/></path><path stroke-dasharray="8" stroke-dashoffset="8" d="M9 16H15"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.2s" dur="0.2s" values="8;0"/></path></g><path stroke-dasharray="14" stroke-dashoffset="14" d="M12.5 3V8.5H19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="14;0"/></path></g></svg>`,
-  export: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Downloading-loop SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="2 4" stroke-dashoffset="6" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21"><animate attributeName="stroke-dashoffset" dur="0.6s" repeatCount="indefinite" values="6;0"/></path><path stroke-dasharray="30" stroke-dashoffset="30" d="M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.1s" dur="0.3s" values="30;0"/></path><path stroke-dasharray="10" stroke-dashoffset="10" d="M12 8v7.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.2s" values="10;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 15.5l3.5 -3.5M12 15.5l-3.5 -3.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="6;0"/></path></g></svg>`,
+  export: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Download SVG Icon</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 21h12M12 3v14m0 0l5-5m-5 5l-5-5"/></svg>`,
+  addPlus: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Add-plus SVG Icon</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h6m0 0h6m-6 0v6m0-6V6"/></svg>`,
   confirm: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Confirm SVG Icon</title><path fill="none" stroke="currentColor" stroke-dasharray="24" stroke-dashoffset="24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11L11 17L21 7"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="24;0"/></path></svg>`,
   remove: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"/></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"/></path></g></svg>`,
+  open: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Arrow-up-right-md SVG Icon</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7m0 0H9m8 0v8"/></svg>`,
+};
+
+const faviconIcons = {
+  auth: '/favicons/chair.svg',
+  default: '/favicons/mug.svg',
+  settings: '/favicons/cog.svg',
+  profile: '/favicons/smile.svg',
+  newFunction: '/favicons/pen.svg',
 };
 
 const i18n = {
   ru: {
-    authTitle: 'Функции ООП — вход',
-    authSubtitle: 'Работа с табулированными функциями через /api',
+    authTitle: 'Калькулятор функций — вход',
+    authSubtitle: 'Создавайте функции, управляйте точками и вычисляйте значения',
     login: 'Вход',
     register: 'Регистрация',
     nickname: 'Ник',
@@ -159,7 +170,12 @@ const i18n = {
     repeatPassword: 'Повтор пароля',
     loginAction: 'Войти',
     registerAction: 'Зарегистрироваться',
-    headerTitle: 'Функции ООП — веб-интерфейс',
+    headerTitle: 'Калькулятор функций',
+    pageTitle: 'Калькулятор функций',
+    pageTitleProfile: 'Калькулятор функций — Профиль',
+    pageTitleSettings: 'Калькулятор функций — Настройки',
+    pageTitleAuth: 'Калькулятор функций — Вход',
+    pageTitleNewFunction: 'Калькулятор функций — Новая функция',
     loggedAs: 'Вы вошли как',
     refresh: 'Обновить',
     settings: 'Настройки',
@@ -190,6 +206,7 @@ const i18n = {
     pointsCount: 'Количество точек',
     constValue: 'Значение константы',
     cancel: 'Отмена',
+    close: 'Закрыть',
     modalCompositeTitle: 'Создание сложной функции',
     firstFn: 'Первая функция (f)',
     secondFn: 'Вторая функция (g)',
@@ -233,6 +250,54 @@ const i18n = {
     update: 'Обновить',
     deleteAccount: 'Удалить аккаунт',
     passwordNew: 'Новый пароль',
+    toastRegisterSuccess: 'Регистрация успешна, войдите под новым пользователем',
+    toastConnectionEstablished: 'Готово! Соединение установлено',
+    errorFillLoginPassword: 'Заполните логин и пароль',
+    errorEnterLoginPassword: 'Введите логин и пароль',
+    errorPasswordsNotMatch: 'Пароли не совпадают',
+    errorUsernameTooLong: 'Логин не длиннее 32 символов.',
+    errorEmailTooLong: 'Email не длиннее 128 символов.',
+    errorPasswordTooLong: 'Пароль не длиннее 128 символов.',
+    errorRegistrationFailed: 'Ошибка регистрации: проверьте логин/email/пароль.',
+    errorLoginFailed: 'Не удалось войти',
+    errorWrongLoginPassword: 'Неверный логин или пароль',
+    errorUsernameFormat: 'Логин 3-32 символа, только буквы/цифры/_/-',
+    errorEmailInvalid: 'Введите корректный email.',
+    errorPasswordTooShort: 'Пароль должен быть не короче 6 символов.',
+    errorPasswordWeak: 'Пароль должен содержать прописные, строчные, цифру и спецсимвол (6-128).',
+    errorUserIdUnknown: 'UserId не определён. Перелогиньтесь.',
+    errorUsernameTaken: 'Такой логин уже занят.',
+    toastFunctionDeleted: 'Функция удалена',
+    toastCompositeChildError: 'Не удалось получить дочерние функции для композиции',
+    toastCompositeOutOfRange: 'Композиция вне области определения: скорректируйте диапазоны',
+    toastCompositeCalcError: 'Не удалось вычислить композицию',
+    toastNoPoints: 'Для функции нет точек. Укажите xFrom/xTo или создайте точки.',
+    toastCompositePointsChange: 'Точки композиции меняются через дочерние функции',
+    toastPointUpdated: 'Точка обновлена',
+    toastPointSaved: 'Точка сохранена',
+    toastNoFunctionSelected: 'Нет выбранной функции для сохранения точки',
+    toastDeleteInBaseFunctions: 'Удаляйте точки в базовых функциях, не в композиции',
+    toastPointDeleted: 'Точка удалена',
+    toastLocalPointDeleted: 'Локальная точка удалена',
+    toastFunctionSaved: 'Функция сохранена',
+    toastFunctionFromFormula: 'Функция по формуле создана',
+    toastCompositeSaved: 'Композит сохранён',
+    toastAddPointsInChild: 'Добавляйте точки в дочерние функции, не в композицию',
+    toastSettingsSaved: 'Настройки сохранены',
+    toastSaveInBaseFunctions: 'Сохраняйте точки в базовых функциях, композиция только читает',
+    toastExportedJson: 'Экспортировано в JSON',
+    toastPointsLoaded: 'Точки загружены в форму создания',
+    errorLoadingFunctions: 'Загрузка функций',
+    errorDeletingFunction: 'Удаление функции',
+    errorFunctionPoints: 'Точки функции',
+    errorUpdatingPoint: 'Обновление точки',
+    errorDeletingPoint: 'Удаление точки',
+    errorCreatingFunction: 'Создание функции',
+    errorCreatingFromFormula: 'Создание по формуле',
+    errorCompositeFunction: 'Композитная функция',
+    errorLoadingProfile: 'Не удалось загрузить профиль',
+    errorDeleting: 'Удаление',
+    errorImport: 'Импорт',
     types: {
       SQR: 'Квадратичная',
       IDENTITY: 'Тождественная',
@@ -261,8 +326,8 @@ const i18n = {
     },
   },
   en: {
-    authTitle: 'OOP Functions — Sign in',
-    authSubtitle: 'Work with tabulated functions via /api',
+    authTitle: 'Function Calculator — Sign in',
+    authSubtitle: 'Create functions, manage points, and calculate values',
     login: 'Login',
     register: 'Register',
     nickname: 'Username',
@@ -271,7 +336,12 @@ const i18n = {
     repeatPassword: 'Repeat password',
     loginAction: 'Sign in',
     registerAction: 'Sign up',
-    headerTitle: 'OOP Functions — Web UI',
+    headerTitle: 'Function Calculator',
+    pageTitle: 'Function Calculator',
+    pageTitleProfile: 'Function Calculator — Profile',
+    pageTitleSettings: 'Function Calculator — Settings',
+    pageTitleAuth: 'Function Calculator — Sign in',
+    pageTitleNewFunction: 'Function Calculator — New Function',
     loggedAs: 'Signed in as',
     refresh: 'Refresh',
     settings: 'Settings',
@@ -302,6 +372,7 @@ const i18n = {
     pointsCount: 'Points count',
     constValue: 'Constant value',
     cancel: 'Cancel',
+    close: 'Close',
     modalCompositeTitle: 'Create composite function',
     firstFn: 'First function (f)',
     secondFn: 'Second function (g)',
@@ -337,7 +408,7 @@ const i18n = {
     ok: 'Got it',
     contact: 'Contact',
     footerLinks: ['Docs','Support','Policy','Contacts','About','Help','API','Download'],
-    langRu: 'Russian',
+    langRu: 'Русский',
     langEn: 'English',
     delete: 'Delete',
     open: 'Open',
@@ -345,6 +416,54 @@ const i18n = {
     update: 'Update',
     deleteAccount: 'Delete account',
     passwordNew: 'New password',
+    toastRegisterSuccess: 'Registration successful, please sign in with your new account',
+    toastConnectionEstablished: 'Done! Connection established',
+    errorFillLoginPassword: 'Please enter username and password',
+    errorEnterLoginPassword: 'Enter username and password',
+    errorPasswordsNotMatch: 'Passwords do not match',
+    errorUsernameTooLong: 'Username must be at most 32 characters.',
+    errorEmailTooLong: 'Email must be at most 128 characters.',
+    errorPasswordTooLong: 'Password must be at most 128 characters.',
+    errorRegistrationFailed: 'Registration error: check login/email/password.',
+    errorLoginFailed: 'Failed to login',
+    errorWrongLoginPassword: 'Wrong login or password',
+    errorUsernameFormat: 'Username must be 3-32 chars, letters/digits/_/- only.',
+    errorEmailInvalid: 'Enter a valid email.',
+    errorPasswordTooShort: 'Password must be at least 6 characters.',
+    errorPasswordWeak: 'Password must have upper, lower, digit and special char (6-128).',
+    errorUserIdUnknown: 'User id is unknown. Re-login, please.',
+    errorUsernameTaken: 'This username is already taken.',
+    toastFunctionDeleted: 'Function deleted',
+    toastCompositeChildError: 'Failed to get child functions for composition',
+    toastCompositeOutOfRange: 'Composition out of domain: adjust ranges',
+    toastCompositeCalcError: 'Failed to calculate composition',
+    toastNoPoints: 'Function has no points. Specify xFrom/xTo or create points.',
+    toastCompositePointsChange: 'Composite points are changed through child functions',
+    toastPointUpdated: 'Point updated',
+    toastPointSaved: 'Point saved',
+    toastNoFunctionSelected: 'No function selected to save point',
+    toastDeleteInBaseFunctions: 'Delete points in base functions, not in composition',
+    toastPointDeleted: 'Point deleted',
+    toastLocalPointDeleted: 'Local point deleted',
+    toastFunctionSaved: 'Function saved',
+    toastFunctionFromFormula: 'Function from formula created',
+    toastCompositeSaved: 'Composite saved',
+    toastAddPointsInChild: 'Add points in child functions, not in composition',
+    toastSettingsSaved: 'Settings saved',
+    toastSaveInBaseFunctions: 'Save points in base functions, composition is read-only',
+    toastExportedJson: 'Exported to JSON',
+    toastPointsLoaded: 'Points loaded into creation form',
+    errorLoadingFunctions: 'Loading functions',
+    errorDeletingFunction: 'Deleting function',
+    errorFunctionPoints: 'Function points',
+    errorUpdatingPoint: 'Updating point',
+    errorDeletingPoint: 'Deleting point',
+    errorCreatingFunction: 'Creating function',
+    errorCreatingFromFormula: 'Creating from formula',
+    errorCompositeFunction: 'Composite function',
+    errorLoadingProfile: 'Failed to load profile',
+    errorDeleting: 'Deletion',
+    errorImport: 'Import',
     types: {
       SQR: 'Square',
       IDENTITY: 'Identity',
@@ -659,13 +778,14 @@ function synthesizePointsFromFunction(fn, count = 25) {
         adBadgeIcon,
         adMuteIcon,
         burgerIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32m0 160c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32m448 160c0-17.7 14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32h384c17.7 0 32 14.3 32 32"/></svg>`,
-        burgerIconOpen: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32m64 160c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H96c-17.7 0-32-14.3-32-32m384 160c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32h384c17.7 0 32 14.3 32 32"/></svg>`,
+        burgerIconOpen: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><title>Compass SVG Icon</title><mask id="lineMdCompass0"><path fill="none" stroke="#fff" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-width="2" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path fill="#fff" d="M11 11L12 12L13 13L12 12z"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.3s" values="M11 11L12 12L13 13L12 12z;M10.2 10.2L17 7L13.8 13.8L7 17z"/><animateTransform attributeName="transform" begin="0.5s" dur="0.5s" type="rotate" values="-180 12 12;0 12 12"/></path><circle cx="12" cy="12" r="1" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.3s" values="0;1"/></circle></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdCompass0)"/></svg>`,
       };
     },
     mounted() {
       this.initFromStorage();
       this.runStageAnimation();
       this.spawnAds();
+      this.updateTitle();
     },
     methods: {
       resetState() {
@@ -676,7 +796,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
         this.stageAnimated = false;
         this.spawnAds();
       },
-      toast(message, type = 'success') {
+      toast(message, type = 'success', showDetail = false) {
         const id = Date.now();
         const lang = this.state.ui.lang || 'ru';
         const titles = {
@@ -697,15 +817,20 @@ function synthesizePointsFromFunction(fn, count = 25) {
           info: 'This is an informational notification, no action is required.',
           error: 'An error occurred, review the details and try again.',
         };
-        const detail = (lang === 'en' ? detailsEn[type] : detailsRu[type]) || (lang === 'en' ? detailsEn.info : detailsRu.info);
-        const msg = message
-          ? `${message}${/[.!?]$/.test(message.trim()) ? '' : '.'} ${detail}`
-          : detail;
+        let msg = message || '';
+        if (showDetail || !message) {
+          const detail = (lang === 'en' ? detailsEn[type] : detailsRu[type]) || (lang === 'en' ? detailsEn.info : detailsRu.info);
+          msg = message
+            ? `${message}${/[.!?]$/.test(message.trim()) ? '' : '.'} ${detail}`
+            : detail;
+        } else if (message && !/[.!?]$/.test(message.trim())) {
+          msg = message + '.';
+        }
         const icons = {
-          success: 'https://i.pinimg.com/736x/d5/09/ca/d509ca41d6d01f406cb13ab9dbd06178.jpg',
-          warning: 'https://i.pinimg.com/1200x/21/36/2e/21362e6ec4312730016613384f25f41c.jpg',
-          error: 'https://i.pinimg.com/1200x/21/36/2e/21362e6ec4312730016613384f25f41c.jpg',
-          info: 'https://i.pinimg.com/736x/9f/e4/be/9fe4be23d357519d0ce35bd93137b1bb.jpg',
+          success: 'https://media.tenor.com/bvXwJ4I19ZQAAAAi/cat-cat-meme.gif',
+          warning: 'https://media1.tenor.com/m/A4XEGPtSd-4AAAAd/rowe-cat.gif',
+          error: 'https://media.tenor.com/cXe--DrS0iYAAAAi/warthog.gif',
+          info: 'https://media1.tenor.com/m/pwJ6OF2elfYAAAAd/stupid-cat-cat-stare.gif',
         };
         this.state.toasts.push({
           id,
@@ -729,7 +854,10 @@ function synthesizePointsFromFunction(fn, count = 25) {
           return;
         }
         const [fnAd, graphAd] = pickRandomAds(2);
-        this.state.ads.slots.functions = fnAd || null;
+        // Левый блок рекламы появляется с шансом ниже
+        const shouldShowFunctionsAd = Math.random() < 1.0;
+        this.state.ads.slots.functions = shouldShowFunctionsAd ? (fnAd || null) : null;
+        // Правый блок всегда
         this.state.ads.slots.graph = graphAd || fnAd || null;
         this.state.ads.dismissed.functions = false;
         this.state.ads.dismissed.graph = false;
@@ -774,25 +902,19 @@ function synthesizePointsFromFunction(fn, count = 25) {
       async register() {
         try {
           if (!this.state.authForm.username || !this.state.authForm.password) {
-            throw new Error('Заполните логин и пароль');
+            throw new Error(this.t('errorFillLoginPassword'));
           }
           if (this.state.authForm.username.length > 32) {
-            throw new Error(this.state.ui.lang === 'en'
-              ? 'Username must be at most 32 characters.'
-              : 'Логин не длиннее 32 символов.');
+            throw new Error(this.t('errorUsernameTooLong'));
           }
           if (this.state.authForm.email && this.state.authForm.email.length > 128) {
-            throw new Error(this.state.ui.lang === 'en'
-              ? 'Email must be at most 128 characters.'
-              : 'Email не длиннее 128 символов.');
+            throw new Error(this.t('errorEmailTooLong'));
           }
           if (this.state.authForm.password.length > 128) {
-            throw new Error(this.state.ui.lang === 'en'
-              ? 'Password must be at most 128 characters.'
-              : 'Пароль не длиннее 128 символов.');
+            throw new Error(this.t('errorPasswordTooLong'));
           }
           if (this.state.authForm.password !== this.state.authForm.confirm) {
-            throw new Error('Пароли не совпадают');
+            throw new Error(this.t('errorPasswordsNotMatch'));
           }
           this.state.loading = true;
           const res = await api.post('/auth/register', {
@@ -800,7 +922,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
             password: this.state.authForm.password,
             email: this.state.authForm.email,
           });
-          this.toast('Регистрация успешна, войдите под новым пользователем');
+          this.toast(this.t('toastRegisterSuccess'));
           this.state.authMode = 'login';
           this.state.credentials.username = this.state.authForm.username;
           this.state.credentials.password = this.state.authForm.password;
@@ -809,9 +931,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
             this.state.credentials.userId = res.userId;
           }
         } catch (e) {
-          const msg = e.message || (this.state.ui.lang === 'en'
-            ? 'Registration error: check login/email/password.'
-            : 'Ошибка регистрации: проверьте логин/email/пароль.');
+          const msg = e.message || this.t('errorRegistrationFailed');
           this.showError(this.t('register'), msg);
         } finally {
           this.state.loading = false;
@@ -820,7 +940,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
       async tryLogin() {
         try {
           const { username, password } = this.state.credentials;
-          if (!username || !password) throw new Error('Введите логин и пароль');
+          if (!username || !password) throw new Error(this.t('errorEnterLoginPassword'));
           this.state.loading = true;
           api.setAuth(username, password);
           await this.loadCurrentUser();
@@ -828,12 +948,12 @@ function synthesizePointsFromFunction(fn, count = 25) {
           this.state.isAuthed = true;
           persistCredentials(this.state.credentials);
           await this.refreshFunctions();
-          this.toast('Готово! Соединение установлено');
+          this.toast(this.t('toastConnectionEstablished'));
         } catch (e) {
           api.clearAuth();
-          let msg = e.message || (this.state.ui.lang === 'en' ? 'Failed to login' : 'Не удалось войти');
+          let msg = e.message || this.t('errorLoginFailed');
           if (e.message?.includes('Unauthorized')) {
-            msg = this.state.ui.lang === 'en' ? 'Wrong login or password' : 'Неверный логин или пароль';
+            msg = this.t('errorWrongLoginPassword');
           }
           this.showError(this.t('login'), msg);
         } finally {
@@ -860,6 +980,39 @@ function synthesizePointsFromFunction(fn, count = 25) {
       },
       t(key) {
         return (i18n[this.state.ui.lang] && i18n[this.state.ui.lang][key]) || key;
+      },
+      setFavicon(iconPath) {
+        let link = document.querySelector('#favicon');
+        if (!link) {
+          link = document.createElement('link');
+          link.id = 'favicon';
+          link.rel = 'icon';
+          link.type = 'image/svg+xml';
+          document.head.appendChild(link);
+        }
+        link.href = iconPath;
+      },
+      updateTitle() {
+        const lang = this.state.ui.lang || 'ru';
+        let title = this.t('pageTitle');
+        let favicon = faviconIcons.default;
+        
+        if (!this.state.isAuthed) {
+          title = this.t('pageTitleAuth');
+          favicon = faviconIcons.auth;
+        } else if (this.state.modals.profile) {
+          title = this.t('pageTitleProfile');
+          favicon = faviconIcons.profile;
+        } else if (this.state.modals.settings) {
+          title = this.t('pageTitleSettings');
+          favicon = faviconIcons.settings;
+        } else if (this.state.modals.create || this.state.modals.math || this.state.modals.composite) {
+          title = this.t('pageTitleNewFunction');
+          favicon = faviconIcons.newFunction;
+        }
+        
+        document.title = title;
+        this.setFavicon(favicon);
       },
       typeLabel(key) {
         return (i18n[this.state.ui.lang]?.types && i18n[this.state.ui.lang].types[key]) || key;
@@ -930,7 +1083,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
         } catch (e) {
           const onlyBase = await api.get('/functions').catch(() => []);
           this.state.functions = onlyBase || [];
-          this.showError('Загрузка функций', e.message);
+          this.showError(this.t('errorLoadingFunctions'), e.message);
         } finally {
           this.state.loadingGlobal = false;
           this.runStageAnimation();
@@ -939,7 +1092,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
       async deleteFunction(id) {
         try {
           await api.delete(`/functions/${id}`);
-          this.toast('Функция удалена', 'warning');
+          this.toast(this.t('toastFunctionDeleted'), 'warning', false);
           await this.refreshFunctions();
           if (this.state.selectedFunction?.functionId === id) {
             this.state.selectedFunction = null;
@@ -947,7 +1100,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
             chart.destroy();
           }
         } catch (e) {
-          this.showError('Удаление функции', e.message);
+          this.showError(this.t('errorDeletingFunction'), e.message);
         }
       },
       async loadPoints(functionId) {
@@ -977,20 +1130,20 @@ function synthesizePointsFromFunction(fn, count = 25) {
                 }
               }
               if (!firstId || !secondId) {
-                this.toast('Не удалось получить дочерние функции для композиции', 'warning');
+                this.toast(this.t('toastCompositeChildError'), 'warning');
                 chart.destroy();
                 this.state.points = [];
                 return;
               }
               points = await composeFunctions(firstId, secondId);
               if (!points.length) {
-                this.toast('Композиция вне области определения: скорректируйте диапазоны', 'warning');
+                this.toast(this.t('toastCompositeOutOfRange'), 'warning');
                 chart.destroy();
                 this.state.points = [];
                 return;
               }
             } catch (err) {
-              this.toast('Не удалось вычислить композицию', 'warning');
+              this.toast(this.t('toastCompositeCalcError'), 'warning');
               console.error(err);
               chart.destroy();
               this.state.points = [];
@@ -1018,11 +1171,11 @@ function synthesizePointsFromFunction(fn, count = 25) {
             if (!points.length && this.state.selectedFunction) {
               const fType = (this.state.selectedFunction.functionType || '').toUpperCase();
               if (fType === 'TABULATED' || fType === 'COMPOSITE') {
-                this.toast('Для функции нет точек. Укажите xFrom/xTo или создайте точки.', 'warning');
+                this.toast(this.t('toastNoPoints'), 'warning');
               } else {
                 points = synthesizePointsFromFunction(this.state.selectedFunction);
                 if (!points.length) {
-                  this.toast('Для функции нет точек. Укажите xFrom/xTo или создайте точки.', 'warning');
+                  this.toast(this.t('toastNoPoints'), 'warning');
                 }
               }
             }
@@ -1035,14 +1188,14 @@ function synthesizePointsFromFunction(fn, count = 25) {
             this.evalFunction();
           });
         } catch (e) {
-          this.showError('Точки функции', e.message);
+          this.showError(this.t('errorFunctionPoints'), e.message);
         }
       },
       async updatePoint(point) {
         try {
           const isComposite = this.state.selectedFunction?._composite || (this.state.selectedFunction?.functionType || '').toUpperCase() === 'COMPOSITE';
           if (isComposite) {
-            this.toast('Точки композиции меняются через дочерние функции', 'warning');
+            this.toast(this.t('toastCompositePointsChange'), 'warning');
             return;
           }
           const isPersisted = Number.isFinite(Number(point.pointId));
@@ -1056,40 +1209,39 @@ function synthesizePointsFromFunction(fn, count = 25) {
               xValue: x,
               yValue: y,
             });
-            this.toast('Точка обновлена');
+            this.toast(this.t('toastPointUpdated'));
           } else if (this.state.selectedFunction?.functionId) {
             await api.post(`/functions/${this.state.selectedFunction.functionId}/points`, {
               xValue: x,
               yValue: y,
             });
-            this.toast('Точка сохранена');
-          } else {
-            this.toast('Нет выбранной функции для сохранения точки', 'warning');
+            this.toast(this.t('toastPointSaved'));с          } else {
+            this.toast(this.t('toastNoFunctionSelected'), 'warning');
             return;
           }
           await this.loadPoints(point.functionId || this.state.selectedFunction?.functionId);
         } catch (e) {
-          this.showError('Обновление точки', e.message);
+          this.showError(this.t('errorUpdatingPoint'), e.message);
         }
       },
       async deletePoint(point) {
         try {
           const isComposite = this.state.selectedFunction?._composite || (this.state.selectedFunction?.functionType || '').toUpperCase() === 'COMPOSITE';
           if (isComposite) {
-            this.toast('Удаляйте точки в базовых функциях, не в композиции', 'warning');
+            this.toast(this.t('toastDeleteInBaseFunctions'), 'warning');
             return;
           }
           const isPersisted = Number.isFinite(Number(point.pointId));
           if (isPersisted) {
             await api.delete(`/points/${point.pointId}`);
-            this.toast('Точка удалена', 'warning');
+            this.toast(this.t('toastPointDeleted'), 'warning', false);
           } else {
             this.state.points = this.state.points.filter((p) => p.pointId !== point.pointId);
-            this.toast('Локальная точка удалена', 'warning');
+            this.toast(this.t('toastLocalPointDeleted'), 'warning', false);
           }
           await this.loadPoints(point.functionId || this.state.selectedFunction?.functionId);
         } catch (e) {
-          this.showError('Удаление точки', e.message);
+          this.showError(this.t('errorDeletingPoint'), e.message);
         }
       },
       addPointRow() {
@@ -1148,13 +1300,13 @@ function synthesizePointsFromFunction(fn, count = 25) {
             xTo,
             points,
           });
-          this.toast('Функция сохранена');
+          this.toast(this.t('toastFunctionSaved'));
           this.state.modals.create = false;
           await this.refreshFunctions();
           await this.loadPoints(fn.functionId);
           this.state.createForm = createInitialState().createForm;
         } catch (e) {
-          this.showError('Создание функции', e.message);
+          this.showError(this.t('errorCreatingFunction'), e.message);
         }
       },
       async createFromMath() {
@@ -1185,13 +1337,13 @@ function synthesizePointsFromFunction(fn, count = 25) {
             xTo,
             points,
           });
-          this.toast('Функция по формуле создана');
+          this.toast(this.t('toastFunctionFromFormula'));
           this.state.modals.math = false;
           await this.refreshFunctions();
           await this.loadPoints(fn.functionId);
           this.state.mathForm = createInitialState().mathForm;
         } catch (e) {
-          this.showError('Создание по формуле', e.message);
+          this.showError(this.t('errorCreatingFromFormula'), e.message);
         }
       },
       async saveComposite() {
@@ -1206,18 +1358,18 @@ function synthesizePointsFromFunction(fn, count = 25) {
             firstFunctionId: a,
             secondFunctionId: b,
           });
-          this.toast('Композит сохранён');
+          this.toast(this.t('toastCompositeSaved'));
           this.state.compositeForm = createInitialState().compositeForm;
           this.state.modals.composite = false;
           await this.refreshFunctions();
         } catch (e) {
-          this.showError('Композитная функция', e.message);
+          this.showError(this.t('errorCompositeFunction'), e.message);
         }
       },
       addEmptyPointRow() {
         const isComposite = this.state.selectedFunction?._composite || (this.state.selectedFunction?.functionType || '').toUpperCase() === 'COMPOSITE';
         if (isComposite) {
-          this.toast('Добавляйте точки в дочерние функции, не в композицию', 'warning');
+          this.toast(this.t('toastAddPointsInChild'), 'warning');
           return;
         }
         this.state.points.push({
@@ -1238,7 +1390,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
         localStorage.setItem('ui-adblock', this.state.ads.adBlock ? 'true' : 'false');
         this.scheduleApplyTheme();
         this.state.modals.settings = false;
-        this.toast('Настройки сохранены');
+        this.toast(this.t('toastSettingsSaved'));
         location.reload();
       },
   async openProfile() {
@@ -1250,7 +1402,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
       this.state.profileForm.password = '';
       this.state.modals.profile = true;
     } catch (e) {
-      this.showError('Профиль', e.message || 'Не удалось загрузить профиль');
+      this.showError(this.t('profile'), e.message || this.t('errorLoadingProfile'));
     } finally {
       this.state.loadingGlobal = false;
     }
@@ -1261,33 +1413,23 @@ function synthesizePointsFromFunction(fn, count = 25) {
             await this.loadCurrentUser();
           }
           if (!this.state.credentials.userId) {
-            this.showError(this.t('profile'), this.state.ui.lang === 'en'
-              ? 'User id is unknown. Re-login, please.'
-              : 'UserId не определён. Перелогиньтесь.');
+            this.showError(this.t('profile'), this.t('errorUserIdUnknown'));
             return;
       }
       if (!/^[A-Za-z0-9_-]{3,32}$/.test(this.state.profileForm.username)) {
-        throw new Error(this.state.ui.lang === 'en'
-          ? 'Username must be 3-32 chars, letters/digits/_/- only.'
-          : 'Логин 3-32 символа, только буквы/цифры/_/-');
+        throw new Error(this.t('errorUsernameFormat'));
       }
       if (this.state.profileForm.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.state.profileForm.email)) {
-        throw new Error(this.state.ui.lang === 'en'
-          ? 'Enter a valid email.'
-          : 'Введите корректный email.');
+        throw new Error(this.t('errorEmailInvalid'));
       }
       if (this.state.profileForm.password && this.state.profileForm.password.length < 6) {
-        throw new Error(this.state.ui.lang === 'en'
-          ? 'Password must be at least 6 characters.'
-          : 'Пароль должен быть не короче 6 символов.');
+        throw new Error(this.t('errorPasswordTooShort'));
       }
       if (this.state.profileForm.password) {
         const pwd = this.state.profileForm.password;
         const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,128}$/;
         if (!strong.test(pwd)) {
-          throw new Error(this.state.ui.lang === 'en'
-            ? 'Password must have upper, lower, digit and special char (6-128).'
-            : 'Пароль должен содержать прописные, строчные, цифру и спецсимвол (6-128).');
+          throw new Error(this.t('errorPasswordWeak'));
         }
       }
       const payload = {
@@ -1322,11 +1464,11 @@ function synthesizePointsFromFunction(fn, count = 25) {
       const low = (e.message || '').toLowerCase();
       let msg;
       if (low.includes('already exists') || low.includes('username') && low.includes('exists')) {
-        msg = this.state.ui.lang === 'en' ? 'This username is already taken.' : 'Такой логин уже занят.';
+        msg = this.t('errorUsernameTaken');
       } else {
         msg = e.message || this.t('error');
       }
-      this.showError('Профиль', msg);
+      this.showError(this.t('profile'), msg);
     }
   },
   async deleteAccount() {
@@ -1342,14 +1484,14 @@ function synthesizePointsFromFunction(fn, count = 25) {
       const msg = e.message?.includes('403')
         ? (this.state.ui.lang === 'en' ? 'You have no rights to delete this user.' : 'Нет прав удалить этого пользователя.')
         : (e.message || (this.state.ui.lang === 'en' ? 'Failed to delete user' : 'Не удалось удалить пользователя'));
-      this.showError('Удаление', msg);
+      this.showError(this.t('errorDeleting'), msg);
     }
   },
       async saveAllPoints() {
         if (!this.state.selectedFunction || !this.state.points.length) return;
         const isComposite = this.state.selectedFunction?._composite || (this.state.selectedFunction?.functionType || '').toUpperCase() === 'COMPOSITE';
         if (isComposite) {
-          this.toast('Сохраняйте точки в базовых функциях, композиция только читает', 'warning');
+          this.toast(this.t('toastSaveInBaseFunctions'), 'warning');
           return;
         }
         try {
@@ -1395,7 +1537,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
         a.download = `${this.state.selectedFunction.functionName || 'function'}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        this.toast('Экспортировано в JSON');
+        this.toast(this.t('toastExportedJson'));
       },
       async importJson(event) {
         const file = event.target.files?.[0];
@@ -1412,9 +1554,9 @@ function synthesizePointsFromFunction(fn, count = 25) {
             y: p.yValue ?? p.y,
           }));
           this.state.modals.create = true;
-          this.toast('Точки загружены в форму создания');
+          this.toast(this.t('toastPointsLoaded'));
         } catch (e) {
-          this.showError('Импорт', e.message);
+          this.showError(this.t('errorImport'), e.message);
         } finally {
           event.target.value = '';
         }
@@ -1446,6 +1588,30 @@ function synthesizePointsFromFunction(fn, count = 25) {
       },
       'state.ui.lang'() {
         localStorage.setItem('ui-lang', this.state.ui.lang);
+        this.updateTitle();
+      },
+      'state.isAuthed'() {
+        this.updateTitle();
+      },
+      'state.modals.profile'() {
+        this.updateTitle();
+      },
+      'state.modals.settings'() {
+        this.updateTitle();
+      },
+      'state.modals.create'() {
+        this.updateTitle();
+      },
+      'state.modals.math'() {
+        this.updateTitle();
+      },
+      'state.modals.composite'() {
+        this.updateTitle();
+      },
+      'state.authMode'() {
+        if (!this.state.isAuthed) {
+          this.updateTitle();
+        }
       },
       'state.ads.adBlock'(val, old) {
         if (val === old) return;
