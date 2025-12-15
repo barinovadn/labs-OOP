@@ -99,7 +99,7 @@
       </div>
     </div>
 
-    <div class="grid grid-2">
+    <div class="grid grid-2 main-page-grid">
       <div class="column-stack">
         <div v-if="!state.ads.adBlock && !state.ads.dismissed.functions && state.ads.slots.functions" class="card ad-card">
           <button class="ad-close" @click="closeAd('functions')" v-html="adCloseIcon" aria-label="Закрыть рекламу"></button>
@@ -189,7 +189,7 @@
                     <td><input class="input" type="number" v-model.number="p.xValue" placeholder="x"></td>
                     <td><input class="input" type="number" v-model.number="p.yValue" placeholder="y"></td>
                     <td class="row" style="gap:6px;">
-                      <button class="btn danger ghost" style="padding:6px 10px;width:100%;" @click="deletePoint(p)">
+                      <button class="btn danger ghost" style="width:100%;" @click="deletePoint(p)">
                         <span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span>
                       </button>
                     </td>
@@ -422,8 +422,8 @@
           </label>
         </div>
       </div>
-      <div class="row settings-actions">
-        <button class="btn secondary half force-grid" @click="state.modals.settings=false">
+      <div class="row settings-actions force-grid">
+        <button class="btn secondary half" @click="state.modals.settings=false">
           <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
         </button>
         <button class="btn half" @click="saveSettings">
