@@ -315,12 +315,12 @@ a { color: inherit; }
   to { transform: translateX(0); }
 }
 @keyframes toastIn {
-  from { transform: translateY(32px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translate(16px, 32px); opacity: 0; }
+  to { transform: translate(0); opacity: 1; }
 }
 @keyframes toastOut {
-  from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(-32px); opacity: 0; }
+  from { transform: translate(0); opacity: 1; }
+  to { transform: translate(16px, -8px); opacity: 0; }
 }
 
 .grid {
@@ -644,8 +644,82 @@ p {
   z-index: 80;
 }
 .toast .linklike { color: var(--text); text-decoration: underline; }
+.ticker-container {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  overflow: hidden;
+  z-index: 1;
+  background-color: var(--bg);
+  border-top: 1px solid var(--border);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.ticker-container::before,
+.ticker-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ticker-container::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg), transparent);
+}
+
+.ticker-container::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg), transparent);
+}
+
+.ticker-container:hover {
+  opacity: 1;
+}
+
+.ticker-content {
+  position: absolute;
+  white-space: nowrap;
+  display: inline-block;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 40px;
+}
+
+.ticker-content a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.ticker-content a:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.christmas-tree-button {
+  position: fixed;
+  bottom: 20px;
+  width: 80px;
+  height: 80px;
+  z-index: 9998;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  transform: rotate(-15deg) translateX(50px);
+  pointer-events: auto;
+  transition-duration: 1s;
+}
+
+.christmas-tree-button:hover {
+  transform: rotate(-20deg) translateX(0);
+}
+
 .footer {
-  margin-top: 28px;
+  margin-top: 0;
   padding: 28px 0 40px;
   border-top: 1px solid var(--border);
   display: flex;
@@ -943,9 +1017,9 @@ p {
   .footer-grid a { margin-left: 15px; }
   .grid-2 { grid-template-columns: 1fr; }
 }
-/* @media (max-width: 500px) {
-  .btn { max-width: 200px; }
-} */
+@media (max-width: 350px) {
+  .brand-logo { margin-right: 0; }
+}
 
 @media (max-width: 1001px) {
   .footer-grid {
@@ -1052,6 +1126,7 @@ p {
 
 @media (max-width: 600px) {
   .mobile-menu-popup {
+    display: grid;
     grid-template-columns: 1fr;
     justify-items: end;
     right: 0;
@@ -1059,8 +1134,7 @@ p {
 }
 @media (max-width: 500px) {
   .mobile-menu-popup {
-    display: inline;
-    float: right;
+    display: grid;
   }
 }
 
@@ -1228,7 +1302,7 @@ p {
 
 @media (max-width: 768px) {
   :root {
-    --ad-height: 220px;
+    --ad-height: 160px;
   }
   
   .ad-card {
@@ -1252,13 +1326,13 @@ p {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  .table {
+  .table-functions {
     max-width: 200px;
     overflow-x: auto;
   }
   
-  .table th:nth-child(2),
-  .table td:nth-child(2) {
+  .table-functions th:nth-child(2),
+  .table-functions td:nth-child(2) {
     display: none;
   }
 }
@@ -1377,4 +1451,7 @@ p {
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
+}
+.main-page-grid {
+  margin-bottom: 28px;
 }

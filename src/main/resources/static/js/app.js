@@ -3,6 +3,113 @@ import { Api } from './api.js';
 import { ChartManager } from './chart.js';
 import { createInitialState, mathEvaluators, mathFunctions } from './state.js';
 
+const MIN_LOADING_TIME = 750;
+
+// Новогодний режим - параметры снега
+const SNOWFLAKE_URL = 'https://media.tenor.com/KZnE4lQ6Z2cAAAAi/snowflake.gif';
+
+// Снежинки на фоне
+const SNOW_BG_SIZE_MIN = 100;
+const SNOW_BG_SIZE_MAX = 300;
+const SNOW_BG_SPEED_MIN = 1/10;
+const SNOW_BG_SPEED_MAX = 1/5;
+const SNOW_BG_COUNT = 14;
+const SNOW_BG_Z_INDEX = -2;
+const SNOW_BG_OPACITY = 0.4;
+
+// Снежинки спереди
+const SNOW_FG_SIZE_MIN = 50;
+const SNOW_FG_SIZE_MAX = 100;
+const SNOW_FG_SPEED_MIN = 1/5;
+const SNOW_FG_SPEED_MAX = 1/2;
+const SNOW_FG_COUNT = 6;
+const SNOW_FG_Z_INDEX = 9999;
+const SNOW_FG_OPACITY = 0.3;
+
+// Рождественские огоньки
+const CHRISTMAS_LIGHTS_Z_INDEX = -1;
+const CHRISTMAS_LIGHTS_OPACITY = 0.075;
+const CHRISTMAS_LIGHTS_SIZE = 1700;
+const CHRISTMAS_LIGHTS_ANIMATION_DURATION = 12000;
+
+// Лента
+const TICKER_SPEED = 8;
+const TICKER_SPEED_HOVER = 2.5;
+
+// Елочка
+const CHRISTMAS_TREE_IMAGE = 'https://media.tenor.com/5YU_WXg2X1kAAAAi/christmas-star.gif';
+const CHRISTMAS_TREE_SIZE = 250;
+const CHRISTMAS_TREE_OFFSET_RIGHT = 25;
+const CHRISTMAS_TREE_Z_INDEX = 9998;
+
+const ARTICLES = {
+  ru: [
+    { title: 'ИСТОРИЯ МАТЕМАТИКА БУРБАКИ ЕГО НЕ СУЩЕСТВОВАЛО А НАУЧНЫЕ РАБОТЫ ПИСАЛО ТАЙНОЕ ОБЩЕСТВО', url: 'https://mathcenter.kpfu.ru/tpost/rd75tr0oj1-istoriya-matematika-burbaki-ego-ne-susch' },
+    { title: 'АНДРЕЙ ОКУНЬКОВ О КРАСОТЕ ЗАДАЧ И РОЛИ МАТЕМАТИКИ В ТЕХНОЛОГИЯХ', url: 'https://mathcenter.kpfu.ru/tpost/dbf63drsc1-andrei-okunkov-o-krasote-zadach-i-roli-m' },
+    { title: 'ОЛИМПИАДА ZAMACODE ОБЪЕДИНИЛА ШКОЛЬНИКОВ ОТ БОГАТЫХ САБОВ ДО ТАНЗАНИИ', url: 'https://mathcenter.kpfu.ru/tpost/dbx1tnhzi1-olimpiada-zamacode-obedinila-shkolnikov' },
+    { title: 'ДЕНЬ ТЕОРЕМЫ ПИФАГОРА', url: 'https://mathcenter.kpfu.ru/tpost/cak6psd2g1-den-teoremi-pifagora' },
+    { title: 'ПОТАЙНОЙ ВХОД КТО И КАК ПЕРВЫМ ДОДУМАЛСЯ ДО ПОПУЛЯРНОГО АЛГОРИТМА ШИФРОВАНИЯ RSA', url: 'https://mathcenter.kpfu.ru/tpost/8sjp8ekaj1-potainoi-vhod-kto-i-kak-pervim-dodumalsy' },
+    { title: 'ОТКРЫТ НОВЫЙ СПОСОБ НАХОЖДЕНИЯ ПРОСТЫХ ЧИСЕЛ', url: 'https://mathcenter.kpfu.ru/tpost/zonh2br7v1-otkrit-novii-sposob-nahozhdeniya-prostih' },
+    { title: 'АКАДЕМИК РОБЕРТ НИГМАТУЛИН ПРАЗДНУЕТ ЮБИЛЕЙ', url: 'https://mathcenter.kpfu.ru/tpost/79ioe0obr1-akademik-robert-nigmatulin-prazdnuet-yub' },
+    { title: 'МАТЕМАТИКИ МГУ ПРЕДЛОЖИЛИ НОВЫЙ МЕТОД РАБОТЫ С ДАННЫМИ ВЫСОКОЙ РАЗМЕРНОСТИ', url: 'https://mathcenter.kpfu.ru/tpost/c26bb1mag1-matematiki-mgu-predlozhili-novii-metod-r' },
+    { title: 'В КАЗАНСКОМ УНИВЕРСИТЕТЕ ПОЧТИЛИ ПАМЯТЬ МАТЕМАТИКА ВЛАДИМИРА ФРИДЛЕНДЕРА', url: 'https://mathcenter.kpfu.ru/tpost/2j75c21n51-v-kazanskom-universitete-pochtili-pamyat' },
+    { title: 'МАТЕМАТИКИ ОПИСАЛИ АЛГОРИТМ ВЗЛОМА ДЛЯ КВАНТОВЫХ СИСТЕМ ШИФРОВАНИЯ', url: 'https://mathcenter.kpfu.ru/tpost/ylph3znrb1-matematiki-opisali-algoritm-vzloma-dlya' },
+    { title: 'МАТЕМАТИК ИЗ ФИНЛЯНДИИ РЕШИЛА ЗАДАЧУ КОТОРАЯ ОСТАВАЛАСЬ БЕЗ ОТВЕТА 44 ГОДА', url: 'https://mathcenter.kpfu.ru/tpost/23y59ovmd1-matematik-iz-finlyandii-reshila-zadachu' },
+    { title: 'МАТЕМАТИЧЕСКАЯ КУЛЬТУРА ОБЩЕСТВА ЕЁ ЗНАЧЕНИЕ И РАЗВИТИЕ', url: 'https://mathcenter.kpfu.ru/tpost/bd6ogahoh1-matematicheskaya-kultura-obschestva-eyo' }
+  ],
+  en: [
+    { title: 'THE HISTORY OF MATHEMATICIAN BOURBAKI HE NEVER EXISTED AND A SECRET SOCIETY WROTE SCIENTIFIC PAPERS', url: 'https://mathcenter.kpfu.ru/tpost/rd75tr0oj1-istoriya-matematika-burbaki-ego-ne-susch' },
+    { title: 'ANDREI OKOUNKOV ON THE BEAUTY OF PROBLEMS AND THE ROLE OF MATHEMATICS IN TECHNOLOGY', url: 'https://mathcenter.kpfu.ru/tpost/dbf63drsc1-andrei-okunkov-o-krasote-zadach-i-roli-m' },
+    { title: 'ZAMACODE OLYMPIAD UNITED SCHOOLCHILDREN FROM RICH SABBS TO TANZANIA', url: 'https://mathcenter.kpfu.ru/tpost/dbx1tnhzi1-olimpiada-zamacode-obedinila-shkolnikov' },
+    { title: 'PYTHAGOREAN THEOREM DAY', url: 'https://mathcenter.kpfu.ru/tpost/cak6psd2g1-den-teoremi-pifagora' },
+    { title: 'SECRET ENTRANCE WHO AND HOW FIRST CAME UP WITH THE POPULAR RSA ENCRYPTION ALGORITHM', url: 'https://mathcenter.kpfu.ru/tpost/8sjp8ekaj1-potainoi-vhod-kto-i-kak-pervim-dodumalsy' },
+    { title: 'NEW METHOD FOR FINDING PRIME NUMBERS DISCOVERED', url: 'https://mathcenter.kpfu.ru/tpost/zonh2br7v1-otkrit-novii-sposob-nahozhdeniya-prostih' },
+    { title: 'ACADEMICIAN ROBERT NIGMATULIN CELEBRATES ANNIVERSARY', url: 'https://mathcenter.kpfu.ru/tpost/79ioe0obr1-akademik-robert-nigmatulin-prazdnuet-yub' },
+    { title: 'MOSCOW STATE UNIVERSITY MATHEMATICIANS PROPOSE NEW METHOD FOR WORKING WITH HIGH DIMENSIONAL DATA', url: 'https://mathcenter.kpfu.ru/tpost/c26bb1mag1-matematiki-mgu-predlozhili-novii-metod-r' },
+    { title: 'KAZAN UNIVERSITY HONORS MEMORY OF MATHEMATICIAN VLADIMIR FRIDLENDER', url: 'https://mathcenter.kpfu.ru/tpost/2j75c21n51-v-kazanskom-universitete-pochtili-pamyat' },
+    { title: 'MATHEMATICIANS DESCRIBE HACKING ALGORITHM FOR QUANTUM ENCRYPTION SYSTEMS', url: 'https://mathcenter.kpfu.ru/tpost/ylph3znrb1-matematiki-opisali-algoritm-vzloma-dlya' },
+    { title: 'FINNISH MATHEMATICIAN SOLVED PROBLEM THAT REMAINED UNSOLVED FOR 44 YEARS', url: 'https://mathcenter.kpfu.ru/tpost/23y59ovmd1-matematik-iz-finlyandii-reshila-zadachu' },
+    { title: 'MATHEMATICAL CULTURE OF SOCIETY ITS SIGNIFICANCE AND DEVELOPMENT', url: 'https://mathcenter.kpfu.ru/tpost/bd6ogahoh1-matematicheskaya-kultura-obschestva-eyo' }
+  ]
+};
+
+// Цвета для рождественских огоньков
+const CHRISTMAS_COLORS = [
+  'rgba(255, 0, 0, 1)',
+  'rgba(0, 255, 0, 1)',
+  'rgba(255, 255, 0, 1)',
+  'rgba(255, 0, 255, 1)',
+  'rgba(0, 255, 255, 1)',
+  'rgba(255, 165, 0, 1)',
+];
+
+const LOADING_TEXTS = {
+  en: [
+    'Wait...',
+    'Loading...',
+    'Fetching...',
+    'One second...',
+    'One moment...',
+    'Almost there...',
+    'Here it comes...',
+    'Any second now...',
+    'Just a little longer...'
+  ],
+  ru: [
+    'Ждем...',
+    'Почти...',
+    'Момент...',
+    'Вот-вот...',
+    'Секунду...',
+    'Уже почти...',
+    'Уже вот-вот...',
+    'Еще чуть-чуть...',
+    'Еще немного...',
+    'Еще чуток...',
+    'С минуты на минуту...'
+  ]
+};
+
 const api = new Api('/api');
 const chart = new ChartManager('fn-chart');
 const STORAGE_KEY = 'labs-oop-ui';
@@ -12,7 +119,7 @@ const edgeThemes = ['round','soft','rough'];
 const LIMITS = {
   NAME_MAX: 128,
   TYPE_MAX: 16,
-  NUMBER_ABS_MAX: 1_000_000, // на несколько порядков ниже потенциально опасных значений
+  NUMBER_ABS_MAX: 1_000_000, // намного ниже потенциало опасных чисел
   POINTS_MIN: 2,
   POINTS_MAX: 1000,
 };
@@ -218,6 +325,8 @@ const i18n = {
     extraFeatures: 'Специальные возможности',
     inclusive: 'Контраст и крупный текст',
     adblock: 'AdBlock',
+    newYearMode: 'Новогодний режим',
+    tickerEnabled: 'Лента новостей',
     successLabel: 'Успешно',
     warningLabel: 'Предупреждение',
     infoLabel: 'Инфо',
@@ -384,6 +493,8 @@ const i18n = {
     extraFeatures: 'Accessability & Extra features',
     inclusive: 'High contrast mode',
     adblock: 'AdBlock',
+    newYearMode: 'Christmas mode',
+    tickerEnabled: 'News ticker',
     successLabel: 'Success',
     warningLabel: 'Warning',
     infoLabel: 'Info',
@@ -758,6 +869,424 @@ function synthesizePointsFromFunction(fn, count = 25) {
   return result;
 }
 
+// Новогодний режим, управление снегом
+class SnowManager {
+  constructor(config) {
+    this.snowflakes = [];
+    this.animationId = null;
+    this.container = null;
+    this.isActive = false;
+    this.config = config || {
+      sizeMin: SNOW_FG_SIZE_MIN,
+      sizeMax: SNOW_FG_SIZE_MAX,
+      speedMin: SNOW_FG_SPEED_MIN,
+      speedMax: SNOW_FG_SPEED_MAX,
+      count: SNOW_FG_COUNT,
+      zIndex: SNOW_FG_Z_INDEX,
+      opacity: SNOW_FG_OPACITY
+    };
+  }
+
+  createSnowflake() {
+    const snowflake = document.createElement('img');
+    snowflake.src = SNOWFLAKE_URL;
+    snowflake.style.position = 'fixed';
+    snowflake.style.pointerEvents = 'none';
+    snowflake.style.zIndex = this.config.zIndex;
+    snowflake.style.opacity = String(this.config.opacity);
+    
+    const size = Math.random() * (this.config.sizeMax - this.config.sizeMin) + this.config.sizeMin;
+    snowflake.style.width = `${size}px`;
+    snowflake.style.height = `${size}px`;
+    
+    snowflake.style.left = `${Math.random() * window.innerWidth}px`;
+    snowflake.style.top = `-${this.config.sizeMax}px`;
+    
+    const speed = Math.random() * (this.config.speedMax - this.config.speedMin) + this.config.speedMin;
+    snowflake.dataset.speed = speed;
+    
+    const rotation = Math.random() * 360;
+    snowflake.style.transform = `rotate(${rotation}deg)`;
+    snowflake.dataset.rotation = rotation;
+    const spinDirection = Math.random() < 0.5 ? -1 : 1;
+    snowflake.dataset.rotationSpeed = spinDirection * (Math.random() * speed/5 + this.config.speedMin/2);
+    
+    return snowflake;
+  }
+
+  animate() {
+    if (!this.isActive) return;
+    
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+    
+    this.snowflakes.forEach((flake) => {
+      const currentTop = parseFloat(flake.style.top) || 0;
+      const speed = parseFloat(flake.dataset.speed);
+      const newTop = currentTop + speed;
+      
+      flake.style.top = `${newTop}px`;
+      
+      const rotation = parseFloat(flake.dataset.rotation) + parseFloat(flake.dataset.rotationSpeed);
+      flake.dataset.rotation = rotation;
+      flake.style.transform = `rotate(${rotation}deg)`;
+      
+      if (newTop > windowHeight) {
+        flake.style.top = `-${this.config.sizeMax}px`;
+        flake.style.left = `${Math.random() * windowWidth}px`;
+        const size = Math.random() * (this.config.sizeMax - this.config.sizeMin) + this.config.sizeMin;
+        flake.style.width = `${size}px`;
+        flake.style.height = `${size}px`;
+        const newSpeed = Math.random() * (this.config.speedMax - this.config.speedMin) + this.config.speedMin;
+        flake.dataset.speed = newSpeed;
+      }
+      
+      const currentLeft = parseFloat(flake.style.left) || 0;
+      if (currentLeft > windowWidth) {
+        flake.style.left = `${Math.random() * windowWidth}px`;
+      }
+    });
+    
+    this.animationId = requestAnimationFrame(() => this.animate());
+  }
+
+  start() {
+    if (this.isActive) return;
+    
+    this.isActive = true;
+    
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = `snow-container-${this.config.zIndex}`;
+      this.container.style.position = 'fixed';
+      this.container.style.top = '0';
+      this.container.style.left = '0';
+      this.container.style.width = '100%';
+      this.container.style.height = '100%';
+      this.container.style.pointerEvents = 'none';
+      this.container.style.zIndex = this.config.zIndex;
+      document.body.appendChild(this.container);
+    }
+    
+    this.snowflakes = [];
+    for (let i = 0; i < this.config.count; i++) {
+      const flake = this.createSnowflake();
+      this.container.appendChild(flake);
+      this.snowflakes.push(flake);
+      flake.style.top = `${Math.random() * window.innerHeight}px`;
+    }
+    
+    this.animate();
+  }
+
+  stop() {
+    this.isActive = false;
+    
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    
+    if (this.container) {
+      this.container.remove();
+      this.container = null;
+      this.snowflakes = [];
+    }
+  }
+}
+
+// Рождественские огоньки - управление
+class ChristmasLightsManager {
+  constructor() {
+    this.container = null;
+    this.lights = [];
+    this.animationId = null;
+    this.isActive = false;
+    this.colorIndex = 0;
+    this.startTime = 0;
+  }
+
+  createLight(position) {
+    const light = document.createElement('div');
+    light.style.position = 'fixed';
+    light.style.pointerEvents = 'none';
+    light.style.zIndex = CHRISTMAS_LIGHTS_Z_INDEX;
+    light.style.width = `${CHRISTMAS_LIGHTS_SIZE}px`;
+    light.style.height = `${CHRISTMAS_LIGHTS_SIZE}px`;
+    light.style.borderRadius = '50%';
+    light.style.opacity = CHRISTMAS_LIGHTS_OPACITY;
+    
+    if (position === 'left') {
+      light.style.bottom = '0';
+      light.style.left = '0';
+      light.style.transform = 'translate(-50%, 50%)';
+    } else if (position === 'right') {
+      light.style.bottom = '0';
+      light.style.right = '0';
+      light.style.transform = 'translate(50%, 50%)';
+    } else {
+      light.style.bottom = '0';
+      light.style.left = '50%';
+      light.style.transform = 'translate(-50%, 50%)';
+    }
+    
+    return light;
+  }
+
+  updateGradients() {
+    if (!this.isActive) return;
+    
+    const elapsed = Date.now() - this.startTime;
+    const progress = (elapsed % CHRISTMAS_LIGHTS_ANIMATION_DURATION) / CHRISTMAS_LIGHTS_ANIMATION_DURATION;
+    
+    const colorCount = CHRISTMAS_COLORS.length;
+    const currentColorIndex = Math.floor(progress * colorCount);
+    const nextColorIndex = (currentColorIndex + 1) % colorCount;
+    const localProgress = (progress * colorCount) % 1;
+    
+    this.lights.forEach((light, index) => {
+      const offset = (index * 0.33) % 1;
+      const adjustedProgress = (progress + offset) % 1;
+      const adjustedColorIndex = Math.floor(adjustedProgress * colorCount);
+      const adjustedNextColorIndex = (adjustedColorIndex + 1) % colorCount;
+      const adjustedLocalProgress = (adjustedProgress * colorCount) % 1;
+      
+      const currentColor = CHRISTMAS_COLORS[adjustedColorIndex];
+      const nextColor = CHRISTMAS_COLORS[adjustedNextColorIndex];
+      
+      const gradient = `radial-gradient(circle, ${currentColor} 0%, ${currentColor} 30%, transparent 70%)`;
+      light.style.background = gradient;
+    });
+    
+    this.animationId = requestAnimationFrame(() => this.updateGradients());
+  }
+
+  start() {
+    if (this.isActive) return;
+    
+    this.isActive = true;
+    this.startTime = Date.now();
+    
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'christmas-lights-container';
+      this.container.style.position = 'fixed';
+      this.container.style.top = '1000px';
+      this.container.style.left = '0';
+      this.container.style.width = '100%';
+      this.container.style.height = '100%';
+      this.container.style.pointerEvents = 'none';
+      this.container.style.zIndex = CHRISTMAS_LIGHTS_Z_INDEX;
+      document.body.appendChild(this.container);
+    }
+    
+    // Создаем три огонька
+    this.lights = [
+      this.createLight('left'),
+      this.createLight('center'),
+      this.createLight('right')
+    ];
+    
+    this.lights.forEach(light => {
+      this.container.appendChild(light);
+    });
+    
+    this.updateGradients();
+  }
+
+  stop() {
+    this.isActive = false;
+    
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    
+    if (this.container) {
+      this.container.remove();
+      this.container = null;
+      this.lights = [];
+    }
+  }
+}
+
+const christmasLightsManager = new ChristmasLightsManager();
+
+class TickerManager {
+  constructor() {
+    this.container = null;
+    this.content = null;
+    this.animationId = null;
+    this.isActive = false;
+    this.position = 0;
+    this.speedMultiplier = 1;
+  }
+
+  start(lang = 'ru') {
+    if (this.isActive) {
+      this.updateLanguage(lang);
+      return;
+    }
+    
+    this.isActive = true;
+    
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'ticker-container';
+      this.container.className = 'ticker-container';
+      
+      this.container.addEventListener('mouseenter', () => {
+        this.speedMultiplier = TICKER_SPEED_HOVER / TICKER_SPEED;
+      });
+      
+      this.container.addEventListener('mouseleave', () => {
+        this.speedMultiplier = 1;
+      });
+      
+      const appShell = document.querySelector('.app-shell');
+      const footer = document.querySelector('.footer');
+      if (appShell && footer) {
+        appShell.insertBefore(this.container, footer);
+      } else if (footer) {
+        footer.parentNode.insertBefore(this.container, footer);
+      } else {
+        document.body.appendChild(this.container);
+      }
+    }
+
+    this.updateLanguage(lang);
+    this.animate();
+  }
+
+  updateLanguage(lang) {
+    if (!this.container) return;
+    
+    const articles = ARTICLES[lang] || ARTICLES.ru;
+    
+    if (this.content) {
+      this.content.remove();
+    }
+    
+    this.content = document.createElement('div');
+    this.content.className = 'ticker-content';
+    
+    articles.forEach((article, index) => {
+      const link = document.createElement('a');
+      link.href = article.url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = article.title;
+      link.style.color = 'inherit';
+      link.style.textDecoration = 'none';
+      link.style.transition = 'color 0.2s, text-decoration 0.2s';
+      link.addEventListener('mouseenter', () => {
+        link.style.color = 'var(--text)';
+        link.style.textDecoration = 'underline';
+      });
+      link.addEventListener('mouseleave', () => {
+        link.style.color = 'var(--muted)';
+        link.style.textDecoration = 'none';
+      });
+      
+      this.content.appendChild(link);
+      if (index < articles.length - 1) {
+        this.content.appendChild(document.createTextNode(' '));
+      }
+    });
+    
+    const duplicate = this.content.cloneNode(true);
+    this.content.appendChild(document.createTextNode(' '));
+    this.content.appendChild(duplicate);
+    
+    this.container.appendChild(this.content);
+    this.position = 0;
+  }
+
+  animate() {
+    if (!this.isActive) return;
+    
+    if (this.content) {
+      this.position -= (TICKER_SPEED / 60) * this.speedMultiplier;
+      const contentWidth = this.content.offsetWidth / 2;
+      if (Math.abs(this.position) >= contentWidth) {
+        this.position = 0;
+      }
+      this.content.style.transform = `translateX(${this.position}px)`;
+    }
+    
+    this.animationId = requestAnimationFrame(() => this.animate());
+  }
+
+  stop() {
+    this.isActive = false;
+    
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    
+    if (this.container) {
+      this.container.remove();
+      this.container = null;
+      this.content = null;
+    }
+  }
+}
+
+const tickerManager = new TickerManager();
+
+class ChristmasTreeButton {
+  constructor() {
+    this.element = null;
+    this.isVisible = localStorage.getItem('christmas-tree-hidden') !== 'true';
+  }
+
+  create() {
+    if (!this.isVisible) return;
+    
+    this.element = document.createElement('img');
+    this.element.src = CHRISTMAS_TREE_IMAGE;
+    this.element.className = 'christmas-tree-button';
+    this.element.alt = 'Christmas tree';
+    this.element.style.right = `-${CHRISTMAS_TREE_OFFSET_RIGHT}px`;
+    this.element.style.width = `${CHRISTMAS_TREE_SIZE}px`;
+    this.element.style.height = `${CHRISTMAS_TREE_SIZE}px`;
+    this.element.style.zIndex = CHRISTMAS_TREE_Z_INDEX;
+    
+    this.element.addEventListener('click', () => {
+      localStorage.setItem('christmas-tree-hidden', 'true');
+      localStorage.setItem('ui-newyear', 'true');
+      this.element.remove();
+      this.isVisible = false;
+      location.reload();
+    });
+    
+    document.body.appendChild(this.element);
+  }
+}
+
+const christmasTreeButton = new ChristmasTreeButton();
+
+const snowManagerBg = new SnowManager({
+  sizeMin: SNOW_BG_SIZE_MIN,
+  sizeMax: SNOW_BG_SIZE_MAX,
+  speedMin: SNOW_BG_SPEED_MIN,
+  speedMax: SNOW_BG_SPEED_MAX,
+  count: SNOW_BG_COUNT,
+  zIndex: SNOW_BG_Z_INDEX,
+  opacity: SNOW_BG_OPACITY
+});
+
+const snowManagerFg = new SnowManager({
+  sizeMin: SNOW_FG_SIZE_MIN,
+  sizeMax: SNOW_FG_SIZE_MAX,
+  speedMin: SNOW_FG_SPEED_MIN,
+  speedMax: SNOW_FG_SPEED_MAX,
+  count: SNOW_FG_COUNT,
+  zIndex: SNOW_FG_Z_INDEX,
+  opacity: SNOW_FG_OPACITY
+});
+
 (async () => {
   const template = await loadTemplate();
 
@@ -778,16 +1307,46 @@ function synthesizePointsFromFunction(fn, count = 25) {
         adBadgeIcon,
         adMuteIcon,
         burgerIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32m0 160c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32m448 160c0-17.7 14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32h384c17.7 0 32 14.3 32 32"/></svg>`,
-        burgerIconOpen: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><title>Compass SVG Icon</title><mask id="lineMdCompass0"><path fill="none" stroke="#fff" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-width="2" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path fill="#fff" d="M11 11L12 12L13 13L12 12z"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.3s" values="M11 11L12 12L13 13L12 12z;M10.2 10.2L17 7L13.8 13.8L7 17z"/><animateTransform attributeName="transform" begin="0.5s" dur="0.5s" type="rotate" values="-180 12 12;0 12 12"/></path><circle cx="12" cy="12" r="1" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.3s" values="0;1"/></circle></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdCompass0)"/></svg>`,
+        burgerMenuMaskId: `lineMdCompass${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       };
+    },
+    computed: {
+      burgerIconOpen() {
+        const maskId = this.burgerMenuMaskId;
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Compass SVG Icon</title><mask id="${maskId}"><path fill="none" stroke="#fff" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-width="2" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path fill="#fff" d="M11 11L12 12L13 13L12 12z"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.3s" values="M11 11L12 12L13 13L12 12z;M10.2 10.2L17 7L13.8 13.8L7 17z"/><animateTransform attributeName="transform" begin="0.5s" dur="0.5s" type="rotate" values="-180 12 12;0 12 12"/></path><circle cx="12" cy="12" r="1" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.3s" values="0;1"/></circle></mask><rect width="24" height="24" fill="currentColor" mask="url(#${maskId})"/></svg>`;
+      },
     },
     mounted() {
       this.initFromStorage();
       this.runStageAnimation();
       this.spawnAds();
       this.updateTitle();
+      this.initSnow();
+      this.initTicker();
+      christmasTreeButton.create();
     },
     methods: {
+      getRandomLoadingText() {
+        const lang = this.state.ui.lang || 'ru';
+        const texts = LOADING_TEXTS[lang] || LOADING_TEXTS.ru;
+        return texts[Math.floor(Math.random() * texts.length)];
+      },
+      async showLoadingWithMinTime(callback) {
+        const startTime = Date.now();
+        this.state.loadingText = this.getRandomLoadingText();
+        this.state.loadingGlobal = true;
+        try {
+          await callback();
+        } finally {
+          const elapsed = Date.now() - startTime;
+          const remaining = Math.max(0, MIN_LOADING_TIME - elapsed);
+          await new Promise(resolve => setTimeout(resolve, remaining));
+          this.state.loadingGlobal = false;
+          this.$nextTick(() => {
+            this.runStageAnimation();
+          });
+        }
+      },
       resetState() {
         const fresh = createInitialState();
         Object.keys(fresh).forEach((key) => {
@@ -963,6 +1522,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
       logout() {
         api.clearAuth();
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('christmas-tree-hidden');
         chart.destroy();
         this.resetState();
       },
@@ -1040,58 +1600,65 @@ function synthesizePointsFromFunction(fn, count = 25) {
         this.mobileMenuOpen = false;
       },
       async refreshFunctions() {
-        try {
-          this.state.loadingGlobal = true;
-          const [fnData, compData] = await Promise.all([
-            api.get('/functions'),
-            api.get('/composite-functions').catch(() => []),
-          ]);
-          const baseFunctions = (fnData || []).map((f) => normalizeFunction(f));
-          const composites = (compData || []).map((c) => {
-            const id = c.compositeId ?? c.id;
-            return normalizeFunction({
-              ...c,
-              compositeId: id,
-              functionId: `comp-${id}`,
-              functionName: c.compositeName ?? c.name ?? 'Composite',
-              functionType: 'COMPOSITE',
-              firstFunctionId: c.firstFunctionId ?? c.first_function_id ?? c.first_functionId,
-              secondFunctionId: c.secondFunctionId ?? c.second_function_id ?? c.second_functionId,
-              xFrom: c.xFrom ?? c.x_from ?? null,
-              xTo: c.xTo ?? c.x_to ?? null,
-              _composite: true,
+        await this.showLoadingWithMinTime(async () => {
+          try {
+            const [fnData, compData] = await Promise.all([
+              api.get('/functions'),
+              api.get('/composite-functions').catch(() => []),
+            ]);
+            const baseFunctions = (fnData || []).map((f) => normalizeFunction(f));
+            const composites = (compData || []).map((c) => {
+              const id = c.compositeId ?? c.id;
+              return normalizeFunction({
+                ...c,
+                compositeId: id,
+                functionId: `comp-${id}`,
+                functionName: c.compositeName ?? c.name ?? 'Composite',
+                functionType: 'COMPOSITE',
+                firstFunctionId: c.firstFunctionId ?? c.first_function_id ?? c.first_functionId,
+                secondFunctionId: c.secondFunctionId ?? c.second_function_id ?? c.second_functionId,
+                xFrom: c.xFrom ?? c.x_from ?? null,
+                xTo: c.xTo ?? c.x_to ?? null,
+                _composite: true,
+              });
             });
-          });
-          this.state.functions = [...baseFunctions, ...composites];
-        if (!this.state.credentials.userId && fnData && fnData.length > 0) {
-          const firstId = fnData.map((f) => f.userId).find((v) => v);
-          if (firstId) {
-            this.state.credentials.userId = firstId;
-            persistCredentials(this.state.credentials);
-          }
-        }
-          if (this.state.selectedFunction) {
-            const stillExists = this.state.functions.find((f) => f.functionId === this.state.selectedFunction.functionId);
-            if (!stillExists) {
-              this.state.selectedFunction = null;
-              this.state.points = [];
-              chart.destroy();
-            } else {
-              await this.loadPoints(this.state.selectedFunction.functionId);
+            this.state.functions = [...baseFunctions, ...composites];
+          if (!this.state.credentials.userId && fnData && fnData.length > 0) {
+            const firstId = fnData.map((f) => f.userId).find((v) => v);
+            if (firstId) {
+              this.state.credentials.userId = firstId;
+              persistCredentials(this.state.credentials);
             }
           }
-        } catch (e) {
-          const onlyBase = await api.get('/functions').catch(() => []);
-          this.state.functions = onlyBase || [];
-          this.showError(this.t('errorLoadingFunctions'), e.message);
-        } finally {
-          this.state.loadingGlobal = false;
-          this.runStageAnimation();
-        }
+            if (this.state.selectedFunction) {
+              const stillExists = this.state.functions.find((f) => f.functionId === this.state.selectedFunction.functionId);
+              if (!stillExists) {
+                this.state.selectedFunction = null;
+                this.state.points = [];
+                chart.destroy();
+              } else {
+                await this.loadPoints(this.state.selectedFunction.functionId);
+              }
+            }
+          } catch (e) {
+            const onlyBase = await api.get('/functions').catch(() => []);
+            this.state.functions = onlyBase || [];
+            this.showError(this.t('errorLoadingFunctions'), e.message);
+          }
+        });
       },
       async deleteFunction(id) {
         try {
-          await api.delete(`/functions/${id}`);
+          const functionToDelete = this.state.functions.find(f => f.functionId === id);
+          const isComposite = functionToDelete?._composite || (functionToDelete?.functionType || '').toUpperCase() === 'COMPOSITE';
+          
+          if (isComposite) {
+            const compositeId = functionToDelete.compositeId ?? functionToDelete.composite_id ?? id;
+            await api.delete(`/composite-functions/${compositeId}`);
+          } else {
+            await api.delete(`/functions/${id}`);
+          }
+          
           this.toast(this.t('toastFunctionDeleted'), 'warning', false);
           await this.refreshFunctions();
           if (this.state.selectedFunction?.functionId === id) {
@@ -1388,24 +1955,25 @@ function synthesizePointsFromFunction(fn, count = 25) {
         localStorage.setItem('ui-inclusive', this.state.ui.inclusive ? 'true' : 'false');
         localStorage.setItem('ui-edges', this.state.ui.edges || 'soft');
         localStorage.setItem('ui-adblock', this.state.ads.adBlock ? 'true' : 'false');
+        localStorage.setItem('ui-newyear', this.state.ui.newYearMode ? 'true' : 'false');
+        localStorage.setItem('ui-ticker', this.state.ui.tickerEnabled ? 'true' : 'false');
         this.scheduleApplyTheme();
         this.state.modals.settings = false;
         this.toast(this.t('toastSettingsSaved'));
         location.reload();
       },
   async openProfile() {
-    try {
-      this.state.loadingGlobal = true;
-      const me = await this.loadCurrentUser(this.state.credentials.username);
-      this.state.profileForm.username = me?.username || this.state.credentials.username || '';
-      this.state.profileForm.email = me?.email || this.state.credentials.email || this.state.authForm.email || '';
-      this.state.profileForm.password = '';
-      this.state.modals.profile = true;
-    } catch (e) {
-      this.showError(this.t('profile'), e.message || this.t('errorLoadingProfile'));
-    } finally {
-      this.state.loadingGlobal = false;
-    }
+    await this.showLoadingWithMinTime(async () => {
+      try {
+        const me = await this.loadCurrentUser(this.state.credentials.username);
+        this.state.profileForm.username = me?.username || this.state.credentials.username || '';
+        this.state.profileForm.email = me?.email || this.state.credentials.email || this.state.authForm.email || '';
+        this.state.profileForm.password = '';
+        this.state.modals.profile = true;
+      } catch (e) {
+        this.showError(this.t('profile'), e.message || this.t('errorLoadingProfile'));
+      }
+    });
   },
   async saveProfile() {
     try {
@@ -1569,6 +2137,24 @@ function synthesizePointsFromFunction(fn, count = 25) {
         }
         this.state.graph.evalResult = linearInterpolate(this.state.points, x);
       },
+      initSnow() {
+        if (this.state.ui.newYearMode) {
+          snowManagerBg.start();
+          snowManagerFg.start();
+          christmasLightsManager.start();
+        } else {
+          snowManagerBg.stop();
+          snowManagerFg.stop();
+          christmasLightsManager.stop();
+        }
+      },
+      initTicker() {
+        if (this.state.ui.tickerEnabled) {
+          tickerManager.start(this.state.ui.lang);
+        } else {
+          tickerManager.stop();
+        }
+      },
     },
     watch: {
       'state.ui.theme'(val, old) {
@@ -1589,6 +2175,18 @@ function synthesizePointsFromFunction(fn, count = 25) {
       'state.ui.lang'() {
         localStorage.setItem('ui-lang', this.state.ui.lang);
         this.updateTitle();
+        if (this.state.ui.tickerEnabled) {
+          tickerManager.updateLanguage(this.state.ui.lang);
+        }
+      },
+      'state.ui.tickerEnabled'(val, old) {
+        if (val === old) return;
+        localStorage.setItem('ui-ticker', val ? 'true' : 'false');
+        if (val) {
+          tickerManager.start(this.state.ui.lang);
+        } else {
+          tickerManager.stop();
+        }
       },
       'state.isAuthed'() {
         this.updateTitle();
@@ -1622,6 +2220,11 @@ function synthesizePointsFromFunction(fn, count = 25) {
         } else {
           this.spawnAds();
         }
+      },
+      'state.ui.newYearMode'(val, old) {
+        if (val === old) return;
+        localStorage.setItem('ui-newyear', val ? 'true' : 'false');
+        this.initSnow();
       },
     },
     created() {

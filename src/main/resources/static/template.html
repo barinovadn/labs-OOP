@@ -38,7 +38,7 @@
     </div>
   </div>
 
-  <div v-else>
+  <div v-else v-show="!state.loadingGlobal">
     <div class="header">
       <div class="row" style="gap:12px; align-items:center;">
         <img class="brand-logo" :src="brandLogo" alt="logo">
@@ -110,10 +110,10 @@
             </span>
           </a>
         </div>
-        <div class="card">
+        <div v-if="state.functions.length" class="card">
           <div class="section-title">{{t('functions')}}</div>
           <div class="scroll" style="max-height:420px;">
-            <table class="table">
+            <table class="table table-functions">
               <thead>
                 <tr><th>{{t('name')}}</th><th>{{t('type')}}</th><th colspan="2">{{t('settings')}}</th></tr>
               </thead>
@@ -395,7 +395,7 @@
     <div class="modal">
       <div class="header">
         <div class="title" style="font-size:18px;">{{t('settingsTitle')}}</div>
-        <button class="btn ghost btn-x"><span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"></animate></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"></animate></path></g></svg></span></button>
+        <button class="btn ghost btn-x" @click="state.modals.settings=false"><span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"></animate></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"></animate></path></g></svg></span></button>
       </div>
       <div class="grid grid-2">
         <div>
@@ -428,6 +428,12 @@
           <label class="row muted settings-inline">
             <input type="checkbox" v-model="state.ads.adBlock"> {{t('adblock')}}
           </label>
+          <label class="row muted settings-inline">
+            <input type="checkbox" v-model="state.ui.newYearMode"> {{t('newYearMode')}}
+          </label>
+          <label class="row muted settings-inline">
+            <input type="checkbox" v-model="state.ui.tickerEnabled"> {{t('tickerEnabled')}}
+          </label>
         </div>
       </div>
       <div class="settings-actions">
@@ -445,7 +451,7 @@
     <div class="modal">
       <div class="header">
         <div class="title" style="font-size:18px;">{{t('profile')}}</div>
-        <button class="btn ghost btn-x"><span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"></animate></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"></animate></path></g></svg></span></button>
+        <button class="btn ghost btn-x" @click="state.modals.profile=false"><span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"></animate></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"></animate></path></g></svg></span></button>
       </div>
       <div class="grid">
         <label class="muted">{{t('nickname')}}
@@ -477,7 +483,7 @@
   <!-- loader -->
   <div v-if="state.loadingGlobal" class="backdrop">
     <div class="loader-box">
-      <div class="loader-logo">f(x)</div>
+      <div class="loader-logo">{{state.loadingText || 'f(x)'}}</div>
       <div class="spinner"></div>
     </div>
   </div>
