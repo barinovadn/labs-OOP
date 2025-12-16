@@ -109,9 +109,9 @@ export function createInitialState() {
     mathForm: {
       name: '',
       mathKey: 'SQR',
-      xFrom: 0,
-      xTo: 1,
-      pointsCount: 10,
+      xFrom: 1,
+      xTo: 10,
+      pointsCount: 100,
       constant: 0,
       tabType: 'ARRAY',
     },

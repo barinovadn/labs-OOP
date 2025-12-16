@@ -428,7 +428,7 @@
           <label class="row muted settings-inline">
             <input type="checkbox" v-model="state.ads.adBlock"> {{t('adblock')}}
           </label>
-          <label class="row muted settings-inline">
+          <label v-if="newYearModeUnlocked" class="row muted settings-inline">
             <input type="checkbox" v-model="state.ui.newYearMode"> {{t('newYearMode')}}
           </label>
           <label class="row muted settings-inline">

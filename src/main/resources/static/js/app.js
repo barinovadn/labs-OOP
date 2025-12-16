@@ -28,7 +28,7 @@ const SNOW_FG_OPACITY = 0.3;
 
 // Рождественские огоньки
 const CHRISTMAS_LIGHTS_Z_INDEX = -1;
-const CHRISTMAS_LIGHTS_OPACITY = 0.075;
+const CHRISTMAS_LIGHTS_OPACITY = 0.1;
 const CHRISTMAS_LIGHTS_SIZE = 1700;
 const CHRISTMAS_LIGHTS_ANIMATION_DURATION = 12000;
 
@@ -664,24 +664,11 @@ function pickRandomLogo() {
 
 async function fetchPointsNormalized(functionId, depth = 0) {
   if (depth > 3) return [];
-  const raw = await api.get(`/functions/${functionId}/points`);
-  let points = (raw || [])
-    .map(normalizePoint)
-    .map((p, idx) => ({
-      ...p,
-      xValue: p.xValue,
-      yValue: p.yValue,
-      pointId: p.pointId ?? p.id ?? `local-${idx}`,
-      functionId: p.functionId ?? functionId,
-    }));
-
+  
   try {
     const fnRes = await api.get(`/functions/${functionId}`);
     const fnType = (fnRes?.functionType || fnRes?.function_type || '').toUpperCase();
-    if (fnType === 'COMPOSITE' && points.length) {
-      return dedupeByX(points);
-    }
-    if (fnType === 'COMPOSITE' && !points.length) {
+    if (fnType === 'COMPOSITE') {
       let firstId = fnRes?.firstFunctionId || fnRes?.first_function_id || fnRes?.first_functionId;
       let secondId = fnRes?.secondFunctionId || fnRes?.second_function_id || fnRes?.second_functionId;
       if (!firstId || !secondId) {
@@ -695,14 +682,63 @@ async function fetchPointsNormalized(functionId, depth = 0) {
       }
       if (!firstId || !secondId) {
         console.warn('compose: missing child ids for composite', functionId, { firstId, secondId, fnRes });
-      }
-      if (firstId && secondId) {
+        const raw = await api.get(`/functions/${functionId}/points`);
+        let points = (raw || [])
+          .map(normalizePoint)
+          .map((p, idx) => ({
+            ...p,
+            xValue: p.xValue,
+            yValue: p.yValue,
+            pointId: p.pointId ?? p.id ?? `local-${idx}`,
+            functionId: p.functionId ?? functionId,
+          }));
+        if (points.length) {
+          return dedupeByX(points);
+        }
+        return [];
+      } else {
+        console.log(`[fetchPointsNormalized] Computing composite for functionId=${functionId}, firstId=${firstId}, secondId=${secondId}`);
         const composed = await composeFunctions(firstId, secondId, depth + 1);
-        if (composed?.length) return dedupeByX(composed);
+        if (composed?.length) {
+          console.log(`[fetchPointsNormalized] Composite computed successfully: ${composed.length} points`);
+          return dedupeByX(composed);
+        }
+        console.warn(`[fetchPointsNormalized] Composite composition returned no points for functionId=${functionId}`);
+        return [];
       }
     }
+  } catch (e) {
+    console.warn('fetchPointsNormalized error:', e);
+  }
+  
+  let fnType = null;
+  try {
+    const fnRes = await api.get(`/functions/${functionId}`);
+    fnType = (fnRes?.functionType || fnRes?.function_type || '').toUpperCase();
+  } catch (e) {
+    console.warn('fetchPointsNormalized: failed to get function type', e);
+  }
+  
+  let points = [];
+  try {
+    const raw = await api.get(`/functions/${functionId}/points`);
+    points = (raw || [])
+      .map(normalizePoint)
+      .map((p, idx) => ({
+        ...p,
+        xValue: p.xValue,
+        yValue: p.yValue,
+        pointId: p.pointId ?? p.id ?? `local-${idx}`,
+        functionId: p.functionId ?? functionId,
+      }));
     points = dedupeByX(points);
-    if (!points.length && fnType !== 'TABULATED' && fnType !== 'COMPOSITE') {
+    if (!points.length && fnType && fnType !== 'TABULATED' && fnType !== 'COMPOSITE') {
+      let fnRes = null;
+      try {
+        fnRes = await api.get(`/functions/${functionId}`);
+      } catch (e) {
+        console.warn('fetchPointsNormalized: failed to get function for synthesis', e);
+      }
       let xFrom = fnRes?.xFrom ?? fnRes?.x_from;
       let xTo = fnRes?.xTo ?? fnRes?.x_to;
       if (xFrom === undefined || xFrom === null || xTo === undefined || xTo === null) {
@@ -725,10 +761,18 @@ async function fetchPointsNormalized(functionId, depth = 0) {
         functionId,
       }));
     }
+    
+    try {
+      return dedupeByX(points);
+    } catch {
+      return points;
+    }
   } catch (e) {
     console.warn('fetchPointsNormalized fallback failed', e);
+    return [];
   }
-    try {
+  
+  try {
     return dedupeByX(points);
   } catch {
     return points;
@@ -736,17 +780,29 @@ async function fetchPointsNormalized(functionId, depth = 0) {
 }
 
 async function composeFunctions(firstId, secondId, depth = 0) {
-  const fPts = (await fetchPointsNormalized(Number(firstId), depth)).map((p) => ({
-    ...p,
-    xValue: Number(p.xValue),
-    yValue: Number(p.yValue),
-  })).filter((p) => Number.isFinite(p.xValue) && Number.isFinite(p.yValue));
-  const gPts = (await fetchPointsNormalized(Number(secondId), depth)).map((p) => ({
-    ...p,
-    xValue: Number(p.xValue),
-    yValue: Number(p.yValue),
-  })).filter((p) => Number.isFinite(p.xValue) && Number.isFinite(p.yValue));
+  const fPtsRaw = await fetchPointsNormalized(Number(firstId), depth);
+  const fPts = fPtsRaw.map((p) => {
+    const xVal = p.xValue ?? p.xvalue ?? p.x_value ?? p.x;
+    const yVal = p.yValue ?? p.yvalue ?? p.y_value ?? p.y;
+    return {
+      ...p,
+      xValue: Number(xVal),
+      yValue: Number(yVal),
+    };
+  }).filter((p) => Number.isFinite(p.xValue) && Number.isFinite(p.yValue));
+  const gPtsRaw = await fetchPointsNormalized(Number(secondId), depth);
+  const gPts = gPtsRaw.map((p) => {
+    const xVal = p.xValue ?? p.xvalue ?? p.x_value ?? p.x;
+    const yVal = p.yValue ?? p.yvalue ?? p.y_value ?? p.y;
+    return {
+      ...p,
+      xValue: Number(xVal),
+      yValue: Number(yVal),
+    };
+  }).filter((p) => Number.isFinite(p.xValue) && Number.isFinite(p.yValue));
   console.log('compose source fPts', fPts, 'gPts', gPts);
+  if (fPts.length > 0) console.log('compose fPts[0] sample:', { xValue: fPts[0].xValue, yValue: fPts[0].yValue, raw: fPtsRaw?.[0] });
+  if (gPts.length > 0) console.log('compose gPts[0] sample:', { xValue: gPts[0].xValue, yValue: gPts[0].yValue, raw: gPtsRaw?.[0] });
   if (!fPts.length || !gPts.length) {
     console.warn('compose aborted: empty points', { firstId, secondId, fPtsLen: fPts.length, gPtsLen: gPts.length });
     return [];
@@ -764,26 +820,149 @@ async function composeFunctions(firstId, secondId, depth = 0) {
       innerMin -= 5;
       innerMax += 5;
     }
-    const samples = Math.max(200, inner.length * 8);
+    const samples = Math.max(1000, inner.length * 30);
     const step = (innerMax - innerMin) / (samples - 1 || 1);
     const pts = [];
+    let skippedOutOfRange = 0;
+    let skippedNull = 0;
+    let debugFirstFew = true;
     for (let i = 0; i < samples; i++) {
       const x = innerMin + i * step;
       const yInner = linearInterpolate(innerSorted, x);
-      if (yInner === null || yInner === undefined) continue;
-      if (yInner < outerMin || yInner > outerMax) continue;
-      const yOuter = linearInterpolate(outerSorted, yInner);
+      if (yInner === null || yInner === undefined) {
+        skippedNull++;
+        continue;
+      }
+      
+      let yOuter;
+      let yInnerForLookup = yInner;
+      
+      if (yInner < outerMin && outerMin >= 0 && outerMin < 1.0) {
+        yInnerForLookup = Math.abs(yInner);
+        if (yInnerForLookup <= outerMax) {
+          yOuter = linearInterpolate(outerSorted, yInnerForLookup);
+          skippedOutOfRange++;
+          let shouldLog = skippedOutOfRange <= 10;
+          if (shouldLog) {
+            console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)} < ${outerMin.toFixed(4)}, using reflection: g(${yInner.toFixed(4)}) = g(${yInnerForLookup.toFixed(4)}) = ${yOuter?.toFixed(4)}`);
+          }
+          if (yOuter !== null && yOuter !== undefined) {
+            pts.push({ pointId: `comp-${pts.length}`, functionId: `comp-${firstId}-${secondId}`, xValue: x, yValue: yOuter });
+            if (pts.length === 10) debugFirstFew = false;
+          }
+          continue;
+        } else {
+          if (debugFirstFew && skippedOutOfRange <= 3) {
+            console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)}, reflection would give ${yInnerForLookup.toFixed(4)} which is > ${outerMax.toFixed(4)}, using normal extrapolation`);
+          }
+        }
+      }
+      
+      if (yInner < outerMin) {
+        if (outerSorted.length >= 3) {
+          const x0 = outerSorted[0].xValue;
+          const y0 = outerSorted[0].yValue;
+          const x2 = outerSorted[Math.min(2, outerSorted.length - 1)].xValue;
+          const y2 = outerSorted[Math.min(2, outerSorted.length - 1)].yValue;
+          const dx = x2 - x0;
+          if (Math.abs(dx) > 1e-10) {
+            const slope = (y2 - y0) / dx;
+            yOuter = y0 + (yInner - x0) * slope;
+          } else {
+            yOuter = y0;
+          }
+        } else if (outerSorted.length >= 2) {
+          const x0 = outerSorted[0].xValue;
+          const y0 = outerSorted[0].yValue;
+          const x1 = outerSorted[1].xValue;
+          const y1 = outerSorted[1].yValue;
+          const dx = x1 - x0;
+          if (Math.abs(dx) > 1e-10) {
+            const slope = (y1 - y0) / dx;
+            yOuter = y0 + (yInner - x0) * slope;
+          } else {
+            yOuter = y0;
+          }
+        } else {
+          yOuter = outerSorted[0].yValue;
+        }
+        skippedOutOfRange++;
+        if (debugFirstFew && skippedOutOfRange <= 3) {
+          console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)} < ${outerMin.toFixed(4)}, extrapolating left: g(${yInner.toFixed(4)}) ≈ ${yOuter.toFixed(4)}`);
+        }
+      } else if (yInner > outerMax) {
+        if (outerSorted.length >= 3) {
+          const n = outerSorted.length;
+          const x0 = outerSorted[Math.max(0, n - 3)].xValue;
+          const y0 = outerSorted[Math.max(0, n - 3)].yValue;
+          const x2 = outerSorted[n - 1].xValue;
+          const y2 = outerSorted[n - 1].yValue;
+          const dx = x2 - x0;
+          if (Math.abs(dx) > 1e-10) {
+            const slope = (y2 - y0) / dx;
+            yOuter = y2 + (yInner - x2) * slope;
+          } else {
+            yOuter = y2;
+          }
+        } else if (outerSorted.length >= 2) {
+          const n = outerSorted.length;
+          const x0 = outerSorted[n - 2].xValue;
+          const y0 = outerSorted[n - 2].yValue;
+          const x1 = outerSorted[n - 1].xValue;
+          const y1 = outerSorted[n - 1].yValue;
+          const dx = x1 - x0;
+          if (Math.abs(dx) > 1e-10) {
+            const slope = (y1 - y0) / dx;
+            yOuter = y1 + (yInner - x1) * slope;
+          } else {
+            yOuter = y1;
+          }
+        } else {
+          yOuter = outerSorted[outerSorted.length - 1].yValue;
+        }
+        skippedOutOfRange++;
+        if (debugFirstFew && skippedOutOfRange <= 3) {
+          console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)} > ${outerMax.toFixed(4)}, extrapolating right: g(${yInner.toFixed(4)}) ≈ ${yOuter.toFixed(4)}`);
+        }
+      } else {
+        yOuter = linearInterpolate(outerSorted, yInner);
+        if (debugFirstFew && pts.length < 3) {
+          console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)} in range [${outerMin.toFixed(4)}, ${outerMax.toFixed(4)}], interpolating: g(${yInner.toFixed(4)}) = ${yOuter.toFixed(4)}`);
+        }
+      }
       if (yOuter === null || yOuter === undefined) continue;
+      if (debugFirstFew && pts.length < 3) {
+        console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)}, g(f(x))=${yOuter.toFixed(4)}`);
+      }
       pts.push({ pointId: `comp-${pts.length}`, functionId: `comp-${firstId}-${secondId}`, xValue: x, yValue: yOuter });
+      if (pts.length === 3) debugFirstFew = false;
     }
-    console.log(`[compose ${label}] inner x:[${innerMin},${innerMax}] outer x:[${outerMin},${outerMax}] samples=${samples} result=${pts.length}`);
+    console.log(`[compose ${label}] firstId=${firstId} (f) secondId=${secondId} (g), computing g(f(x))`);
+    const innerYMin = Math.min(...innerSorted.map(p => p.yValue));
+    const innerYMax = Math.max(...innerSorted.map(p => p.yValue));
+    console.log(`[compose ${label}] inner (f) domain: [${innerMin}, ${innerMax}], outer (g) domain: [${outerMin}, ${outerMax}]`);
+    console.log(`[compose ${label}] inner (f) range: [${innerYMin.toFixed(4)}, ${innerYMax.toFixed(4)}]`);
+    console.log(`[compose ${label}] inner (f) points: ${inner.length}, outer (g) points: ${outer.length}`);
+    if (inner.length <= 5) console.log(`[compose ${label}] inner (f) sample points:`, innerSorted.map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
+    if (outer.length <= 5) console.log(`[compose ${label}] outer (g) sample points:`, outerSorted.map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
+    console.log(`[compose ${label}] samples=${samples}, result=${pts.length}, extrapolatedOutOfRange=${skippedOutOfRange}, skippedNull=${skippedNull}`);
+    if (skippedOutOfRange > 0) {
+      console.log(`[compose ${label}] INFO: ${skippedOutOfRange} points extrapolated because f(x) values [${innerYMin.toFixed(4)}, ${innerYMax.toFixed(4)}] extend outside g's domain [${outerMin}, ${outerMax}]`);
+    }
+    if (firstId === secondId) {
+      console.warn(`[compose ${label}] WARNING: Both functions have the same ID (${firstId})! This means you're composing a function with itself.`);
+    }
+    if (pts.length > 0) {
+      console.log(`[compose ${label}] first few points:`, pts.slice(0, 5).map(p => `(${p.xValue.toFixed(2)}, ${p.yValue.toFixed(2)})`));
+      console.log(`[compose ${label}] last few points:`, pts.slice(-5).map(p => `(${p.xValue.toFixed(2)}, ${p.yValue.toFixed(2)})`));
+    } else {
+      console.warn(`[compose ${label}] WARNING: No points computed! This might indicate domain mismatch.`);
+    }
     return pts;
   };
 
-  const firstOrder = build(fPts, gPts, 'g(f(x))');
-  if (firstOrder.length) return firstOrder;
-  const secondOrder = build(gPts, fPts, 'f(g(x))');
-  return secondOrder;
+  const result = build(fPts, gPts, 'g(f(x))');
+  return result;
 }
 
 function persistCredentials(credentials) {
@@ -876,6 +1055,7 @@ class SnowManager {
     this.animationId = null;
     this.container = null;
     this.isActive = false;
+    this.spawnInterval = null;
     this.config = config || {
       sizeMin: SNOW_FG_SIZE_MIN,
       sizeMax: SNOW_FG_SIZE_MAX,
@@ -887,7 +1067,7 @@ class SnowManager {
     };
   }
 
-  createSnowflake() {
+  createSnowflake(spawnFromTop = false) {
     const snowflake = document.createElement('img');
     snowflake.src = SNOWFLAKE_URL;
     snowflake.style.position = 'fixed';
@@ -900,7 +1080,15 @@ class SnowManager {
     snowflake.style.height = `${size}px`;
     
     snowflake.style.left = `${Math.random() * window.innerWidth}px`;
-    snowflake.style.top = `-${this.config.sizeMax}px`;
+    
+    if (spawnFromTop) {
+      const windowHeight = window.innerHeight;
+      const spawnRangeMin = this.config.sizeMax;
+      const spawnRangeMax = windowHeight;
+      snowflake.style.top = `${-spawnRangeMin - Math.random() * spawnRangeMax}px`;
+    } else {
+      snowflake.style.top = `-${this.config.sizeMax}px`;
+    }
     
     const speed = Math.random() * (this.config.speedMax - this.config.speedMin) + this.config.speedMin;
     snowflake.dataset.speed = speed;
@@ -969,14 +1157,22 @@ class SnowManager {
     }
     
     this.snowflakes = [];
-    for (let i = 0; i < this.config.count; i++) {
-      const flake = this.createSnowflake();
+    this.animate();
+    
+    let created = 0;
+    this.spawnInterval = setInterval(() => {
+      if (!this.isActive || created >= this.config.count) {
+        if (this.spawnInterval) {
+          clearInterval(this.spawnInterval);
+          this.spawnInterval = null;
+        }
+        return;
+      }
+      const flake = this.createSnowflake(true);
       this.container.appendChild(flake);
       this.snowflakes.push(flake);
-      flake.style.top = `${Math.random() * window.innerHeight}px`;
-    }
-    
-    this.animate();
+      created++;
+    }, 200);
   }
 
   stop() {
@@ -985,6 +1181,11 @@ class SnowManager {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
       this.animationId = null;
+    }
+    
+    if (this.spawnInterval) {
+      clearInterval(this.spawnInterval);
+      this.spawnInterval = null;
     }
     
     if (this.container) {
@@ -1015,6 +1216,7 @@ class ChristmasLightsManager {
     light.style.height = `${CHRISTMAS_LIGHTS_SIZE}px`;
     light.style.borderRadius = '50%';
     light.style.opacity = CHRISTMAS_LIGHTS_OPACITY;
+    light.style.transition = 'background 0.325s ease';
     
     if (position === 'left') {
       light.style.bottom = '0';
@@ -1077,6 +1279,7 @@ class ChristmasLightsManager {
       this.container.style.height = '100%';
       this.container.style.pointerEvents = 'none';
       this.container.style.zIndex = CHRISTMAS_LIGHTS_Z_INDEX;
+      this.container.style.transitionDuration = '1s';
       document.body.appendChild(this.container);
     }
     
@@ -1242,7 +1445,7 @@ class ChristmasTreeButton {
   }
 
   create() {
-    if (!this.isVisible) return;
+    if (!this.isVisible || this.element) return;
     
     this.element = document.createElement('img');
     this.element.src = CHRISTMAS_TREE_IMAGE;
@@ -1253,13 +1456,14 @@ class ChristmasTreeButton {
     this.element.style.height = `${CHRISTMAS_TREE_SIZE}px`;
     this.element.style.zIndex = CHRISTMAS_TREE_Z_INDEX;
     
-    this.element.addEventListener('click', () => {
-      localStorage.setItem('christmas-tree-hidden', 'true');
-      localStorage.setItem('ui-newyear', 'true');
-      this.element.remove();
-      this.isVisible = false;
-      location.reload();
-    });
+      this.element.addEventListener('click', () => {
+        localStorage.setItem('christmas-tree-hidden', 'true');
+        localStorage.setItem('ui-newyear', 'true');
+        localStorage.setItem('newyear-mode-unlocked', 'true');
+        this.element.remove();
+        this.isVisible = false;
+        location.reload();
+      });
     
     document.body.appendChild(this.element);
   }
@@ -1314,6 +1518,9 @@ const snowManagerFg = new SnowManager({
       burgerIconOpen() {
         const maskId = this.burgerMenuMaskId;
         return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Compass SVG Icon</title><mask id="${maskId}"><path fill="none" stroke="#fff" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-width="2" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path fill="#fff" d="M11 11L12 12L13 13L12 12z"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.3s" values="M11 11L12 12L13 13L12 12z;M10.2 10.2L17 7L13.8 13.8L7 17z"/><animateTransform attributeName="transform" begin="0.5s" dur="0.5s" type="rotate" values="-180 12 12;0 12 12"/></path><circle cx="12" cy="12" r="1" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.3s" values="0;1"/></circle></mask><rect width="24" height="24" fill="currentColor" mask="url(#${maskId})"/></svg>`;
+      },
+      newYearModeUnlocked() {
+        return localStorage.getItem('newyear-mode-unlocked') === 'true';
       },
     },
     mounted() {
@@ -1469,6 +1676,9 @@ const snowManagerFg = new SnowManager({
           if (this.state.authForm.email && this.state.authForm.email.length > 128) {
             throw new Error(this.t('errorEmailTooLong'));
           }
+          if (this.state.authForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.authForm.email)) {
+            throw new Error(this.t('errorEmailInvalid'));
+          }
           if (this.state.authForm.password.length > 128) {
             throw new Error(this.t('errorPasswordTooLong'));
           }
@@ -1523,8 +1733,21 @@ const snowManagerFg = new SnowManager({
         api.clearAuth();
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem('christmas-tree-hidden');
+        localStorage.removeItem('newyear-mode-unlocked');
+        localStorage.setItem('ui-newyear', 'false');
+        snowManagerBg.stop();
+        snowManagerFg.stop();
+        christmasLightsManager.stop();
         chart.destroy();
         this.resetState();
+        if (christmasTreeButton.element) {
+          christmasTreeButton.element.remove();
+          christmasTreeButton.element = null;
+        }
+        christmasTreeButton.isVisible = true;
+        this.$nextTick(() => {
+          christmasTreeButton.create();
+        });
       },
       applyTheme() {
         document.documentElement.setAttribute('data-theme', this.state.ui.theme);
@@ -1609,14 +1832,17 @@ const snowManagerFg = new SnowManager({
             const baseFunctions = (fnData || []).map((f) => normalizeFunction(f));
             const composites = (compData || []).map((c) => {
               const id = c.compositeId ?? c.id;
+              const firstId = c.firstFunctionId ?? c.first_function_id;
+              const secondId = c.secondFunctionId ?? c.second_function_id;
+              console.log(`[refreshFunctions] Loading composite ${id}: firstFunctionId=${firstId}, secondFunctionId=${secondId}`, c);
               return normalizeFunction({
                 ...c,
                 compositeId: id,
                 functionId: `comp-${id}`,
                 functionName: c.compositeName ?? c.name ?? 'Composite',
                 functionType: 'COMPOSITE',
-                firstFunctionId: c.firstFunctionId ?? c.first_function_id ?? c.first_functionId,
-                secondFunctionId: c.secondFunctionId ?? c.second_function_id ?? c.second_functionId,
+                firstFunctionId: firstId,
+                secondFunctionId: secondId,
                 xFrom: c.xFrom ?? c.x_from ?? null,
                 xTo: c.xTo ?? c.x_to ?? null,
                 _composite: true,
@@ -1687,9 +1913,19 @@ const snowManagerFg = new SnowManager({
               }
               let firstId = this.state.selectedFunction.firstFunctionId;
               let secondId = this.state.selectedFunction.secondFunctionId;
+              console.log(`[loadPoints] Initial IDs from selectedFunction: firstId=${firstId}, secondId=${secondId}`);
+              console.log(`[loadPoints] selectedFunction:`, {
+                functionId: this.state.selectedFunction.functionId,
+                functionName: this.state.selectedFunction.functionName,
+                functionType: this.state.selectedFunction.functionType,
+                firstFunctionId: this.state.selectedFunction.firstFunctionId,
+                secondFunctionId: this.state.selectedFunction.secondFunctionId,
+                compositeId: this.state.selectedFunction.compositeId
+              });
               if (!firstId || !secondId) {
                 try {
                   const compMeta = await api.get(`/composite-functions/${compId || functionId}/points`);
+                  console.log(`[loadPoints] Fetched compMeta:`, compMeta);
                   firstId = firstId || compMeta?.firstFunctionId || compMeta?.first_function_id;
                   secondId = secondId || compMeta?.secondFunctionId || compMeta?.second_function_id;
                 } catch (err) {
@@ -1702,7 +1938,16 @@ const snowManagerFg = new SnowManager({
                 this.state.points = [];
                 return;
               }
+              console.log(`[loadPoints] About to compute composite: firstId=${firstId}, secondId=${secondId}`);
+              if (firstId === secondId) {
+                console.warn(`[loadPoints] WARNING: firstId === secondId (${firstId})! This means the same function is used for both parts of the composition.`);
+              }
               points = await composeFunctions(firstId, secondId);
+              console.log(`[loadPoints] Composite function points computed: ${points.length} points`);
+              if (points.length > 0) {
+                console.log(`[loadPoints] First 3 computed points:`, points.slice(0, 3).map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
+                console.log(`[loadPoints] Last 3 computed points:`, points.slice(-3).map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
+              }
               if (!points.length) {
                 this.toast(this.t('toastCompositeOutOfRange'), 'warning');
                 chart.destroy();
@@ -1919,6 +2164,10 @@ const snowManagerFg = new SnowManager({
           const { a, b } = this.state.compositeForm;
           const name = ensureName(this.state.compositeForm.name, 'composite');
           if (!name || !a || !b) throw new Error('Заполните имя и выберите обе функции');
+          console.log(`[saveComposite] Saving composite: name=${name}, firstFunctionId=${a}, secondFunctionId=${b}`);
+          if (a === b) {
+            console.warn(`[saveComposite] WARNING: firstFunctionId === secondFunctionId (${a})! This will create a composition of a function with itself.`);
+          }
           await api.post('/composite-functions', {
             userId: Number(this.state.credentials.userId),
             compositeName: name,
