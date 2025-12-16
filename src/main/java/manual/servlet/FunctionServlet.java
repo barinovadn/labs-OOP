@@ -10,6 +10,7 @@ import manual.entity.UserEntity;
 import manual.repository.FunctionRepository;
 import manual.repository.PointRepository;
 import manual.repository.UserRepository;
+import manual.security.SecurityContext;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -94,18 +95,28 @@ public class FunctionServlet extends BaseServlet {
         }
         
         try {
-            CreateFunctionRequest req = parseJsonRequest(request, CreateFunctionRequest.class);
-            logger.info("Creating function: name=" + req.getFunctionName() + ", userId=" + req.getUserId());
-            Long userId = req.getUserId();
-            if (userId == null) {
-                logger.warning("User ID is null in create function request");
-                sendError(request, response, HttpServletResponse.SC_BAD_REQUEST, "User ID required");
+            SecurityContext context = getSecurityContext(request);
+            if (context == null || !context.isAuthenticated()) {
+                logger.warning("Unauthenticated request to create function");
+                sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "Authentication required");
                 return;
             }
+            
+            Long userId = context.getUserId();
+            if (userId == null) {
+                logger.warning("User ID is null in security context");
+                sendError(request, response, HttpServletResponse.SC_UNAUTHORIZED, "User ID not found in security context");
+                return;
+            }
+            
+            CreateFunctionRequest req = parseJsonRequest(request, CreateFunctionRequest.class);
+            logger.info("Creating function: name=" + req.getFunctionName() + ", userId=" + userId);
+            
             try (Connection conn = DatabaseConnection.getConnection()) {
                 UserRepository userRepo = new UserRepository(conn);
                 UserResponse userResp = userRepo.findById(userId);
                 if (userResp == null) {
+                    logger.warning("User not found in database: " + userId);
                     sendError(request, response, HttpServletResponse.SC_NOT_FOUND, "User not found");
                     return;
                 }

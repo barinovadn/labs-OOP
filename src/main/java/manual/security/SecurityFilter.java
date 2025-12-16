@@ -40,10 +40,35 @@ public class SecurityFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         
-        String requestPath = httpRequest.getRequestURI();
+        String origin = httpRequest.getHeader("Origin");
+        if (origin != null) {
+            httpResponse.setHeader("Access-Control-Allow-Origin", origin);
+            httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+        } else {
+            httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+        }
+        httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        httpResponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        httpResponse.setHeader("Access-Control-Expose-Headers", "Request-Path");
+        
+        String contextPath = httpRequest.getContextPath();
+        String requestURI = httpRequest.getRequestURI();
+        String requestPath = requestURI;
+        
+        if (contextPath != null && !contextPath.isEmpty() && requestURI.startsWith(contextPath)) {
+            requestPath = requestURI.substring(contextPath.length());
+        }
+        
         String method = httpRequest.getMethod();
         
-        logger.info("Security filter: " + method + " " + requestPath);
+        logger.info("Security filter: " + method + " " + requestPath + " (full URI: " + requestURI + ", context: " + contextPath + ")");
+        
+        if ("OPTIONS".equals(method)) {
+            logger.fine("CORS preflight request, allowing");
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            chain.doFilter(request, response);
+            return;
+        }
         
         if (isPublicEndpoint(requestPath, method)) {
             logger.fine("Public endpoint, skipping authentication");
@@ -52,8 +77,14 @@ public class SecurityFilter implements Filter {
         }
 
         String authHeader = httpRequest.getHeader(AUTH_HEADER);
+        if (authHeader == null) {
+            authHeader = httpRequest.getHeader("authorization");
+        }
+        if (authHeader == null) {
+            authHeader = httpRequest.getHeader("AUTHORIZATION");
+        }
         
-        if (authHeader == null || !authHeader.startsWith(BASIC_PREFIX)) {
+        if (authHeader == null || authHeader.trim().isEmpty() || !authHeader.startsWith(BASIC_PREFIX)) {
             logger.warning("Missing or invalid Authorization header for " + requestPath);
             sendUnauthorized(httpResponse, "Authorization required");
             return;
@@ -61,10 +92,30 @@ public class SecurityFilter implements Filter {
 
         try {
             String credentials = authHeader.substring(BASIC_PREFIX.length());
-            String decoded = new String(Base64.getDecoder().decode(credentials));
+            if (credentials == null || credentials.trim().isEmpty()) {
+                logger.warning("Empty credentials in Authorization header");
+                sendUnauthorized(httpResponse, "Invalid credentials format");
+                return;
+            }
+            
+            String decoded;
+            try {
+                decoded = new String(Base64.getDecoder().decode(credentials));
+            } catch (IllegalArgumentException e) {
+                logger.warning("Invalid Base64 encoding in credentials: " + e.getMessage());
+                sendUnauthorized(httpResponse, "Invalid credentials format");
+                return;
+            }
+            
+            if (decoded == null || decoded.isEmpty()) {
+                logger.warning("Empty decoded credentials");
+                sendUnauthorized(httpResponse, "Invalid credentials format");
+                return;
+            }
+            
             String[] parts = decoded.split(":", 2);
             
-            if (parts.length != 2) {
+            if (parts.length != 2 || parts[0] == null || parts[0].isEmpty() || parts[1] == null) {
                 logger.warning("Invalid credentials format");
                 sendUnauthorized(httpResponse, "Invalid credentials format");
                 return;
@@ -79,8 +130,15 @@ public class SecurityFilter implements Filter {
                 UserRepository userRepo = new UserRepository(conn);
                 UserEntity user = userRepo.findEntityByUsername(username);
 
-                if (user == null || !user.getPassword().equals(password)) {
-                    logger.warning("Authentication failed for user: " + username);
+                if (user == null) {
+                    logger.warning("Authentication failed: user not found: " + username);
+                    sendUnauthorized(httpResponse, "Invalid credentials");
+                    return;
+                }
+                
+                String storedPassword = user.getPassword();
+                if (storedPassword == null || !storedPassword.equals(password)) {
+                    logger.warning("Authentication failed for user: " + username + " (password mismatch)");
                     sendUnauthorized(httpResponse, "Invalid credentials");
                     return;
                 }
@@ -107,13 +165,15 @@ public class SecurityFilter implements Filter {
                 sendError(httpResponse, "Database error");
             }
         } catch (Exception e) {
-            logger.severe("Error processing authentication: " + e.getMessage());
+            logger.severe("Error processing authentication: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getName()));
+            if (e.getCause() != null) {
+                logger.severe("Caused by: " + e.getCause().getMessage());
+            }
             sendUnauthorized(httpResponse, "Authentication failed");
         }
     }
 
     private boolean isPublicEndpoint(String path, String method) {
-        // Use endsWith to handle context path (e.g., /labs-oop/api/auth/register)
         if (method.equals("POST") && path.endsWith("/api/auth/register")) {
             return true;
         }
@@ -127,25 +187,27 @@ public class SecurityFilter implements Filter {
     }
 
     private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
-        // Do not set WWW-Authenticate to avoid browser Basic Auth popup; return JSON instead.
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"" + message + "\"}");
+        response.getWriter().write("{\"success\":false,\"error\":\"Unauthorized\",\"message\":\"" + 
+            message.replace("\"", "\\\"") + "\"}");
     }
 
     private void sendForbidden(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"" + message + "\"}");
+        response.getWriter().write("{\"success\":false,\"error\":\"Forbidden\",\"message\":\"" + 
+            message.replace("\"", "\\\"") + "\"}");
     }
 
     private void sendError(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"error\":\"Internal Server Error\",\"message\":\"" + message + "\"}");
+        response.getWriter().write("{\"success\":false,\"error\":\"Internal Server Error\",\"message\":\"" + 
+            message.replace("\"", "\\\"") + "\"}");
     }
 
     @Override

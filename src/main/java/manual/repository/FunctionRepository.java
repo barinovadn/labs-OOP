@@ -91,8 +91,16 @@ public class FunctionRepository {
             stmt.setString(2, request.getFunctionName());
             stmt.setString(3, request.getFunctionType());
             stmt.setString(4, request.getFunctionExpression());
-            stmt.setDouble(5, request.getXFrom());
-            stmt.setDouble(6, request.getXTo());
+            if (request.getXFrom() != null) {
+                stmt.setDouble(5, request.getXFrom());
+            } else {
+                stmt.setNull(5, Types.DOUBLE);
+            }
+            if (request.getXTo() != null) {
+                stmt.setDouble(6, request.getXTo());
+            } else {
+                stmt.setNull(6, Types.DOUBLE);
+            }
             stmt.executeUpdate();
 
             ResultSet keys = stmt.getGeneratedKeys();
@@ -148,8 +156,16 @@ public class FunctionRepository {
             stmt.setString(1, request.getFunctionName());
             stmt.setString(2, request.getFunctionType());
             stmt.setString(3, request.getFunctionExpression());
-            stmt.setDouble(4, request.getXFrom());
-            stmt.setDouble(5, request.getXTo());
+            if (request.getXFrom() != null) {
+                stmt.setDouble(4, request.getXFrom());
+            } else {
+                stmt.setNull(4, Types.DOUBLE);
+            }
+            if (request.getXTo() != null) {
+                stmt.setDouble(5, request.getXTo());
+            } else {
+                stmt.setNull(5, Types.DOUBLE);
+            }
             stmt.setLong(6, functionId);
 
             boolean result = stmt.executeUpdate() > 0;

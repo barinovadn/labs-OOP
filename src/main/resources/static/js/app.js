@@ -373,6 +373,7 @@ const i18n = {
     errorUsernameFormat: 'Логин 3-32 символа, только буквы/цифры/_/-',
     errorEmailInvalid: 'Введите корректный email.',
     errorPasswordTooShort: 'Пароль должен быть не короче 6 символов.',
+    errorPasswordRequired: 'Пароль обязателен для обновления профиля.',
     errorPasswordWeak: 'Пароль должен содержать прописные, строчные, цифру и спецсимвол (6-128).',
     errorUserIdUnknown: 'UserId не определён. Перелогиньтесь.',
     errorUsernameTaken: 'Такой логин уже занят.',
@@ -541,6 +542,7 @@ const i18n = {
     errorUsernameFormat: 'Username must be 3-32 chars, letters/digits/_/- only.',
     errorEmailInvalid: 'Enter a valid email.',
     errorPasswordTooShort: 'Password must be at least 6 characters.',
+    errorPasswordRequired: 'Password is required to update profile.',
     errorPasswordWeak: 'Password must have upper, lower, digit and special char (6-128).',
     errorUserIdUnknown: 'User id is unknown. Re-login, please.',
     errorUsernameTaken: 'This username is already taken.',
@@ -2063,6 +2065,11 @@ const snowManagerFg = new SnowManager({
         this.state.createForm.points.splice(idx, 1);
       },
       async createFunctionWithPoints({ name, type, xFrom, xTo, points }) {
+        if (!this.state.credentials.username || !this.state.credentials.password) {
+          throw new Error('Необходима авторизация. Пожалуйста, войдите в систему.');
+        }
+        api.setAuth(this.state.credentials.username, this.state.credentials.password);
+        
         if (!this.state.credentials.userId && this.state.functions.length) {
           this.state.credentials.userId = this.state.functions[0].userId ?? null;
         }
@@ -2071,9 +2078,17 @@ const snowManagerFg = new SnowManager({
         }
         const safeName = ensureName(name || 'f(x)');
         const safeType = ensureType(type || 'TABULATED');
-        const safeXFrom = ensureOptionalNumber(xFrom, 'xFrom');
-        const safeXTo = ensureOptionalNumber(xTo, 'xTo');
         const safePoints = sanitizePoints(points);
+        
+        let safeXFrom = ensureOptionalNumber(xFrom, 'xFrom');
+        let safeXTo = ensureOptionalNumber(xTo, 'xTo');
+        
+        if ((safeXFrom === null || safeXFrom === undefined) && safePoints.length > 0) {
+          safeXFrom = Math.min(...safePoints.map(p => p.xValue));
+        }
+        if ((safeXTo === null || safeXTo === undefined) && safePoints.length > 0) {
+          safeXTo = Math.max(...safePoints.map(p => p.xValue));
+        }
 
         const payload = {
           userId: Number(this.state.credentials.userId),
@@ -2233,26 +2248,27 @@ const snowManagerFg = new SnowManager({
             this.showError(this.t('profile'), this.t('errorUserIdUnknown'));
             return;
       }
+      if (!this.state.profileForm.password || this.state.profileForm.password.trim() === '') {
+        throw new Error(this.t('errorPasswordRequired'));
+      }
       if (!/^[A-Za-z0-9_-]{3,32}$/.test(this.state.profileForm.username)) {
         throw new Error(this.t('errorUsernameFormat'));
       }
       if (this.state.profileForm.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.state.profileForm.email)) {
         throw new Error(this.t('errorEmailInvalid'));
       }
-      if (this.state.profileForm.password && this.state.profileForm.password.length < 6) {
+      if (this.state.profileForm.password.length < 6) {
         throw new Error(this.t('errorPasswordTooShort'));
       }
-      if (this.state.profileForm.password) {
-        const pwd = this.state.profileForm.password;
-        const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,128}$/;
-        if (!strong.test(pwd)) {
-          throw new Error(this.t('errorPasswordWeak'));
-        }
+      const pwd = this.state.profileForm.password;
+      const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,128}$/;
+      if (!strong.test(pwd)) {
+        throw new Error(this.t('errorPasswordWeak'));
       }
       const payload = {
         username: this.state.profileForm.username,
         email: this.state.profileForm.email,
-        password: this.state.profileForm.password || undefined,
+        password: this.state.profileForm.password,
       };
       const trySave = async () => {
         await api.put(`/users/${this.state.credentials.userId}`, payload);
