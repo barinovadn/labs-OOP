@@ -209,6 +209,15 @@
   color: #ffffff;
 }
 
+[data-inclusive="true"] .btn.secondary.no-bg {
+  color: #000000;
+}
+
+[data-inclusive="true"] .btn.secondary.no-bg .btn-icon,
+[data-inclusive="true"] .btn.secondary.no-bg .btn-icon svg {
+  color: #000000;
+}
+
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -1454,4 +1463,9 @@ p {
 }
 .main-page-grid {
   margin-bottom: 28px;
+  align-items: start;
+}
+
+.main-page-grid > .column-stack:first-child {
+  align-self: start;
 }

@@ -2166,6 +2166,7 @@ const snowManagerFg = new SnowManager({
         if (val === old) return;
         localStorage.setItem('ui-inclusive', this.state.ui.inclusive ? 'true' : 'false');
         this.scheduleApplyTheme();
+        location.reload();
       },
       'state.ui.edges'(val, old) {
         if (val === old) return;
