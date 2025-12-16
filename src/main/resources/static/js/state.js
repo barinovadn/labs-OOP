@@ -47,6 +47,7 @@ export function createInitialState() {
     isAuthed: false,
     loading: false,
     loadingGlobal: false,
+    loadingText: '',
     stageAnimated: false,
     authMode: 'login',
     credentials: {
@@ -73,6 +74,8 @@ export function createInitialState() {
       lang: localStorage.getItem('ui-lang') || 'ru',
       inclusive: localStorage.getItem('ui-inclusive') === 'true',
       edges: localStorage.getItem('ui-edges') || 'soft',
+      newYearMode: localStorage.getItem('ui-newyear') === 'true',
+      tickerEnabled: localStorage.getItem('ui-ticker') !== 'false',
     },
     ads: {
       adBlock: localStorage.getItem('ui-adblock') === 'true',
@@ -106,9 +109,9 @@ export function createInitialState() {
     mathForm: {
       name: '',
       mathKey: 'SQR',
-      xFrom: 0,
-      xTo: 1,
-      pointsCount: 10,
+      xFrom: 1,
+      xTo: 10,
+      pointsCount: 100,
       constant: 0,
       tabType: 'ARRAY',
     },

@@ -38,7 +38,7 @@
     </div>
   </div>
 
-  <div v-else>
+  <div v-else v-show="!state.loadingGlobal">
     <div class="header">
       <div class="row" style="gap:12px; align-items:center;">
         <img class="brand-logo" :src="brandLogo" alt="logo">
@@ -48,21 +48,19 @@
         </div>
       </div>
       <div class="row header-actions desktop-menu">
-        <!-- <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button> -->
-        <button class="btn secondary" @click="openSettings">
-          <span class="btn-icon" v-html="icons.settings"></span><span>{{t('settings')}}</span>
-        </button>
-        <button class="btn secondary" @click="openProfile">
-          <span class="btn-icon" v-html="icons.profile"></span><span>{{t('profile')}}</span>
-        </button>
         <button class="btn ghost" @click="logout">
           <span class="btn-icon" v-html="icons.logout"></span><span>{{t('logout')}}</span>
+        </button>
+        <button class="btn ghost" @click="openProfile">
+          <span class="btn-icon" v-html="icons.profile"></span><span>{{t('profile')}}</span>
+        </button>
+        <button class="btn secondary no-bg" @click="openSettings">
+          <span class="btn-icon" v-html="icons.settings"></span><span>{{t('settings')}}</span>
         </button>
       </div>
       <div class="mobile-menu-container">
         <button :class="['btn','icon-btn','mobile-menu-trigger', {active: mobileMenuOpen}]" @click="toggleMobileMenu" v-html="mobileMenuOpen ? burgerIconOpen : burgerIcon"></button>
         <div v-if="mobileMenuOpen" class="mobile-menu-popup" @click.self="closeMobileMenu">
-          <!-- <button class="btn" @click="refreshFunctions">{{t('refresh')}}</button> -->
           <button class="btn secondary" @click="() => { openSettings(); closeMobileMenu(); }">
             <span class="btn-icon" v-html="icons.settings"></span><span>{{t('settings')}}</span>
           </button>
@@ -70,7 +68,7 @@
             <span class="btn-icon" v-html="icons.profile"></span><span>{{t('profile')}}</span>
           </button>
           <button class="btn ghost" @click="() => { logout(); closeMobileMenu(); }">
-            <span class="btn-icon" v-html="icons.logout"></span><span>{{t('logout')}}</span>
+            <span class="btn-icon" v-html="icons.logout2"></span><span>{{t('logout')}}</span>
           </button>
         </div>
       </div>
@@ -79,6 +77,8 @@
     <div class="card grid grid-2">
       <div>
         <div class="section-title">{{t('quickActions')}}</div>
+        <p class="muted" v-if="state.ui.lang==='ru'">Создавайте функции из точек или формул, управляйте данными и вычисляйте значения y для любого x.</p>
+        <p class="muted" v-else>Create functions from points or formulas, manage data, and calculate y values for any x.</p>
         <div class="row quick-actions">
           <button class="btn" @click="state.modals.create = true">
             <span class="btn-icon" v-html="icons.createPoints"></span><span>{{t('createFromPoints')}}</span>
@@ -94,12 +94,10 @@
           </button>
           <input type="file" ref="importer" accept="application/json" style="display:none" @change="importJson">
         </div>
-        <p class="muted" v-if="state.ui.lang==='ru'">Все операции выполняются через API с Basic Auth. Ошибки показываются модально.</p>
-        <p class="muted" v-else>All operations go via API with Basic Auth. Errors show in modals.</p>
       </div>
     </div>
 
-    <div class="grid grid-2">
+    <div class="grid grid-2 main-page-grid">
       <div class="column-stack">
         <div v-if="!state.ads.adBlock && !state.ads.dismissed.functions && state.ads.slots.functions" class="card ad-card">
           <button class="ad-close" @click="closeAd('functions')" v-html="adCloseIcon" aria-label="Закрыть рекламу"></button>
@@ -112,10 +110,10 @@
             </span>
           </a>
         </div>
-        <div class="card">
+        <div v-if="state.functions.length" class="card">
           <div class="section-title">{{t('functions')}}</div>
           <div class="scroll" style="max-height:420px;">
-            <table class="table">
+            <table class="table table-functions">
               <thead>
                 <tr><th>{{t('name')}}</th><th>{{t('type')}}</th><th colspan="2">{{t('settings')}}</th></tr>
               </thead>
@@ -128,7 +126,9 @@
                     <button class="btn ghost"
                       :class="{'disabled': state.selectedFunction?.functionId===fn.functionId}"
                       :disabled="state.selectedFunction?.functionId===fn.functionId"
-                      @click="state.selectedFunction?.functionId!==fn.functionId && loadPoints(fn.functionId)">{{t('open')}}</button>
+                      @click="state.selectedFunction?.functionId!==fn.functionId && loadPoints(fn.functionId)">
+                      <span class="btn-icon" v-html="icons.open"></span><span>{{t('open')}}</span>
+                    </button>
                     <button class="btn danger ghost" @click="deleteFunction(fn.functionId)">
                       <span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span>
                     </button>
@@ -153,14 +153,11 @@
             </span>
           </a>
         </div>
-        <div class="card grid grid-2" style="padding-bottom: 0;">
+        <div v-if="state.selectedFunction" class="card grid grid-2">
           <div>
             <div class="section-title">{{t('graph')}}</div>
-            <canvas v-if="state.selectedFunction" id="fn-chart" height="240"></canvas>
-            <div v-else class="scroll" style="height:240px; display:grid; place-items:center;">
-              <img src="https://i.pinimg.com/736x/61/d1/ac/61d1ac10c76a23249c5d51048aea8126.jpg" alt="Выберите функцию" style="max-height:220px; max-width:100%; opacity:0.9;">
-            </div>
-            <div class="row appear" style="margin-top:10px;" v-if="state.selectedFunction">
+            <canvas id="fn-chart" height="240"></canvas>
+            <div class="row appear" style="margin-top:10px;">
               <input class="input" style="flex:1" type="number" v-model="state.graph.evalX" :placeholder="t('evalPlaceholder')" @input="evalFunction">
               <div class="chip" v-if="state.graph.evalResult !== null">y ≈ {{state.graph.evalResult}}</div>
             </div>
@@ -173,7 +170,9 @@
                 <button class="btn ghost" @click="exportJson" :disabled="!state.points.length">
                   <span class="btn-icon" v-html="icons.export"></span><span>{{t('export')}}</span>
                 </button>
-                <button class="btn secondary" @click="addEmptyPointRow" :disabled="!state.selectedFunction">{{t('addPoint')}}</button>
+                <button class="btn secondary" @click="addEmptyPointRow" :disabled="!state.selectedFunction">
+                  <span class="btn-icon" v-html="icons.addPlus"></span><span>{{t('addPoint')}}</span>
+                </button>
                 <button class="btn" @click="saveAllPoints" :disabled="!state.selectedFunction || !state.points.length">
                   <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
                 </button>
@@ -189,7 +188,7 @@
                     <td><input class="input" type="number" v-model.number="p.xValue" placeholder="x"></td>
                     <td><input class="input" type="number" v-model.number="p.yValue" placeholder="y"></td>
                     <td class="row" style="gap:6px;">
-                      <button class="btn danger ghost" style="padding:6px 10px;width:100%;" @click="deletePoint(p)">
+                      <button class="btn danger ghost" style="width:100%;" @click="deletePoint(p)">
                         <span class="btn-icon" v-html="icons.remove"></span><span>{{t('delete')}}</span>
                       </button>
                     </td>
@@ -207,8 +206,8 @@
       <div class="modal">
         <div class="header">
           <div class="title" style="font-size:18px;">{{t('modalCreateTitle')}}</div>
-          <button class="btn ghost" @click="state.modals.create=false">
-            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          <button class="btn ghost btn-x" @click="state.modals.create=false">
+            <span class="btn-icon" v-html="icons.remove"></span>
           </button>
         </div>
         <div class="grid grid-2">
@@ -239,8 +238,10 @@
           </table>
         </div>
         <div class="row" style="margin-top:12px;">
-          <button class="btn secondary" @click="addPointRow">{{t('addPointRow')}}</button>
-          <button class="btn" @click="createFromTable">
+          <button class="btn secondary" @click="addPointRow">
+            <span class="btn-icon" v-html="icons.addPlus"></span><span>{{t('addPointRow')}}</span>
+          </button>
+          <button class="btn success" @click="createFromTable">
             <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('create')}}</span>
           </button>
         </div>
@@ -251,8 +252,8 @@
       <div class="modal">
         <div class="header">
           <div class="title" style="font-size:18px;">{{t('modalMathTitle')}}</div>
-          <button class="btn ghost" @click="state.modals.math=false">
-            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          <button class="btn ghost btn-x" @click="state.modals.math=false">
+            <span class="btn-icon" v-html="icons.remove"></span>
           </button>
         </div>
         <div class="grid grid-2">
@@ -281,7 +282,7 @@
           <button class="btn secondary" @click="state.modals.math=false">
             <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
           </button>
-          <button class="btn" @click="createFromMath">
+          <button class="btn success" @click="createFromMath">
             <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('create')}}</span>
           </button>
         </div>
@@ -292,13 +293,13 @@
       <div class="modal">
         <div class="header">
           <div class="title" style="font-size:18px;">{{t('modalCompositeTitle')}}</div>
-          <button class="btn ghost" @click="state.modals.composite=false">
-            <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+          <button class="btn ghost btn-x" @click="state.modals.composite=false">
+            <span class="btn-icon" v-html="icons.remove"></span>
           </button>
         </div>
         <div class="grid grid-2">
           <label class="muted">{{t('name')}}
-            <input class="input" v-model="state.compositeForm.name" placeholder="g∘f">
+            <input class="input" v-model="state.compositeForm.name" placeholder="">
           </label>
           <label class="muted">{{t('firstFn')}}
             <select class="input" v-model.number="state.compositeForm.a">
@@ -317,11 +318,10 @@
           <button class="btn secondary" @click="state.modals.composite=false">
             <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
           </button>
-          <button class="btn" @click="saveComposite">
+          <button class="btn success" @click="saveComposite">
             <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
           </button>
         </div>
-        <p class="muted" style="margin-top:8px;">{{t('complexHint')}}</p>
       </div>
     </div>
   </div>
@@ -333,7 +333,7 @@
           <span class="icon-img"></span>
           {{state.modals.error.title || t('error')}}
         </div>
-        <button class="btn ghost" @click="state.modals.error=null">×</button>
+        <button class="btn ghost btn-x"><span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"></animate></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"></animate></path></g></svg></span></button>
       </div>
       <p class="muted">{{state.modals.error.message}}</p>
       <button class="btn" @click="state.modals.error=null">
@@ -368,7 +368,14 @@
     <div class="footer-grid">
       <div>
         <div class="muted">{{ state.ui.lang === 'ru' ? 'Ссылки' : 'Links' }}</div>
-        <a href="#" class="link" v-for="(l,idx) in t('footerLinks')" :key="idx">{{l}}</a>
+        <a href="https://github.com/barinovadn/labs-OOP#документация-" target="_blank" rel="noopener" class="link">{{ state.ui.lang === 'ru' ? 'Документация' : 'Docs' }}</a>
+        <a href="https://github.com/barinovadn/labs-OOP/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen" target="_blank" rel="noopener" class="link">{{ state.ui.lang === 'ru' ? 'Поддержка' : 'Support' }}</a>
+        <a href="https://github.com/barinovadn/labs-OOP?tab=coc-ov-file" target="_blank" rel="noopener" class="link">{{ state.ui.lang === 'ru' ? 'Политика' : 'Policy' }}</a>
+        <a href="https://github.com/barinovadn" target="_blank" rel="noopener" class="link">{{ state.ui.lang === 'ru' ? 'Контакты' : 'Contacts' }}</a>
+        <a href="https://github.com/barinovadn/labs-OOP" target="_blank" rel="noopener" class="link">{{ state.ui.lang === 'ru' ? 'О проекте' : 'About' }}</a>
+        <a href="https://www.meme-arsenal.com/memes/e7c12b18116cdbb0bfe25dc49f13d481.jpg" target="_blank" rel="noopener" class="link">{{ state.ui.lang === 'ru' ? 'Помощь' : 'Help' }}</a>
+        <a href="https://github.com/barinovadn/labs-OOP#единый-api-контракт--" target="_blank" rel="noopener" class="link">API</a>
+        <a href="https://github.com/barinovadn/labs-OOP/tree/framework" target="_blank" rel="noopener" class="link">{{ state.ui.lang === 'ru' ? 'Скачать' : 'Download' }}</a>
       </div>
       <div>
         <div class="muted">{{t('language')}}</div>
@@ -378,8 +385,8 @@
       </div>
       <div>
         <div class="muted">{{t('contact')}}</div>
-        <a href="#" class="link">support@example.com</a>
-        <a href="#" class="link">+1 (555) 010-010</a>
+        <a href="tel:+78003020060" class="link">8 (800) 302-00-60</a>
+        <a href="mailto:gaben@valvesoftware.com" class="link">gaben@valvesoftware.com</a>
       </div>
     </div>
   </footer>
@@ -388,7 +395,7 @@
     <div class="modal">
       <div class="header">
         <div class="title" style="font-size:18px;">{{t('settingsTitle')}}</div>
-        <button class="btn ghost" @click="state.modals.settings=false">×</button>
+        <button class="btn ghost btn-x" @click="state.modals.settings=false"><span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"></animate></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"></animate></path></g></svg></span></button>
       </div>
       <div class="grid grid-2">
         <div>
@@ -413,6 +420,7 @@
             <option value="ru">{{t('langRu')}}</option>
             <option value="en">{{t('langEn')}}</option>
           </select>
+          <br><br>
           <div class="section-title extra-margin">{{t('extraFeatures')}}</div>
           <label class="row muted settings-inline">
             <input type="checkbox" v-model="state.ui.inclusive"> {{t('inclusive')}}
@@ -420,13 +428,19 @@
           <label class="row muted settings-inline">
             <input type="checkbox" v-model="state.ads.adBlock"> {{t('adblock')}}
           </label>
+          <label v-if="newYearModeUnlocked" class="row muted settings-inline">
+            <input type="checkbox" v-model="state.ui.newYearMode"> {{t('newYearMode')}}
+          </label>
+          <label class="row muted settings-inline">
+            <input type="checkbox" v-model="state.ui.tickerEnabled"> {{t('tickerEnabled')}}
+          </label>
         </div>
       </div>
-      <div class="row settings-actions">
-        <button class="btn secondary half force-grid" @click="state.modals.settings=false">
-          <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
+      <div class="settings-actions">
+        <button class="btn secondary" @click="state.modals.settings=false">
+          <span class="btn-icon" v-html="icons.remove"></span><span>{{t('close')}}</span>
         </button>
-        <button class="btn half" @click="saveSettings">
+        <button class="btn success" @click="saveSettings">
           <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('save')}}</span>
         </button>
       </div>
@@ -437,7 +451,7 @@
     <div class="modal">
       <div class="header">
         <div class="title" style="font-size:18px;">{{t('profile')}}</div>
-        <button class="btn ghost" @click="state.modals.profile=false">×</button>
+        <button class="btn ghost btn-x" @click="state.modals.profile=false"><span class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"></animate></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"></animate></path></g></svg></span></button>
       </div>
       <div class="grid">
         <label class="muted">{{t('nickname')}}
@@ -454,8 +468,11 @@
         <button class="btn secondary" @click="state.modals.profile=false">
           <span class="btn-icon" v-html="icons.remove"></span><span>{{t('cancel')}}</span>
         </button>
-        <button class="btn" @click="saveProfile">
+        <button class="btn success" @click="saveProfile">
           <span class="btn-icon" v-html="icons.confirm"></span><span>{{t('update')}}</span>
+        </button>
+        <button class="btn danger" @click="logout">
+          <span class="btn-icon" v-html="icons.logout2"></span><span>{{t('logout')}}</span>
         </button>
         <button class="btn danger" @click="deleteAccount">
           <span class="btn-icon" v-html="icons.remove"></span><span>{{t('deleteAccount')}}</span>
@@ -466,7 +483,7 @@
   <!-- loader -->
   <div v-if="state.loadingGlobal" class="backdrop">
     <div class="loader-box">
-      <div class="loader-logo">f(x)</div>
+      <div class="loader-logo">{{state.loadingText || 'f(x)'}}</div>
       <div class="spinner"></div>
     </div>
   </div>

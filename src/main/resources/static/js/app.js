@@ -3,6 +3,113 @@ import { Api } from './api.js';
 import { ChartManager } from './chart.js';
 import { createInitialState, mathEvaluators, mathFunctions } from './state.js';
 
+const MIN_LOADING_TIME = 750;
+
+// Новогодний режим - параметры снега
+const SNOWFLAKE_URL = 'https://media.tenor.com/KZnE4lQ6Z2cAAAAi/snowflake.gif';
+
+// Снежинки на фоне
+const SNOW_BG_SIZE_MIN = 100;
+const SNOW_BG_SIZE_MAX = 300;
+const SNOW_BG_SPEED_MIN = 1/10;
+const SNOW_BG_SPEED_MAX = 1/5;
+const SNOW_BG_COUNT = 14;
+const SNOW_BG_Z_INDEX = -2;
+const SNOW_BG_OPACITY = 0.4;
+
+// Снежинки спереди
+const SNOW_FG_SIZE_MIN = 50;
+const SNOW_FG_SIZE_MAX = 100;
+const SNOW_FG_SPEED_MIN = 1/5;
+const SNOW_FG_SPEED_MAX = 1/2;
+const SNOW_FG_COUNT = 6;
+const SNOW_FG_Z_INDEX = 9999;
+const SNOW_FG_OPACITY = 0.3;
+
+// Рождественские огоньки
+const CHRISTMAS_LIGHTS_Z_INDEX = -1;
+const CHRISTMAS_LIGHTS_OPACITY = 0.1;
+const CHRISTMAS_LIGHTS_SIZE = 1700;
+const CHRISTMAS_LIGHTS_ANIMATION_DURATION = 12000;
+
+// Лента
+const TICKER_SPEED = 8;
+const TICKER_SPEED_HOVER = 2.5;
+
+// Елочка
+const CHRISTMAS_TREE_IMAGE = 'https://media.tenor.com/5YU_WXg2X1kAAAAi/christmas-star.gif';
+const CHRISTMAS_TREE_SIZE = 250;
+const CHRISTMAS_TREE_OFFSET_RIGHT = 25;
+const CHRISTMAS_TREE_Z_INDEX = 9998;
+
+const ARTICLES = {
+  ru: [
+    { title: 'ИСТОРИЯ МАТЕМАТИКА БУРБАКИ ЕГО НЕ СУЩЕСТВОВАЛО А НАУЧНЫЕ РАБОТЫ ПИСАЛО ТАЙНОЕ ОБЩЕСТВО', url: 'https://mathcenter.kpfu.ru/tpost/rd75tr0oj1-istoriya-matematika-burbaki-ego-ne-susch' },
+    { title: 'АНДРЕЙ ОКУНЬКОВ О КРАСОТЕ ЗАДАЧ И РОЛИ МАТЕМАТИКИ В ТЕХНОЛОГИЯХ', url: 'https://mathcenter.kpfu.ru/tpost/dbf63drsc1-andrei-okunkov-o-krasote-zadach-i-roli-m' },
+    { title: 'ОЛИМПИАДА ZAMACODE ОБЪЕДИНИЛА ШКОЛЬНИКОВ ОТ БОГАТЫХ САБОВ ДО ТАНЗАНИИ', url: 'https://mathcenter.kpfu.ru/tpost/dbx1tnhzi1-olimpiada-zamacode-obedinila-shkolnikov' },
+    { title: 'ДЕНЬ ТЕОРЕМЫ ПИФАГОРА', url: 'https://mathcenter.kpfu.ru/tpost/cak6psd2g1-den-teoremi-pifagora' },
+    { title: 'ПОТАЙНОЙ ВХОД КТО И КАК ПЕРВЫМ ДОДУМАЛСЯ ДО ПОПУЛЯРНОГО АЛГОРИТМА ШИФРОВАНИЯ RSA', url: 'https://mathcenter.kpfu.ru/tpost/8sjp8ekaj1-potainoi-vhod-kto-i-kak-pervim-dodumalsy' },
+    { title: 'ОТКРЫТ НОВЫЙ СПОСОБ НАХОЖДЕНИЯ ПРОСТЫХ ЧИСЕЛ', url: 'https://mathcenter.kpfu.ru/tpost/zonh2br7v1-otkrit-novii-sposob-nahozhdeniya-prostih' },
+    { title: 'АКАДЕМИК РОБЕРТ НИГМАТУЛИН ПРАЗДНУЕТ ЮБИЛЕЙ', url: 'https://mathcenter.kpfu.ru/tpost/79ioe0obr1-akademik-robert-nigmatulin-prazdnuet-yub' },
+    { title: 'МАТЕМАТИКИ МГУ ПРЕДЛОЖИЛИ НОВЫЙ МЕТОД РАБОТЫ С ДАННЫМИ ВЫСОКОЙ РАЗМЕРНОСТИ', url: 'https://mathcenter.kpfu.ru/tpost/c26bb1mag1-matematiki-mgu-predlozhili-novii-metod-r' },
+    { title: 'В КАЗАНСКОМ УНИВЕРСИТЕТЕ ПОЧТИЛИ ПАМЯТЬ МАТЕМАТИКА ВЛАДИМИРА ФРИДЛЕНДЕРА', url: 'https://mathcenter.kpfu.ru/tpost/2j75c21n51-v-kazanskom-universitete-pochtili-pamyat' },
+    { title: 'МАТЕМАТИКИ ОПИСАЛИ АЛГОРИТМ ВЗЛОМА ДЛЯ КВАНТОВЫХ СИСТЕМ ШИФРОВАНИЯ', url: 'https://mathcenter.kpfu.ru/tpost/ylph3znrb1-matematiki-opisali-algoritm-vzloma-dlya' },
+    { title: 'МАТЕМАТИК ИЗ ФИНЛЯНДИИ РЕШИЛА ЗАДАЧУ КОТОРАЯ ОСТАВАЛАСЬ БЕЗ ОТВЕТА 44 ГОДА', url: 'https://mathcenter.kpfu.ru/tpost/23y59ovmd1-matematik-iz-finlyandii-reshila-zadachu' },
+    { title: 'МАТЕМАТИЧЕСКАЯ КУЛЬТУРА ОБЩЕСТВА ЕЁ ЗНАЧЕНИЕ И РАЗВИТИЕ', url: 'https://mathcenter.kpfu.ru/tpost/bd6ogahoh1-matematicheskaya-kultura-obschestva-eyo' }
+  ],
+  en: [
+    { title: 'THE HISTORY OF MATHEMATICIAN BOURBAKI HE NEVER EXISTED AND A SECRET SOCIETY WROTE SCIENTIFIC PAPERS', url: 'https://mathcenter.kpfu.ru/tpost/rd75tr0oj1-istoriya-matematika-burbaki-ego-ne-susch' },
+    { title: 'ANDREI OKOUNKOV ON THE BEAUTY OF PROBLEMS AND THE ROLE OF MATHEMATICS IN TECHNOLOGY', url: 'https://mathcenter.kpfu.ru/tpost/dbf63drsc1-andrei-okunkov-o-krasote-zadach-i-roli-m' },
+    { title: 'ZAMACODE OLYMPIAD UNITED SCHOOLCHILDREN FROM RICH SABBS TO TANZANIA', url: 'https://mathcenter.kpfu.ru/tpost/dbx1tnhzi1-olimpiada-zamacode-obedinila-shkolnikov' },
+    { title: 'PYTHAGOREAN THEOREM DAY', url: 'https://mathcenter.kpfu.ru/tpost/cak6psd2g1-den-teoremi-pifagora' },
+    { title: 'SECRET ENTRANCE WHO AND HOW FIRST CAME UP WITH THE POPULAR RSA ENCRYPTION ALGORITHM', url: 'https://mathcenter.kpfu.ru/tpost/8sjp8ekaj1-potainoi-vhod-kto-i-kak-pervim-dodumalsy' },
+    { title: 'NEW METHOD FOR FINDING PRIME NUMBERS DISCOVERED', url: 'https://mathcenter.kpfu.ru/tpost/zonh2br7v1-otkrit-novii-sposob-nahozhdeniya-prostih' },
+    { title: 'ACADEMICIAN ROBERT NIGMATULIN CELEBRATES ANNIVERSARY', url: 'https://mathcenter.kpfu.ru/tpost/79ioe0obr1-akademik-robert-nigmatulin-prazdnuet-yub' },
+    { title: 'MOSCOW STATE UNIVERSITY MATHEMATICIANS PROPOSE NEW METHOD FOR WORKING WITH HIGH DIMENSIONAL DATA', url: 'https://mathcenter.kpfu.ru/tpost/c26bb1mag1-matematiki-mgu-predlozhili-novii-metod-r' },
+    { title: 'KAZAN UNIVERSITY HONORS MEMORY OF MATHEMATICIAN VLADIMIR FRIDLENDER', url: 'https://mathcenter.kpfu.ru/tpost/2j75c21n51-v-kazanskom-universitete-pochtili-pamyat' },
+    { title: 'MATHEMATICIANS DESCRIBE HACKING ALGORITHM FOR QUANTUM ENCRYPTION SYSTEMS', url: 'https://mathcenter.kpfu.ru/tpost/ylph3znrb1-matematiki-opisali-algoritm-vzloma-dlya' },
+    { title: 'FINNISH MATHEMATICIAN SOLVED PROBLEM THAT REMAINED UNSOLVED FOR 44 YEARS', url: 'https://mathcenter.kpfu.ru/tpost/23y59ovmd1-matematik-iz-finlyandii-reshila-zadachu' },
+    { title: 'MATHEMATICAL CULTURE OF SOCIETY ITS SIGNIFICANCE AND DEVELOPMENT', url: 'https://mathcenter.kpfu.ru/tpost/bd6ogahoh1-matematicheskaya-kultura-obschestva-eyo' }
+  ]
+};
+
+// Цвета для рождественских огоньков
+const CHRISTMAS_COLORS = [
+  'rgba(255, 0, 0, 1)',
+  'rgba(0, 255, 0, 1)',
+  'rgba(255, 255, 0, 1)',
+  'rgba(255, 0, 255, 1)',
+  'rgba(0, 255, 255, 1)',
+  'rgba(255, 165, 0, 1)',
+];
+
+const LOADING_TEXTS = {
+  en: [
+    'Wait...',
+    'Loading...',
+    'Fetching...',
+    'One second...',
+    'One moment...',
+    'Almost there...',
+    'Here it comes...',
+    'Any second now...',
+    'Just a little longer...'
+  ],
+  ru: [
+    'Ждем...',
+    'Почти...',
+    'Момент...',
+    'Вот-вот...',
+    'Секунду...',
+    'Уже почти...',
+    'Уже вот-вот...',
+    'Еще чуть-чуть...',
+    'Еще немного...',
+    'Еще чуток...',
+    'С минуты на минуту...'
+  ]
+};
+
 const api = new Api('/api');
 const chart = new ChartManager('fn-chart');
 const STORAGE_KEY = 'labs-oop-ui';
@@ -12,7 +119,7 @@ const edgeThemes = ['round','soft','rough'];
 const LIMITS = {
   NAME_MAX: 128,
   TYPE_MAX: 16,
-  NUMBER_ABS_MAX: 1_000_000, // на несколько порядков ниже потенциально опасных значений
+  NUMBER_ABS_MAX: 1_000_000, // намного ниже потенциало опасных чисел
   POINTS_MIN: 2,
   POINTS_MAX: 1000,
 };
@@ -138,19 +245,30 @@ const actionIcons = {
   settings: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Cog-loop SVG Icon</title><defs><symbol id="lineMdCogLoop0"><path fill="none" stroke-width="2" d="M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.6 7.4 16.8 7.61 16.99 7.83C17.46 8.4 17.85 9.05 18.11 9.77C18.2 10.03 18.28 10.31 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12"><animate fill="freeze" attributeName="d" begin="0.8s" dur="0.2s" values="M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.6 7.4 16.8 7.61 16.99 7.83C17.46 8.4 17.85 9.05 18.11 9.77C18.2 10.03 18.28 10.31 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12;M15.24 6.37C15.65 6.6 16.04 6.88 16.38 7.2C16.38 7.2 19 6.12 19.01 6.14C19.01 6.14 20.57 8.84 20.57 8.84C20.58 8.87 18.35 10.59 18.35 10.59C18.45 11.04 18.5 11.52 18.5 12"/></path></symbol></defs><g fill="none" stroke="currentColor" stroke-width="2"><g stroke-linecap="round" stroke-linejoin="round"><path stroke-dasharray="42" stroke-dashoffset="42" d="M12 5.5C15.59 5.5 18.5 8.41 18.5 12C18.5 15.59 15.59 18.5 12 18.5C8.41 18.5 5.5 15.59 5.5 12C5.5 8.41 8.41 5.5 12 5.5z" opacity="0"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.2s" dur="0.5s" values="42;0"/><set attributeName="opacity" begin="0.2s" to="1"/><set attributeName="opacity" begin="0.7s" to="0"/></path><path stroke-dasharray="20" stroke-dashoffset="20" d="M12 9C13.66 9 15 10.34 15 12C15 13.66 13.66 15 12 15C10.34 15 9 13.66 9 12C9 10.34 10.34 9 12 9z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.2s" values="20;0"/></path></g><g opacity="0"><use href="#lineMdCogLoop0"/><use href="#lineMdCogLoop0" transform="rotate(60 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(120 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(180 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(240 12 12)"/><use href="#lineMdCogLoop0" transform="rotate(300 12 12)"/><set attributeName="opacity" begin="0.7s" to="1"/><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></g></g></svg>`,
   profile: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Person SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="20" stroke-dashoffset="20" d="M12 5C13.66 5 15 6.34 15 8C15 9.65685 13.6569 11 12 11C10.3431 11 9 9.65685 9 8C9 6.34315 10.3431 5 12 5z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="20;0"/></path><path stroke-dasharray="36" stroke-dashoffset="36" d="M12 14C16 14 19 16 19 17V19H5V17C5 16 8 14 12 14z" opacity="0"><set attributeName="opacity" begin="0.5s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.4s" values="36;0"/></path></g></svg>`,
   logout: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Compass SVG Icon</title><mask id="lineMdCompass0"><path fill="none" stroke="#fff" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-width="2" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path fill="#fff" d="M11 11L12 12L13 13L12 12z"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.3s" values="M11 11L12 12L13 13L12 12z;M10.2 10.2L17 7L13.8 13.8L7 17z"/><animateTransform attributeName="transform" begin="0.5s" dur="0.5s" type="rotate" values="-180 12 12;0 12 12"/></path><circle cx="12" cy="12" r="1" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.3s" values="0;1"/></circle></mask><rect width="24" height="24" fill="currentColor" mask="url(#lineMdCompass0)"/></svg>`,
+  logout2: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Logout SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="32" stroke-dashoffset="32" d="M12 4H5C4.44772 4 4 4.44772 4 5V19C4 19.5523 4.44772 20 5 20H12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="32;0"/></path><path stroke-dasharray="12" stroke-dashoffset="12" d="M9 12h11.5" opacity="0"><set attributeName="opacity" begin="0.5s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.2s" values="12;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M20.5 12l-3.5 -3.5M20.5 12l-3.5 3.5" opacity="0"><set attributeName="opacity" begin="0.7s" to="1"/><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="6;0"/></path></g></svg>`,
   createPoints: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>My-location-loop SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="56" stroke-dashoffset="56" d="M12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="56;0"/></path><path d="M12 4v0M20 12h0M12 20v0M4 12h0" opacity="0"><set attributeName="opacity" begin="0.9s" to="1"/><animate fill="freeze" attributeName="d" begin="0.9s" dur="0.2s" values="M12 4v0M20 12h0M12 20v0M4 12h0;M12 4v-2M20 12h2M12 20v2M4 12h-2"/><animateTransform attributeName="transform" dur="30s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g><circle cx="12" cy="12" r="0" fill="currentColor" fill-opacity="0"><set attributeName="fill-opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="r" begin="0.6s" dur="0.2s" values="0;4"/></circle></svg>`,
   createMath: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Text-box-multiple SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="62" stroke-dashoffset="62" d="M22 4V3C22 2.45 21.55 2 21 2H7C6.45 2 6 2.45 6 3V17C6 17.55 6.45 18 7 18H21C21.55 18 22 17.55 22 17z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="62;124"/></path><g stroke-dasharray="10" stroke-dashoffset="10"><path d="M10 6h8"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="10;0"/></path><path d="M10 10h8"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.9s" dur="0.2s" values="10;0"/></path></g><path stroke-dasharray="7" stroke-dashoffset="7" d="M10 14h5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.1s" dur="0.2s" values="7;0"/></path><path stroke-dasharray="34" stroke-dashoffset="34" d="M2 6V21C2 21.55 2.45 22 3 22H18"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.4s" dur="0.4s" values="34;68"/></path></g></svg>`,
   createComposite: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Arrows-horizontal SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="12" stroke-dashoffset="12" d="M15 7H3.5M9 17H20.5"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="12;0"/></path><path stroke-dasharray="8" stroke-dashoffset="8" d="M3 7L7 11M3 7L7 3M21 17L17 21M21 17L17 13"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.2s" values="8;0"/></path></g></svg>`,
   importJson: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Document-list SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><g stroke-width="2"><path stroke-dasharray="64" stroke-dashoffset="64" d="M13 3L19 9V21H5V3H13"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.6s" values="64;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M9 13H13"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1s" dur="0.2s" values="6;0"/></path><path stroke-dasharray="8" stroke-dashoffset="8" d="M9 16H15"><animate fill="freeze" attributeName="stroke-dashoffset" begin="1.2s" dur="0.2s" values="8;0"/></path></g><path stroke-dasharray="14" stroke-dashoffset="14" d="M12.5 3V8.5H19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="14;0"/></path></g></svg>`,
-  export: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Downloading-loop SVG Icon</title><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="2 4" stroke-dashoffset="6" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21"><animate attributeName="stroke-dashoffset" dur="0.6s" repeatCount="indefinite" values="6;0"/></path><path stroke-dasharray="30" stroke-dashoffset="30" d="M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.1s" dur="0.3s" values="30;0"/></path><path stroke-dasharray="10" stroke-dashoffset="10" d="M12 8v7.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.5s" dur="0.2s" values="10;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 15.5l3.5 -3.5M12 15.5l-3.5 -3.5"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.7s" dur="0.2s" values="6;0"/></path></g></svg>`,
+  export: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Download SVG Icon</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 21h12M12 3v14m0 0l5-5m-5 5l-5-5"/></svg>`,
+  addPlus: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Add-plus SVG Icon</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h6m0 0h6m-6 0v6m0-6V6"/></svg>`,
   confirm: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Confirm SVG Icon</title><path fill="none" stroke="currentColor" stroke-dasharray="24" stroke-dashoffset="24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11L11 17L21 7"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.4s" values="24;0"/></path></svg>`,
   remove: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Remove SVG Icon</title><g fill="none" stroke="currentColor" stroke-dasharray="22" stroke-dashoffset="22" stroke-linecap="round" stroke-width="2"><path d="M19 5L5 19"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.3s" dur="0.3s" values="22;0"/></path><path d="M5 5L19 19"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="22;0"/></path></g></svg>`,
+  open: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Arrow-up-right-md SVG Icon</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7m0 0H9m8 0v8"/></svg>`,
+};
+
+const faviconIcons = {
+  auth: '/favicons/chair.svg',
+  default: '/favicons/mug.svg',
+  settings: '/favicons/cog.svg',
+  profile: '/favicons/smile.svg',
+  newFunction: '/favicons/pen.svg',
 };
 
 const i18n = {
   ru: {
-    authTitle: 'Функции ООП — вход',
-    authSubtitle: 'Работа с табулированными функциями через /api',
+    authTitle: 'Калькулятор функций — вход',
+    authSubtitle: 'Создавайте функции, управляйте точками и вычисляйте значения',
     login: 'Вход',
     register: 'Регистрация',
     nickname: 'Ник',
@@ -159,7 +277,12 @@ const i18n = {
     repeatPassword: 'Повтор пароля',
     loginAction: 'Войти',
     registerAction: 'Зарегистрироваться',
-    headerTitle: 'Функции ООП — веб-интерфейс',
+    headerTitle: 'Калькулятор функций',
+    pageTitle: 'Калькулятор функций',
+    pageTitleProfile: 'Калькулятор функций — Профиль',
+    pageTitleSettings: 'Калькулятор функций — Настройки',
+    pageTitleAuth: 'Калькулятор функций — Вход',
+    pageTitleNewFunction: 'Калькулятор функций — Новая функция',
     loggedAs: 'Вы вошли как',
     refresh: 'Обновить',
     settings: 'Настройки',
@@ -190,6 +313,7 @@ const i18n = {
     pointsCount: 'Количество точек',
     constValue: 'Значение константы',
     cancel: 'Отмена',
+    close: 'Закрыть',
     modalCompositeTitle: 'Создание сложной функции',
     firstFn: 'Первая функция (f)',
     secondFn: 'Вторая функция (g)',
@@ -201,6 +325,8 @@ const i18n = {
     extraFeatures: 'Специальные возможности',
     inclusive: 'Контраст и крупный текст',
     adblock: 'AdBlock',
+    newYearMode: 'Новогодний режим',
+    tickerEnabled: 'Лента новостей',
     successLabel: 'Успешно',
     warningLabel: 'Предупреждение',
     infoLabel: 'Инфо',
@@ -233,6 +359,54 @@ const i18n = {
     update: 'Обновить',
     deleteAccount: 'Удалить аккаунт',
     passwordNew: 'Новый пароль',
+    toastRegisterSuccess: 'Регистрация успешна, войдите под новым пользователем',
+    toastConnectionEstablished: 'Готово! Соединение установлено',
+    errorFillLoginPassword: 'Заполните логин и пароль',
+    errorEnterLoginPassword: 'Введите логин и пароль',
+    errorPasswordsNotMatch: 'Пароли не совпадают',
+    errorUsernameTooLong: 'Логин не длиннее 32 символов.',
+    errorEmailTooLong: 'Email не длиннее 128 символов.',
+    errorPasswordTooLong: 'Пароль не длиннее 128 символов.',
+    errorRegistrationFailed: 'Ошибка регистрации: проверьте логин/email/пароль.',
+    errorLoginFailed: 'Не удалось войти',
+    errorWrongLoginPassword: 'Неверный логин или пароль',
+    errorUsernameFormat: 'Логин 3-32 символа, только буквы/цифры/_/-',
+    errorEmailInvalid: 'Введите корректный email.',
+    errorPasswordTooShort: 'Пароль должен быть не короче 6 символов.',
+    errorPasswordWeak: 'Пароль должен содержать прописные, строчные, цифру и спецсимвол (6-128).',
+    errorUserIdUnknown: 'UserId не определён. Перелогиньтесь.',
+    errorUsernameTaken: 'Такой логин уже занят.',
+    toastFunctionDeleted: 'Функция удалена',
+    toastCompositeChildError: 'Не удалось получить дочерние функции для композиции',
+    toastCompositeOutOfRange: 'Композиция вне области определения: скорректируйте диапазоны',
+    toastCompositeCalcError: 'Не удалось вычислить композицию',
+    toastNoPoints: 'Для функции нет точек. Укажите xFrom/xTo или создайте точки.',
+    toastCompositePointsChange: 'Точки композиции меняются через дочерние функции',
+    toastPointUpdated: 'Точка обновлена',
+    toastPointSaved: 'Точка сохранена',
+    toastNoFunctionSelected: 'Нет выбранной функции для сохранения точки',
+    toastDeleteInBaseFunctions: 'Удаляйте точки в базовых функциях, не в композиции',
+    toastPointDeleted: 'Точка удалена',
+    toastLocalPointDeleted: 'Локальная точка удалена',
+    toastFunctionSaved: 'Функция сохранена',
+    toastFunctionFromFormula: 'Функция по формуле создана',
+    toastCompositeSaved: 'Композит сохранён',
+    toastAddPointsInChild: 'Добавляйте точки в дочерние функции, не в композицию',
+    toastSettingsSaved: 'Настройки сохранены',
+    toastSaveInBaseFunctions: 'Сохраняйте точки в базовых функциях, композиция только читает',
+    toastExportedJson: 'Экспортировано в JSON',
+    toastPointsLoaded: 'Точки загружены в форму создания',
+    errorLoadingFunctions: 'Загрузка функций',
+    errorDeletingFunction: 'Удаление функции',
+    errorFunctionPoints: 'Точки функции',
+    errorUpdatingPoint: 'Обновление точки',
+    errorDeletingPoint: 'Удаление точки',
+    errorCreatingFunction: 'Создание функции',
+    errorCreatingFromFormula: 'Создание по формуле',
+    errorCompositeFunction: 'Композитная функция',
+    errorLoadingProfile: 'Не удалось загрузить профиль',
+    errorDeleting: 'Удаление',
+    errorImport: 'Импорт',
     types: {
       SQR: 'Квадратичная',
       IDENTITY: 'Тождественная',
@@ -261,8 +435,8 @@ const i18n = {
     },
   },
   en: {
-    authTitle: 'OOP Functions — Sign in',
-    authSubtitle: 'Work with tabulated functions via /api',
+    authTitle: 'Function Calculator — Sign in',
+    authSubtitle: 'Create functions, manage points, and calculate values',
     login: 'Login',
     register: 'Register',
     nickname: 'Username',
@@ -271,7 +445,12 @@ const i18n = {
     repeatPassword: 'Repeat password',
     loginAction: 'Sign in',
     registerAction: 'Sign up',
-    headerTitle: 'OOP Functions — Web UI',
+    headerTitle: 'Function Calculator',
+    pageTitle: 'Function Calculator',
+    pageTitleProfile: 'Function Calculator — Profile',
+    pageTitleSettings: 'Function Calculator — Settings',
+    pageTitleAuth: 'Function Calculator — Sign in',
+    pageTitleNewFunction: 'Function Calculator — New Function',
     loggedAs: 'Signed in as',
     refresh: 'Refresh',
     settings: 'Settings',
@@ -302,6 +481,7 @@ const i18n = {
     pointsCount: 'Points count',
     constValue: 'Constant value',
     cancel: 'Cancel',
+    close: 'Close',
     modalCompositeTitle: 'Create composite function',
     firstFn: 'First function (f)',
     secondFn: 'Second function (g)',
@@ -313,6 +493,8 @@ const i18n = {
     extraFeatures: 'Accessability & Extra features',
     inclusive: 'High contrast mode',
     adblock: 'AdBlock',
+    newYearMode: 'Christmas mode',
+    tickerEnabled: 'News ticker',
     successLabel: 'Success',
     warningLabel: 'Warning',
     infoLabel: 'Info',
@@ -337,7 +519,7 @@ const i18n = {
     ok: 'Got it',
     contact: 'Contact',
     footerLinks: ['Docs','Support','Policy','Contacts','About','Help','API','Download'],
-    langRu: 'Russian',
+    langRu: 'Русский',
     langEn: 'English',
     delete: 'Delete',
     open: 'Open',
@@ -345,6 +527,54 @@ const i18n = {
     update: 'Update',
     deleteAccount: 'Delete account',
     passwordNew: 'New password',
+    toastRegisterSuccess: 'Registration successful, please sign in with your new account',
+    toastConnectionEstablished: 'Done! Connection established',
+    errorFillLoginPassword: 'Please enter username and password',
+    errorEnterLoginPassword: 'Enter username and password',
+    errorPasswordsNotMatch: 'Passwords do not match',
+    errorUsernameTooLong: 'Username must be at most 32 characters.',
+    errorEmailTooLong: 'Email must be at most 128 characters.',
+    errorPasswordTooLong: 'Password must be at most 128 characters.',
+    errorRegistrationFailed: 'Registration error: check login/email/password.',
+    errorLoginFailed: 'Failed to login',
+    errorWrongLoginPassword: 'Wrong login or password',
+    errorUsernameFormat: 'Username must be 3-32 chars, letters/digits/_/- only.',
+    errorEmailInvalid: 'Enter a valid email.',
+    errorPasswordTooShort: 'Password must be at least 6 characters.',
+    errorPasswordWeak: 'Password must have upper, lower, digit and special char (6-128).',
+    errorUserIdUnknown: 'User id is unknown. Re-login, please.',
+    errorUsernameTaken: 'This username is already taken.',
+    toastFunctionDeleted: 'Function deleted',
+    toastCompositeChildError: 'Failed to get child functions for composition',
+    toastCompositeOutOfRange: 'Composition out of domain: adjust ranges',
+    toastCompositeCalcError: 'Failed to calculate composition',
+    toastNoPoints: 'Function has no points. Specify xFrom/xTo or create points.',
+    toastCompositePointsChange: 'Composite points are changed through child functions',
+    toastPointUpdated: 'Point updated',
+    toastPointSaved: 'Point saved',
+    toastNoFunctionSelected: 'No function selected to save point',
+    toastDeleteInBaseFunctions: 'Delete points in base functions, not in composition',
+    toastPointDeleted: 'Point deleted',
+    toastLocalPointDeleted: 'Local point deleted',
+    toastFunctionSaved: 'Function saved',
+    toastFunctionFromFormula: 'Function from formula created',
+    toastCompositeSaved: 'Composite saved',
+    toastAddPointsInChild: 'Add points in child functions, not in composition',
+    toastSettingsSaved: 'Settings saved',
+    toastSaveInBaseFunctions: 'Save points in base functions, composition is read-only',
+    toastExportedJson: 'Exported to JSON',
+    toastPointsLoaded: 'Points loaded into creation form',
+    errorLoadingFunctions: 'Loading functions',
+    errorDeletingFunction: 'Deleting function',
+    errorFunctionPoints: 'Function points',
+    errorUpdatingPoint: 'Updating point',
+    errorDeletingPoint: 'Deleting point',
+    errorCreatingFunction: 'Creating function',
+    errorCreatingFromFormula: 'Creating from formula',
+    errorCompositeFunction: 'Composite function',
+    errorLoadingProfile: 'Failed to load profile',
+    errorDeleting: 'Deletion',
+    errorImport: 'Import',
     types: {
       SQR: 'Square',
       IDENTITY: 'Identity',
@@ -434,24 +664,11 @@ function pickRandomLogo() {
 
 async function fetchPointsNormalized(functionId, depth = 0) {
   if (depth > 3) return [];
-  const raw = await api.get(`/functions/${functionId}/points`);
-  let points = (raw || [])
-    .map(normalizePoint)
-    .map((p, idx) => ({
-      ...p,
-      xValue: p.xValue,
-      yValue: p.yValue,
-      pointId: p.pointId ?? p.id ?? `local-${idx}`,
-      functionId: p.functionId ?? functionId,
-    }));
-
+  
   try {
     const fnRes = await api.get(`/functions/${functionId}`);
     const fnType = (fnRes?.functionType || fnRes?.function_type || '').toUpperCase();
-    if (fnType === 'COMPOSITE' && points.length) {
-      return dedupeByX(points);
-    }
-    if (fnType === 'COMPOSITE' && !points.length) {
+    if (fnType === 'COMPOSITE') {
       let firstId = fnRes?.firstFunctionId || fnRes?.first_function_id || fnRes?.first_functionId;
       let secondId = fnRes?.secondFunctionId || fnRes?.second_function_id || fnRes?.second_functionId;
       if (!firstId || !secondId) {
@@ -465,14 +682,63 @@ async function fetchPointsNormalized(functionId, depth = 0) {
       }
       if (!firstId || !secondId) {
         console.warn('compose: missing child ids for composite', functionId, { firstId, secondId, fnRes });
-      }
-      if (firstId && secondId) {
+        const raw = await api.get(`/functions/${functionId}/points`);
+        let points = (raw || [])
+          .map(normalizePoint)
+          .map((p, idx) => ({
+            ...p,
+            xValue: p.xValue,
+            yValue: p.yValue,
+            pointId: p.pointId ?? p.id ?? `local-${idx}`,
+            functionId: p.functionId ?? functionId,
+          }));
+        if (points.length) {
+          return dedupeByX(points);
+        }
+        return [];
+      } else {
+        console.log(`[fetchPointsNormalized] Computing composite for functionId=${functionId}, firstId=${firstId}, secondId=${secondId}`);
         const composed = await composeFunctions(firstId, secondId, depth + 1);
-        if (composed?.length) return dedupeByX(composed);
+        if (composed?.length) {
+          console.log(`[fetchPointsNormalized] Composite computed successfully: ${composed.length} points`);
+          return dedupeByX(composed);
+        }
+        console.warn(`[fetchPointsNormalized] Composite composition returned no points for functionId=${functionId}`);
+        return [];
       }
     }
+  } catch (e) {
+    console.warn('fetchPointsNormalized error:', e);
+  }
+  
+  let fnType = null;
+  try {
+    const fnRes = await api.get(`/functions/${functionId}`);
+    fnType = (fnRes?.functionType || fnRes?.function_type || '').toUpperCase();
+  } catch (e) {
+    console.warn('fetchPointsNormalized: failed to get function type', e);
+  }
+  
+  let points = [];
+  try {
+    const raw = await api.get(`/functions/${functionId}/points`);
+    points = (raw || [])
+      .map(normalizePoint)
+      .map((p, idx) => ({
+        ...p,
+        xValue: p.xValue,
+        yValue: p.yValue,
+        pointId: p.pointId ?? p.id ?? `local-${idx}`,
+        functionId: p.functionId ?? functionId,
+      }));
     points = dedupeByX(points);
-    if (!points.length && fnType !== 'TABULATED' && fnType !== 'COMPOSITE') {
+    if (!points.length && fnType && fnType !== 'TABULATED' && fnType !== 'COMPOSITE') {
+      let fnRes = null;
+      try {
+        fnRes = await api.get(`/functions/${functionId}`);
+      } catch (e) {
+        console.warn('fetchPointsNormalized: failed to get function for synthesis', e);
+      }
       let xFrom = fnRes?.xFrom ?? fnRes?.x_from;
       let xTo = fnRes?.xTo ?? fnRes?.x_to;
       if (xFrom === undefined || xFrom === null || xTo === undefined || xTo === null) {
@@ -495,10 +761,18 @@ async function fetchPointsNormalized(functionId, depth = 0) {
         functionId,
       }));
     }
+    
+    try {
+      return dedupeByX(points);
+    } catch {
+      return points;
+    }
   } catch (e) {
     console.warn('fetchPointsNormalized fallback failed', e);
+    return [];
   }
-    try {
+  
+  try {
     return dedupeByX(points);
   } catch {
     return points;
@@ -506,17 +780,29 @@ async function fetchPointsNormalized(functionId, depth = 0) {
 }
 
 async function composeFunctions(firstId, secondId, depth = 0) {
-  const fPts = (await fetchPointsNormalized(Number(firstId), depth)).map((p) => ({
-    ...p,
-    xValue: Number(p.xValue),
-    yValue: Number(p.yValue),
-  })).filter((p) => Number.isFinite(p.xValue) && Number.isFinite(p.yValue));
-  const gPts = (await fetchPointsNormalized(Number(secondId), depth)).map((p) => ({
-    ...p,
-    xValue: Number(p.xValue),
-    yValue: Number(p.yValue),
-  })).filter((p) => Number.isFinite(p.xValue) && Number.isFinite(p.yValue));
+  const fPtsRaw = await fetchPointsNormalized(Number(firstId), depth);
+  const fPts = fPtsRaw.map((p) => {
+    const xVal = p.xValue ?? p.xvalue ?? p.x_value ?? p.x;
+    const yVal = p.yValue ?? p.yvalue ?? p.y_value ?? p.y;
+    return {
+      ...p,
+      xValue: Number(xVal),
+      yValue: Number(yVal),
+    };
+  }).filter((p) => Number.isFinite(p.xValue) && Number.isFinite(p.yValue));
+  const gPtsRaw = await fetchPointsNormalized(Number(secondId), depth);
+  const gPts = gPtsRaw.map((p) => {
+    const xVal = p.xValue ?? p.xvalue ?? p.x_value ?? p.x;
+    const yVal = p.yValue ?? p.yvalue ?? p.y_value ?? p.y;
+    return {
+      ...p,
+      xValue: Number(xVal),
+      yValue: Number(yVal),
+    };
+  }).filter((p) => Number.isFinite(p.xValue) && Number.isFinite(p.yValue));
   console.log('compose source fPts', fPts, 'gPts', gPts);
+  if (fPts.length > 0) console.log('compose fPts[0] sample:', { xValue: fPts[0].xValue, yValue: fPts[0].yValue, raw: fPtsRaw?.[0] });
+  if (gPts.length > 0) console.log('compose gPts[0] sample:', { xValue: gPts[0].xValue, yValue: gPts[0].yValue, raw: gPtsRaw?.[0] });
   if (!fPts.length || !gPts.length) {
     console.warn('compose aborted: empty points', { firstId, secondId, fPtsLen: fPts.length, gPtsLen: gPts.length });
     return [];
@@ -534,26 +820,149 @@ async function composeFunctions(firstId, secondId, depth = 0) {
       innerMin -= 5;
       innerMax += 5;
     }
-    const samples = Math.max(200, inner.length * 8);
+    const samples = Math.max(1000, inner.length * 30);
     const step = (innerMax - innerMin) / (samples - 1 || 1);
     const pts = [];
+    let skippedOutOfRange = 0;
+    let skippedNull = 0;
+    let debugFirstFew = true;
     for (let i = 0; i < samples; i++) {
       const x = innerMin + i * step;
       const yInner = linearInterpolate(innerSorted, x);
-      if (yInner === null || yInner === undefined) continue;
-      if (yInner < outerMin || yInner > outerMax) continue;
-      const yOuter = linearInterpolate(outerSorted, yInner);
+      if (yInner === null || yInner === undefined) {
+        skippedNull++;
+        continue;
+      }
+      
+      let yOuter;
+      let yInnerForLookup = yInner;
+      
+      if (yInner < outerMin && outerMin >= 0 && outerMin < 1.0) {
+        yInnerForLookup = Math.abs(yInner);
+        if (yInnerForLookup <= outerMax) {
+          yOuter = linearInterpolate(outerSorted, yInnerForLookup);
+          skippedOutOfRange++;
+          let shouldLog = skippedOutOfRange <= 10;
+          if (shouldLog) {
+            console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)} < ${outerMin.toFixed(4)}, using reflection: g(${yInner.toFixed(4)}) = g(${yInnerForLookup.toFixed(4)}) = ${yOuter?.toFixed(4)}`);
+          }
+          if (yOuter !== null && yOuter !== undefined) {
+            pts.push({ pointId: `comp-${pts.length}`, functionId: `comp-${firstId}-${secondId}`, xValue: x, yValue: yOuter });
+            if (pts.length === 10) debugFirstFew = false;
+          }
+          continue;
+        } else {
+          if (debugFirstFew && skippedOutOfRange <= 3) {
+            console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)}, reflection would give ${yInnerForLookup.toFixed(4)} which is > ${outerMax.toFixed(4)}, using normal extrapolation`);
+          }
+        }
+      }
+      
+      if (yInner < outerMin) {
+        if (outerSorted.length >= 3) {
+          const x0 = outerSorted[0].xValue;
+          const y0 = outerSorted[0].yValue;
+          const x2 = outerSorted[Math.min(2, outerSorted.length - 1)].xValue;
+          const y2 = outerSorted[Math.min(2, outerSorted.length - 1)].yValue;
+          const dx = x2 - x0;
+          if (Math.abs(dx) > 1e-10) {
+            const slope = (y2 - y0) / dx;
+            yOuter = y0 + (yInner - x0) * slope;
+          } else {
+            yOuter = y0;
+          }
+        } else if (outerSorted.length >= 2) {
+          const x0 = outerSorted[0].xValue;
+          const y0 = outerSorted[0].yValue;
+          const x1 = outerSorted[1].xValue;
+          const y1 = outerSorted[1].yValue;
+          const dx = x1 - x0;
+          if (Math.abs(dx) > 1e-10) {
+            const slope = (y1 - y0) / dx;
+            yOuter = y0 + (yInner - x0) * slope;
+          } else {
+            yOuter = y0;
+          }
+        } else {
+          yOuter = outerSorted[0].yValue;
+        }
+        skippedOutOfRange++;
+        if (debugFirstFew && skippedOutOfRange <= 3) {
+          console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)} < ${outerMin.toFixed(4)}, extrapolating left: g(${yInner.toFixed(4)}) ≈ ${yOuter.toFixed(4)}`);
+        }
+      } else if (yInner > outerMax) {
+        if (outerSorted.length >= 3) {
+          const n = outerSorted.length;
+          const x0 = outerSorted[Math.max(0, n - 3)].xValue;
+          const y0 = outerSorted[Math.max(0, n - 3)].yValue;
+          const x2 = outerSorted[n - 1].xValue;
+          const y2 = outerSorted[n - 1].yValue;
+          const dx = x2 - x0;
+          if (Math.abs(dx) > 1e-10) {
+            const slope = (y2 - y0) / dx;
+            yOuter = y2 + (yInner - x2) * slope;
+          } else {
+            yOuter = y2;
+          }
+        } else if (outerSorted.length >= 2) {
+          const n = outerSorted.length;
+          const x0 = outerSorted[n - 2].xValue;
+          const y0 = outerSorted[n - 2].yValue;
+          const x1 = outerSorted[n - 1].xValue;
+          const y1 = outerSorted[n - 1].yValue;
+          const dx = x1 - x0;
+          if (Math.abs(dx) > 1e-10) {
+            const slope = (y1 - y0) / dx;
+            yOuter = y1 + (yInner - x1) * slope;
+          } else {
+            yOuter = y1;
+          }
+        } else {
+          yOuter = outerSorted[outerSorted.length - 1].yValue;
+        }
+        skippedOutOfRange++;
+        if (debugFirstFew && skippedOutOfRange <= 3) {
+          console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)} > ${outerMax.toFixed(4)}, extrapolating right: g(${yInner.toFixed(4)}) ≈ ${yOuter.toFixed(4)}`);
+        }
+      } else {
+        yOuter = linearInterpolate(outerSorted, yInner);
+        if (debugFirstFew && pts.length < 3) {
+          console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)} in range [${outerMin.toFixed(4)}, ${outerMax.toFixed(4)}], interpolating: g(${yInner.toFixed(4)}) = ${yOuter.toFixed(4)}`);
+        }
+      }
       if (yOuter === null || yOuter === undefined) continue;
+      if (debugFirstFew && pts.length < 3) {
+        console.log(`[compose debug] x=${x.toFixed(4)}, f(x)=${yInner.toFixed(4)}, g(f(x))=${yOuter.toFixed(4)}`);
+      }
       pts.push({ pointId: `comp-${pts.length}`, functionId: `comp-${firstId}-${secondId}`, xValue: x, yValue: yOuter });
+      if (pts.length === 3) debugFirstFew = false;
     }
-    console.log(`[compose ${label}] inner x:[${innerMin},${innerMax}] outer x:[${outerMin},${outerMax}] samples=${samples} result=${pts.length}`);
+    console.log(`[compose ${label}] firstId=${firstId} (f) secondId=${secondId} (g), computing g(f(x))`);
+    const innerYMin = Math.min(...innerSorted.map(p => p.yValue));
+    const innerYMax = Math.max(...innerSorted.map(p => p.yValue));
+    console.log(`[compose ${label}] inner (f) domain: [${innerMin}, ${innerMax}], outer (g) domain: [${outerMin}, ${outerMax}]`);
+    console.log(`[compose ${label}] inner (f) range: [${innerYMin.toFixed(4)}, ${innerYMax.toFixed(4)}]`);
+    console.log(`[compose ${label}] inner (f) points: ${inner.length}, outer (g) points: ${outer.length}`);
+    if (inner.length <= 5) console.log(`[compose ${label}] inner (f) sample points:`, innerSorted.map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
+    if (outer.length <= 5) console.log(`[compose ${label}] outer (g) sample points:`, outerSorted.map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
+    console.log(`[compose ${label}] samples=${samples}, result=${pts.length}, extrapolatedOutOfRange=${skippedOutOfRange}, skippedNull=${skippedNull}`);
+    if (skippedOutOfRange > 0) {
+      console.log(`[compose ${label}] INFO: ${skippedOutOfRange} points extrapolated because f(x) values [${innerYMin.toFixed(4)}, ${innerYMax.toFixed(4)}] extend outside g's domain [${outerMin}, ${outerMax}]`);
+    }
+    if (firstId === secondId) {
+      console.warn(`[compose ${label}] WARNING: Both functions have the same ID (${firstId})! This means you're composing a function with itself.`);
+    }
+    if (pts.length > 0) {
+      console.log(`[compose ${label}] first few points:`, pts.slice(0, 5).map(p => `(${p.xValue.toFixed(2)}, ${p.yValue.toFixed(2)})`));
+      console.log(`[compose ${label}] last few points:`, pts.slice(-5).map(p => `(${p.xValue.toFixed(2)}, ${p.yValue.toFixed(2)})`));
+    } else {
+      console.warn(`[compose ${label}] WARNING: No points computed! This might indicate domain mismatch.`);
+    }
     return pts;
   };
 
-  const firstOrder = build(fPts, gPts, 'g(f(x))');
-  if (firstOrder.length) return firstOrder;
-  const secondOrder = build(gPts, fPts, 'f(g(x))');
-  return secondOrder;
+  const result = build(fPts, gPts, 'g(f(x))');
+  return result;
 }
 
 function persistCredentials(credentials) {
@@ -639,6 +1048,449 @@ function synthesizePointsFromFunction(fn, count = 25) {
   return result;
 }
 
+// Новогодний режим, управление снегом
+class SnowManager {
+  constructor(config) {
+    this.snowflakes = [];
+    this.animationId = null;
+    this.container = null;
+    this.isActive = false;
+    this.spawnInterval = null;
+    this.config = config || {
+      sizeMin: SNOW_FG_SIZE_MIN,
+      sizeMax: SNOW_FG_SIZE_MAX,
+      speedMin: SNOW_FG_SPEED_MIN,
+      speedMax: SNOW_FG_SPEED_MAX,
+      count: SNOW_FG_COUNT,
+      zIndex: SNOW_FG_Z_INDEX,
+      opacity: SNOW_FG_OPACITY
+    };
+  }
+
+  createSnowflake(spawnFromTop = false) {
+    const snowflake = document.createElement('img');
+    snowflake.src = SNOWFLAKE_URL;
+    snowflake.style.position = 'fixed';
+    snowflake.style.pointerEvents = 'none';
+    snowflake.style.zIndex = this.config.zIndex;
+    snowflake.style.opacity = String(this.config.opacity);
+    
+    const size = Math.random() * (this.config.sizeMax - this.config.sizeMin) + this.config.sizeMin;
+    snowflake.style.width = `${size}px`;
+    snowflake.style.height = `${size}px`;
+    
+    snowflake.style.left = `${Math.random() * window.innerWidth}px`;
+    
+    if (spawnFromTop) {
+      const windowHeight = window.innerHeight;
+      const spawnRangeMin = this.config.sizeMax;
+      const spawnRangeMax = windowHeight;
+      snowflake.style.top = `${-spawnRangeMin - Math.random() * spawnRangeMax}px`;
+    } else {
+      snowflake.style.top = `-${this.config.sizeMax}px`;
+    }
+    
+    const speed = Math.random() * (this.config.speedMax - this.config.speedMin) + this.config.speedMin;
+    snowflake.dataset.speed = speed;
+    
+    const rotation = Math.random() * 360;
+    snowflake.style.transform = `rotate(${rotation}deg)`;
+    snowflake.dataset.rotation = rotation;
+    const spinDirection = Math.random() < 0.5 ? -1 : 1;
+    snowflake.dataset.rotationSpeed = spinDirection * (Math.random() * speed/5 + this.config.speedMin/2);
+    
+    return snowflake;
+  }
+
+  animate() {
+    if (!this.isActive) return;
+    
+    const windowHeight = window.innerHeight;
+    const windowWidth = window.innerWidth;
+    
+    this.snowflakes.forEach((flake) => {
+      const currentTop = parseFloat(flake.style.top) || 0;
+      const speed = parseFloat(flake.dataset.speed);
+      const newTop = currentTop + speed;
+      
+      flake.style.top = `${newTop}px`;
+      
+      const rotation = parseFloat(flake.dataset.rotation) + parseFloat(flake.dataset.rotationSpeed);
+      flake.dataset.rotation = rotation;
+      flake.style.transform = `rotate(${rotation}deg)`;
+      
+      if (newTop > windowHeight) {
+        flake.style.top = `-${this.config.sizeMax}px`;
+        flake.style.left = `${Math.random() * windowWidth}px`;
+        const size = Math.random() * (this.config.sizeMax - this.config.sizeMin) + this.config.sizeMin;
+        flake.style.width = `${size}px`;
+        flake.style.height = `${size}px`;
+        const newSpeed = Math.random() * (this.config.speedMax - this.config.speedMin) + this.config.speedMin;
+        flake.dataset.speed = newSpeed;
+      }
+      
+      const currentLeft = parseFloat(flake.style.left) || 0;
+      if (currentLeft > windowWidth) {
+        flake.style.left = `${Math.random() * windowWidth}px`;
+      }
+    });
+    
+    this.animationId = requestAnimationFrame(() => this.animate());
+  }
+
+  start() {
+    if (this.isActive) return;
+    
+    this.isActive = true;
+    
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = `snow-container-${this.config.zIndex}`;
+      this.container.style.position = 'fixed';
+      this.container.style.top = '0';
+      this.container.style.left = '0';
+      this.container.style.width = '100%';
+      this.container.style.height = '100%';
+      this.container.style.pointerEvents = 'none';
+      this.container.style.zIndex = this.config.zIndex;
+      document.body.appendChild(this.container);
+    }
+    
+    this.snowflakes = [];
+    this.animate();
+    
+    let created = 0;
+    this.spawnInterval = setInterval(() => {
+      if (!this.isActive || created >= this.config.count) {
+        if (this.spawnInterval) {
+          clearInterval(this.spawnInterval);
+          this.spawnInterval = null;
+        }
+        return;
+      }
+      const flake = this.createSnowflake(true);
+      this.container.appendChild(flake);
+      this.snowflakes.push(flake);
+      created++;
+    }, 200);
+  }
+
+  stop() {
+    this.isActive = false;
+    
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    
+    if (this.spawnInterval) {
+      clearInterval(this.spawnInterval);
+      this.spawnInterval = null;
+    }
+    
+    if (this.container) {
+      this.container.remove();
+      this.container = null;
+      this.snowflakes = [];
+    }
+  }
+}
+
+// Рождественские огоньки - управление
+class ChristmasLightsManager {
+  constructor() {
+    this.container = null;
+    this.lights = [];
+    this.animationId = null;
+    this.isActive = false;
+    this.colorIndex = 0;
+    this.startTime = 0;
+  }
+
+  createLight(position) {
+    const light = document.createElement('div');
+    light.style.position = 'fixed';
+    light.style.pointerEvents = 'none';
+    light.style.zIndex = CHRISTMAS_LIGHTS_Z_INDEX;
+    light.style.width = `${CHRISTMAS_LIGHTS_SIZE}px`;
+    light.style.height = `${CHRISTMAS_LIGHTS_SIZE}px`;
+    light.style.borderRadius = '50%';
+    light.style.opacity = CHRISTMAS_LIGHTS_OPACITY;
+    light.style.transition = 'background 0.325s ease';
+    
+    if (position === 'left') {
+      light.style.bottom = '0';
+      light.style.left = '0';
+      light.style.transform = 'translate(-50%, 50%)';
+    } else if (position === 'right') {
+      light.style.bottom = '0';
+      light.style.right = '0';
+      light.style.transform = 'translate(50%, 50%)';
+    } else {
+      light.style.bottom = '0';
+      light.style.left = '50%';
+      light.style.transform = 'translate(-50%, 50%)';
+    }
+    
+    return light;
+  }
+
+  updateGradients() {
+    if (!this.isActive) return;
+    
+    const elapsed = Date.now() - this.startTime;
+    const progress = (elapsed % CHRISTMAS_LIGHTS_ANIMATION_DURATION) / CHRISTMAS_LIGHTS_ANIMATION_DURATION;
+    
+    const colorCount = CHRISTMAS_COLORS.length;
+    const currentColorIndex = Math.floor(progress * colorCount);
+    const nextColorIndex = (currentColorIndex + 1) % colorCount;
+    const localProgress = (progress * colorCount) % 1;
+    
+    this.lights.forEach((light, index) => {
+      const offset = (index * 0.33) % 1;
+      const adjustedProgress = (progress + offset) % 1;
+      const adjustedColorIndex = Math.floor(adjustedProgress * colorCount);
+      const adjustedNextColorIndex = (adjustedColorIndex + 1) % colorCount;
+      const adjustedLocalProgress = (adjustedProgress * colorCount) % 1;
+      
+      const currentColor = CHRISTMAS_COLORS[adjustedColorIndex];
+      const nextColor = CHRISTMAS_COLORS[adjustedNextColorIndex];
+      
+      const gradient = `radial-gradient(circle, ${currentColor} 0%, ${currentColor} 30%, transparent 70%)`;
+      light.style.background = gradient;
+    });
+    
+    this.animationId = requestAnimationFrame(() => this.updateGradients());
+  }
+
+  start() {
+    if (this.isActive) return;
+    
+    this.isActive = true;
+    this.startTime = Date.now();
+    
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'christmas-lights-container';
+      this.container.style.position = 'fixed';
+      this.container.style.top = '1000px';
+      this.container.style.left = '0';
+      this.container.style.width = '100%';
+      this.container.style.height = '100%';
+      this.container.style.pointerEvents = 'none';
+      this.container.style.zIndex = CHRISTMAS_LIGHTS_Z_INDEX;
+      this.container.style.transitionDuration = '1s';
+      document.body.appendChild(this.container);
+    }
+    
+    // Создаем три огонька
+    this.lights = [
+      this.createLight('left'),
+      this.createLight('center'),
+      this.createLight('right')
+    ];
+    
+    this.lights.forEach(light => {
+      this.container.appendChild(light);
+    });
+    
+    this.updateGradients();
+  }
+
+  stop() {
+    this.isActive = false;
+    
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    
+    if (this.container) {
+      this.container.remove();
+      this.container = null;
+      this.lights = [];
+    }
+  }
+}
+
+const christmasLightsManager = new ChristmasLightsManager();
+
+class TickerManager {
+  constructor() {
+    this.container = null;
+    this.content = null;
+    this.animationId = null;
+    this.isActive = false;
+    this.position = 0;
+    this.speedMultiplier = 1;
+  }
+
+  start(lang = 'ru') {
+    if (this.isActive) {
+      this.updateLanguage(lang);
+      return;
+    }
+    
+    this.isActive = true;
+    
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'ticker-container';
+      this.container.className = 'ticker-container';
+      
+      this.container.addEventListener('mouseenter', () => {
+        this.speedMultiplier = TICKER_SPEED_HOVER / TICKER_SPEED;
+      });
+      
+      this.container.addEventListener('mouseleave', () => {
+        this.speedMultiplier = 1;
+      });
+      
+      const appShell = document.querySelector('.app-shell');
+      const footer = document.querySelector('.footer');
+      if (appShell && footer) {
+        appShell.insertBefore(this.container, footer);
+      } else if (footer) {
+        footer.parentNode.insertBefore(this.container, footer);
+      } else {
+        document.body.appendChild(this.container);
+      }
+    }
+
+    this.updateLanguage(lang);
+    this.animate();
+  }
+
+  updateLanguage(lang) {
+    if (!this.container) return;
+    
+    const articles = ARTICLES[lang] || ARTICLES.ru;
+    
+    if (this.content) {
+      this.content.remove();
+    }
+    
+    this.content = document.createElement('div');
+    this.content.className = 'ticker-content';
+    
+    articles.forEach((article, index) => {
+      const link = document.createElement('a');
+      link.href = article.url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = article.title;
+      link.style.color = 'inherit';
+      link.style.textDecoration = 'none';
+      link.style.transition = 'color 0.2s, text-decoration 0.2s';
+      link.addEventListener('mouseenter', () => {
+        link.style.color = 'var(--text)';
+        link.style.textDecoration = 'underline';
+      });
+      link.addEventListener('mouseleave', () => {
+        link.style.color = 'var(--muted)';
+        link.style.textDecoration = 'none';
+      });
+      
+      this.content.appendChild(link);
+      if (index < articles.length - 1) {
+        this.content.appendChild(document.createTextNode(' '));
+      }
+    });
+    
+    const duplicate = this.content.cloneNode(true);
+    this.content.appendChild(document.createTextNode(' '));
+    this.content.appendChild(duplicate);
+    
+    this.container.appendChild(this.content);
+    this.position = 0;
+  }
+
+  animate() {
+    if (!this.isActive) return;
+    
+    if (this.content) {
+      this.position -= (TICKER_SPEED / 60) * this.speedMultiplier;
+      const contentWidth = this.content.offsetWidth / 2;
+      if (Math.abs(this.position) >= contentWidth) {
+        this.position = 0;
+      }
+      this.content.style.transform = `translateX(${this.position}px)`;
+    }
+    
+    this.animationId = requestAnimationFrame(() => this.animate());
+  }
+
+  stop() {
+    this.isActive = false;
+    
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+    
+    if (this.container) {
+      this.container.remove();
+      this.container = null;
+      this.content = null;
+    }
+  }
+}
+
+const tickerManager = new TickerManager();
+
+class ChristmasTreeButton {
+  constructor() {
+    this.element = null;
+    this.isVisible = localStorage.getItem('christmas-tree-hidden') !== 'true';
+  }
+
+  create() {
+    if (!this.isVisible || this.element) return;
+    
+    this.element = document.createElement('img');
+    this.element.src = CHRISTMAS_TREE_IMAGE;
+    this.element.className = 'christmas-tree-button';
+    this.element.alt = 'Christmas tree';
+    this.element.style.right = `-${CHRISTMAS_TREE_OFFSET_RIGHT}px`;
+    this.element.style.width = `${CHRISTMAS_TREE_SIZE}px`;
+    this.element.style.height = `${CHRISTMAS_TREE_SIZE}px`;
+    this.element.style.zIndex = CHRISTMAS_TREE_Z_INDEX;
+    
+      this.element.addEventListener('click', () => {
+        localStorage.setItem('christmas-tree-hidden', 'true');
+        localStorage.setItem('ui-newyear', 'true');
+        localStorage.setItem('newyear-mode-unlocked', 'true');
+        this.element.remove();
+        this.isVisible = false;
+        location.reload();
+      });
+    
+    document.body.appendChild(this.element);
+  }
+}
+
+const christmasTreeButton = new ChristmasTreeButton();
+
+const snowManagerBg = new SnowManager({
+  sizeMin: SNOW_BG_SIZE_MIN,
+  sizeMax: SNOW_BG_SIZE_MAX,
+  speedMin: SNOW_BG_SPEED_MIN,
+  speedMax: SNOW_BG_SPEED_MAX,
+  count: SNOW_BG_COUNT,
+  zIndex: SNOW_BG_Z_INDEX,
+  opacity: SNOW_BG_OPACITY
+});
+
+const snowManagerFg = new SnowManager({
+  sizeMin: SNOW_FG_SIZE_MIN,
+  sizeMax: SNOW_FG_SIZE_MAX,
+  speedMin: SNOW_FG_SPEED_MIN,
+  speedMax: SNOW_FG_SPEED_MAX,
+  count: SNOW_FG_COUNT,
+  zIndex: SNOW_FG_Z_INDEX,
+  opacity: SNOW_FG_OPACITY
+});
+
 (async () => {
   const template = await loadTemplate();
 
@@ -659,15 +1511,49 @@ function synthesizePointsFromFunction(fn, count = 25) {
         adBadgeIcon,
         adMuteIcon,
         burgerIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 448 512"><path fill="currentColor" d="M0 96c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32m0 160c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32m448 160c0-17.7 14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32h384c17.7 0 32 14.3 32 32"/></svg>`,
-        burgerIconOpen: `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 512 512"><path fill="currentColor" d="M0 96c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32m64 160c0-17.7 14.3-32 32-32h384c17.7 0 32 14.3 32 32s-14.3 32-32 32H96c-17.7 0-32-14.3-32-32m384 160c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32h384c17.7 0 32 14.3 32 32"/></svg>`,
+        burgerMenuMaskId: `lineMdCompass${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       };
+    },
+    computed: {
+      burgerIconOpen() {
+        const maskId = this.burgerMenuMaskId;
+        return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>Compass SVG Icon</title><mask id="${maskId}"><path fill="none" stroke="#fff" stroke-dasharray="60" stroke-dashoffset="60" stroke-linecap="round" stroke-width="2" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path fill="#fff" d="M11 11L12 12L13 13L12 12z"><set attributeName="opacity" begin="0.6s" to="1"/><animate fill="freeze" attributeName="d" begin="0.6s" dur="0.3s" values="M11 11L12 12L13 13L12 12z;M10.2 10.2L17 7L13.8 13.8L7 17z"/><animateTransform attributeName="transform" begin="0.5s" dur="0.5s" type="rotate" values="-180 12 12;0 12 12"/></path><circle cx="12" cy="12" r="1" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.3s" values="0;1"/></circle></mask><rect width="24" height="24" fill="currentColor" mask="url(#${maskId})"/></svg>`;
+      },
+      newYearModeUnlocked() {
+        return localStorage.getItem('newyear-mode-unlocked') === 'true';
+      },
     },
     mounted() {
       this.initFromStorage();
       this.runStageAnimation();
       this.spawnAds();
+      this.updateTitle();
+      this.initSnow();
+      this.initTicker();
+      christmasTreeButton.create();
     },
     methods: {
+      getRandomLoadingText() {
+        const lang = this.state.ui.lang || 'ru';
+        const texts = LOADING_TEXTS[lang] || LOADING_TEXTS.ru;
+        return texts[Math.floor(Math.random() * texts.length)];
+      },
+      async showLoadingWithMinTime(callback) {
+        const startTime = Date.now();
+        this.state.loadingText = this.getRandomLoadingText();
+        this.state.loadingGlobal = true;
+        try {
+          await callback();
+        } finally {
+          const elapsed = Date.now() - startTime;
+          const remaining = Math.max(0, MIN_LOADING_TIME - elapsed);
+          await new Promise(resolve => setTimeout(resolve, remaining));
+          this.state.loadingGlobal = false;
+          this.$nextTick(() => {
+            this.runStageAnimation();
+          });
+        }
+      },
       resetState() {
         const fresh = createInitialState();
         Object.keys(fresh).forEach((key) => {
@@ -676,7 +1562,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
         this.stageAnimated = false;
         this.spawnAds();
       },
-      toast(message, type = 'success') {
+      toast(message, type = 'success', showDetail = false) {
         const id = Date.now();
         const lang = this.state.ui.lang || 'ru';
         const titles = {
@@ -697,15 +1583,20 @@ function synthesizePointsFromFunction(fn, count = 25) {
           info: 'This is an informational notification, no action is required.',
           error: 'An error occurred, review the details and try again.',
         };
-        const detail = (lang === 'en' ? detailsEn[type] : detailsRu[type]) || (lang === 'en' ? detailsEn.info : detailsRu.info);
-        const msg = message
-          ? `${message}${/[.!?]$/.test(message.trim()) ? '' : '.'} ${detail}`
-          : detail;
+        let msg = message || '';
+        if (showDetail || !message) {
+          const detail = (lang === 'en' ? detailsEn[type] : detailsRu[type]) || (lang === 'en' ? detailsEn.info : detailsRu.info);
+          msg = message
+            ? `${message}${/[.!?]$/.test(message.trim()) ? '' : '.'} ${detail}`
+            : detail;
+        } else if (message && !/[.!?]$/.test(message.trim())) {
+          msg = message + '.';
+        }
         const icons = {
-          success: 'https://i.pinimg.com/736x/d5/09/ca/d509ca41d6d01f406cb13ab9dbd06178.jpg',
-          warning: 'https://i.pinimg.com/1200x/21/36/2e/21362e6ec4312730016613384f25f41c.jpg',
-          error: 'https://i.pinimg.com/1200x/21/36/2e/21362e6ec4312730016613384f25f41c.jpg',
-          info: 'https://i.pinimg.com/736x/9f/e4/be/9fe4be23d357519d0ce35bd93137b1bb.jpg',
+          success: 'https://media.tenor.com/bvXwJ4I19ZQAAAAi/cat-cat-meme.gif',
+          warning: 'https://media1.tenor.com/m/A4XEGPtSd-4AAAAd/rowe-cat.gif',
+          error: 'https://media.tenor.com/cXe--DrS0iYAAAAi/warthog.gif',
+          info: 'https://media1.tenor.com/m/pwJ6OF2elfYAAAAd/stupid-cat-cat-stare.gif',
         };
         this.state.toasts.push({
           id,
@@ -729,7 +1620,10 @@ function synthesizePointsFromFunction(fn, count = 25) {
           return;
         }
         const [fnAd, graphAd] = pickRandomAds(2);
-        this.state.ads.slots.functions = fnAd || null;
+        // Левый блок рекламы появляется с шансом ниже
+        const shouldShowFunctionsAd = Math.random() < 1.0;
+        this.state.ads.slots.functions = shouldShowFunctionsAd ? (fnAd || null) : null;
+        // Правый блок всегда
         this.state.ads.slots.graph = graphAd || fnAd || null;
         this.state.ads.dismissed.functions = false;
         this.state.ads.dismissed.graph = false;
@@ -774,25 +1668,22 @@ function synthesizePointsFromFunction(fn, count = 25) {
       async register() {
         try {
           if (!this.state.authForm.username || !this.state.authForm.password) {
-            throw new Error('Заполните логин и пароль');
+            throw new Error(this.t('errorFillLoginPassword'));
           }
           if (this.state.authForm.username.length > 32) {
-            throw new Error(this.state.ui.lang === 'en'
-              ? 'Username must be at most 32 characters.'
-              : 'Логин не длиннее 32 символов.');
+            throw new Error(this.t('errorUsernameTooLong'));
           }
           if (this.state.authForm.email && this.state.authForm.email.length > 128) {
-            throw new Error(this.state.ui.lang === 'en'
-              ? 'Email must be at most 128 characters.'
-              : 'Email не длиннее 128 символов.');
+            throw new Error(this.t('errorEmailTooLong'));
+          }
+          if (this.state.authForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.authForm.email)) {
+            throw new Error(this.t('errorEmailInvalid'));
           }
           if (this.state.authForm.password.length > 128) {
-            throw new Error(this.state.ui.lang === 'en'
-              ? 'Password must be at most 128 characters.'
-              : 'Пароль не длиннее 128 символов.');
+            throw new Error(this.t('errorPasswordTooLong'));
           }
           if (this.state.authForm.password !== this.state.authForm.confirm) {
-            throw new Error('Пароли не совпадают');
+            throw new Error(this.t('errorPasswordsNotMatch'));
           }
           this.state.loading = true;
           const res = await api.post('/auth/register', {
@@ -800,7 +1691,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
             password: this.state.authForm.password,
             email: this.state.authForm.email,
           });
-          this.toast('Регистрация успешна, войдите под новым пользователем');
+          this.toast(this.t('toastRegisterSuccess'));
           this.state.authMode = 'login';
           this.state.credentials.username = this.state.authForm.username;
           this.state.credentials.password = this.state.authForm.password;
@@ -809,9 +1700,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
             this.state.credentials.userId = res.userId;
           }
         } catch (e) {
-          const msg = e.message || (this.state.ui.lang === 'en'
-            ? 'Registration error: check login/email/password.'
-            : 'Ошибка регистрации: проверьте логин/email/пароль.');
+          const msg = e.message || this.t('errorRegistrationFailed');
           this.showError(this.t('register'), msg);
         } finally {
           this.state.loading = false;
@@ -820,7 +1709,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
       async tryLogin() {
         try {
           const { username, password } = this.state.credentials;
-          if (!username || !password) throw new Error('Введите логин и пароль');
+          if (!username || !password) throw new Error(this.t('errorEnterLoginPassword'));
           this.state.loading = true;
           api.setAuth(username, password);
           await this.loadCurrentUser();
@@ -828,12 +1717,12 @@ function synthesizePointsFromFunction(fn, count = 25) {
           this.state.isAuthed = true;
           persistCredentials(this.state.credentials);
           await this.refreshFunctions();
-          this.toast('Готово! Соединение установлено');
+          this.toast(this.t('toastConnectionEstablished'));
         } catch (e) {
           api.clearAuth();
-          let msg = e.message || (this.state.ui.lang === 'en' ? 'Failed to login' : 'Не удалось войти');
+          let msg = e.message || this.t('errorLoginFailed');
           if (e.message?.includes('Unauthorized')) {
-            msg = this.state.ui.lang === 'en' ? 'Wrong login or password' : 'Неверный логин или пароль';
+            msg = this.t('errorWrongLoginPassword');
           }
           this.showError(this.t('login'), msg);
         } finally {
@@ -843,8 +1732,22 @@ function synthesizePointsFromFunction(fn, count = 25) {
       logout() {
         api.clearAuth();
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('christmas-tree-hidden');
+        localStorage.removeItem('newyear-mode-unlocked');
+        localStorage.setItem('ui-newyear', 'false');
+        snowManagerBg.stop();
+        snowManagerFg.stop();
+        christmasLightsManager.stop();
         chart.destroy();
         this.resetState();
+        if (christmasTreeButton.element) {
+          christmasTreeButton.element.remove();
+          christmasTreeButton.element = null;
+        }
+        christmasTreeButton.isVisible = true;
+        this.$nextTick(() => {
+          christmasTreeButton.create();
+        });
       },
       applyTheme() {
         document.documentElement.setAttribute('data-theme', this.state.ui.theme);
@@ -860,6 +1763,39 @@ function synthesizePointsFromFunction(fn, count = 25) {
       },
       t(key) {
         return (i18n[this.state.ui.lang] && i18n[this.state.ui.lang][key]) || key;
+      },
+      setFavicon(iconPath) {
+        let link = document.querySelector('#favicon');
+        if (!link) {
+          link = document.createElement('link');
+          link.id = 'favicon';
+          link.rel = 'icon';
+          link.type = 'image/svg+xml';
+          document.head.appendChild(link);
+        }
+        link.href = iconPath;
+      },
+      updateTitle() {
+        const lang = this.state.ui.lang || 'ru';
+        let title = this.t('pageTitle');
+        let favicon = faviconIcons.default;
+        
+        if (!this.state.isAuthed) {
+          title = this.t('pageTitleAuth');
+          favicon = faviconIcons.auth;
+        } else if (this.state.modals.profile) {
+          title = this.t('pageTitleProfile');
+          favicon = faviconIcons.profile;
+        } else if (this.state.modals.settings) {
+          title = this.t('pageTitleSettings');
+          favicon = faviconIcons.settings;
+        } else if (this.state.modals.create || this.state.modals.math || this.state.modals.composite) {
+          title = this.t('pageTitleNewFunction');
+          favicon = faviconIcons.newFunction;
+        }
+        
+        document.title = title;
+        this.setFavicon(favicon);
       },
       typeLabel(key) {
         return (i18n[this.state.ui.lang]?.types && i18n[this.state.ui.lang].types[key]) || key;
@@ -887,59 +1823,69 @@ function synthesizePointsFromFunction(fn, count = 25) {
         this.mobileMenuOpen = false;
       },
       async refreshFunctions() {
-        try {
-          this.state.loadingGlobal = true;
-          const [fnData, compData] = await Promise.all([
-            api.get('/functions'),
-            api.get('/composite-functions').catch(() => []),
-          ]);
-          const baseFunctions = (fnData || []).map((f) => normalizeFunction(f));
-          const composites = (compData || []).map((c) => {
-            const id = c.compositeId ?? c.id;
-            return normalizeFunction({
-              ...c,
-              compositeId: id,
-              functionId: `comp-${id}`,
-              functionName: c.compositeName ?? c.name ?? 'Composite',
-              functionType: 'COMPOSITE',
-              firstFunctionId: c.firstFunctionId ?? c.first_function_id ?? c.first_functionId,
-              secondFunctionId: c.secondFunctionId ?? c.second_function_id ?? c.second_functionId,
-              xFrom: c.xFrom ?? c.x_from ?? null,
-              xTo: c.xTo ?? c.x_to ?? null,
-              _composite: true,
+        await this.showLoadingWithMinTime(async () => {
+          try {
+            const [fnData, compData] = await Promise.all([
+              api.get('/functions'),
+              api.get('/composite-functions').catch(() => []),
+            ]);
+            const baseFunctions = (fnData || []).map((f) => normalizeFunction(f));
+            const composites = (compData || []).map((c) => {
+              const id = c.compositeId ?? c.id;
+              const firstId = c.firstFunctionId ?? c.first_function_id;
+              const secondId = c.secondFunctionId ?? c.second_function_id;
+              console.log(`[refreshFunctions] Loading composite ${id}: firstFunctionId=${firstId}, secondFunctionId=${secondId}`, c);
+              return normalizeFunction({
+                ...c,
+                compositeId: id,
+                functionId: `comp-${id}`,
+                functionName: c.compositeName ?? c.name ?? 'Composite',
+                functionType: 'COMPOSITE',
+                firstFunctionId: firstId,
+                secondFunctionId: secondId,
+                xFrom: c.xFrom ?? c.x_from ?? null,
+                xTo: c.xTo ?? c.x_to ?? null,
+                _composite: true,
+              });
             });
-          });
-          this.state.functions = [...baseFunctions, ...composites];
-        if (!this.state.credentials.userId && fnData && fnData.length > 0) {
-          const firstId = fnData.map((f) => f.userId).find((v) => v);
-          if (firstId) {
-            this.state.credentials.userId = firstId;
-            persistCredentials(this.state.credentials);
-          }
-        }
-          if (this.state.selectedFunction) {
-            const stillExists = this.state.functions.find((f) => f.functionId === this.state.selectedFunction.functionId);
-            if (!stillExists) {
-              this.state.selectedFunction = null;
-              this.state.points = [];
-              chart.destroy();
-            } else {
-              await this.loadPoints(this.state.selectedFunction.functionId);
+            this.state.functions = [...baseFunctions, ...composites];
+          if (!this.state.credentials.userId && fnData && fnData.length > 0) {
+            const firstId = fnData.map((f) => f.userId).find((v) => v);
+            if (firstId) {
+              this.state.credentials.userId = firstId;
+              persistCredentials(this.state.credentials);
             }
           }
-        } catch (e) {
-          const onlyBase = await api.get('/functions').catch(() => []);
-          this.state.functions = onlyBase || [];
-          this.showError('Загрузка функций', e.message);
-        } finally {
-          this.state.loadingGlobal = false;
-          this.runStageAnimation();
-        }
+            if (this.state.selectedFunction) {
+              const stillExists = this.state.functions.find((f) => f.functionId === this.state.selectedFunction.functionId);
+              if (!stillExists) {
+                this.state.selectedFunction = null;
+                this.state.points = [];
+                chart.destroy();
+              } else {
+                await this.loadPoints(this.state.selectedFunction.functionId);
+              }
+            }
+          } catch (e) {
+            const onlyBase = await api.get('/functions').catch(() => []);
+            this.state.functions = onlyBase || [];
+            this.showError(this.t('errorLoadingFunctions'), e.message);
+          }
+        });
       },
       async deleteFunction(id) {
         try {
-          await api.delete(`/functions/${id}`);
-          this.toast('Функция удалена', 'warning');
+          const functionToDelete = this.state.functions.find(f => f.functionId === id);
+          const isComposite = functionToDelete?._composite || (functionToDelete?.functionType || '').toUpperCase() === 'COMPOSITE';
+          
+          if (isComposite) {
+            const compositeId = functionToDelete.compositeId ?? functionToDelete.composite_id ?? id;
+            await api.delete(`/composite-functions/${compositeId}`);
+          } else {
+            await api.delete(`/functions/${id}`);
+          }
+          
+          this.toast(this.t('toastFunctionDeleted'), 'warning', false);
           await this.refreshFunctions();
           if (this.state.selectedFunction?.functionId === id) {
             this.state.selectedFunction = null;
@@ -947,7 +1893,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
             chart.destroy();
           }
         } catch (e) {
-          this.showError('Удаление функции', e.message);
+          this.showError(this.t('errorDeletingFunction'), e.message);
         }
       },
       async loadPoints(functionId) {
@@ -967,9 +1913,19 @@ function synthesizePointsFromFunction(fn, count = 25) {
               }
               let firstId = this.state.selectedFunction.firstFunctionId;
               let secondId = this.state.selectedFunction.secondFunctionId;
+              console.log(`[loadPoints] Initial IDs from selectedFunction: firstId=${firstId}, secondId=${secondId}`);
+              console.log(`[loadPoints] selectedFunction:`, {
+                functionId: this.state.selectedFunction.functionId,
+                functionName: this.state.selectedFunction.functionName,
+                functionType: this.state.selectedFunction.functionType,
+                firstFunctionId: this.state.selectedFunction.firstFunctionId,
+                secondFunctionId: this.state.selectedFunction.secondFunctionId,
+                compositeId: this.state.selectedFunction.compositeId
+              });
               if (!firstId || !secondId) {
                 try {
                   const compMeta = await api.get(`/composite-functions/${compId || functionId}/points`);
+                  console.log(`[loadPoints] Fetched compMeta:`, compMeta);
                   firstId = firstId || compMeta?.firstFunctionId || compMeta?.first_function_id;
                   secondId = secondId || compMeta?.secondFunctionId || compMeta?.second_function_id;
                 } catch (err) {
@@ -977,20 +1933,29 @@ function synthesizePointsFromFunction(fn, count = 25) {
                 }
               }
               if (!firstId || !secondId) {
-                this.toast('Не удалось получить дочерние функции для композиции', 'warning');
+                this.toast(this.t('toastCompositeChildError'), 'warning');
                 chart.destroy();
                 this.state.points = [];
                 return;
               }
+              console.log(`[loadPoints] About to compute composite: firstId=${firstId}, secondId=${secondId}`);
+              if (firstId === secondId) {
+                console.warn(`[loadPoints] WARNING: firstId === secondId (${firstId})! This means the same function is used for both parts of the composition.`);
+              }
               points = await composeFunctions(firstId, secondId);
+              console.log(`[loadPoints] Composite function points computed: ${points.length} points`);
+              if (points.length > 0) {
+                console.log(`[loadPoints] First 3 computed points:`, points.slice(0, 3).map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
+                console.log(`[loadPoints] Last 3 computed points:`, points.slice(-3).map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
+              }
               if (!points.length) {
-                this.toast('Композиция вне области определения: скорректируйте диапазоны', 'warning');
+                this.toast(this.t('toastCompositeOutOfRange'), 'warning');
                 chart.destroy();
                 this.state.points = [];
                 return;
               }
             } catch (err) {
-              this.toast('Не удалось вычислить композицию', 'warning');
+              this.toast(this.t('toastCompositeCalcError'), 'warning');
               console.error(err);
               chart.destroy();
               this.state.points = [];
@@ -1018,11 +1983,11 @@ function synthesizePointsFromFunction(fn, count = 25) {
             if (!points.length && this.state.selectedFunction) {
               const fType = (this.state.selectedFunction.functionType || '').toUpperCase();
               if (fType === 'TABULATED' || fType === 'COMPOSITE') {
-                this.toast('Для функции нет точек. Укажите xFrom/xTo или создайте точки.', 'warning');
+                this.toast(this.t('toastNoPoints'), 'warning');
               } else {
                 points = synthesizePointsFromFunction(this.state.selectedFunction);
                 if (!points.length) {
-                  this.toast('Для функции нет точек. Укажите xFrom/xTo или создайте точки.', 'warning');
+                  this.toast(this.t('toastNoPoints'), 'warning');
                 }
               }
             }
@@ -1035,14 +2000,14 @@ function synthesizePointsFromFunction(fn, count = 25) {
             this.evalFunction();
           });
         } catch (e) {
-          this.showError('Точки функции', e.message);
+          this.showError(this.t('errorFunctionPoints'), e.message);
         }
       },
       async updatePoint(point) {
         try {
           const isComposite = this.state.selectedFunction?._composite || (this.state.selectedFunction?.functionType || '').toUpperCase() === 'COMPOSITE';
           if (isComposite) {
-            this.toast('Точки композиции меняются через дочерние функции', 'warning');
+            this.toast(this.t('toastCompositePointsChange'), 'warning');
             return;
           }
           const isPersisted = Number.isFinite(Number(point.pointId));
@@ -1056,40 +2021,39 @@ function synthesizePointsFromFunction(fn, count = 25) {
               xValue: x,
               yValue: y,
             });
-            this.toast('Точка обновлена');
+            this.toast(this.t('toastPointUpdated'));
           } else if (this.state.selectedFunction?.functionId) {
             await api.post(`/functions/${this.state.selectedFunction.functionId}/points`, {
               xValue: x,
               yValue: y,
             });
-            this.toast('Точка сохранена');
-          } else {
-            this.toast('Нет выбранной функции для сохранения точки', 'warning');
+            this.toast(this.t('toastPointSaved'));с          } else {
+            this.toast(this.t('toastNoFunctionSelected'), 'warning');
             return;
           }
           await this.loadPoints(point.functionId || this.state.selectedFunction?.functionId);
         } catch (e) {
-          this.showError('Обновление точки', e.message);
+          this.showError(this.t('errorUpdatingPoint'), e.message);
         }
       },
       async deletePoint(point) {
         try {
           const isComposite = this.state.selectedFunction?._composite || (this.state.selectedFunction?.functionType || '').toUpperCase() === 'COMPOSITE';
           if (isComposite) {
-            this.toast('Удаляйте точки в базовых функциях, не в композиции', 'warning');
+            this.toast(this.t('toastDeleteInBaseFunctions'), 'warning');
             return;
           }
           const isPersisted = Number.isFinite(Number(point.pointId));
           if (isPersisted) {
             await api.delete(`/points/${point.pointId}`);
-            this.toast('Точка удалена', 'warning');
+            this.toast(this.t('toastPointDeleted'), 'warning', false);
           } else {
             this.state.points = this.state.points.filter((p) => p.pointId !== point.pointId);
-            this.toast('Локальная точка удалена', 'warning');
+            this.toast(this.t('toastLocalPointDeleted'), 'warning', false);
           }
           await this.loadPoints(point.functionId || this.state.selectedFunction?.functionId);
         } catch (e) {
-          this.showError('Удаление точки', e.message);
+          this.showError(this.t('errorDeletingPoint'), e.message);
         }
       },
       addPointRow() {
@@ -1148,13 +2112,13 @@ function synthesizePointsFromFunction(fn, count = 25) {
             xTo,
             points,
           });
-          this.toast('Функция сохранена');
+          this.toast(this.t('toastFunctionSaved'));
           this.state.modals.create = false;
           await this.refreshFunctions();
           await this.loadPoints(fn.functionId);
           this.state.createForm = createInitialState().createForm;
         } catch (e) {
-          this.showError('Создание функции', e.message);
+          this.showError(this.t('errorCreatingFunction'), e.message);
         }
       },
       async createFromMath() {
@@ -1185,13 +2149,13 @@ function synthesizePointsFromFunction(fn, count = 25) {
             xTo,
             points,
           });
-          this.toast('Функция по формуле создана');
+          this.toast(this.t('toastFunctionFromFormula'));
           this.state.modals.math = false;
           await this.refreshFunctions();
           await this.loadPoints(fn.functionId);
           this.state.mathForm = createInitialState().mathForm;
         } catch (e) {
-          this.showError('Создание по формуле', e.message);
+          this.showError(this.t('errorCreatingFromFormula'), e.message);
         }
       },
       async saveComposite() {
@@ -1200,24 +2164,28 @@ function synthesizePointsFromFunction(fn, count = 25) {
           const { a, b } = this.state.compositeForm;
           const name = ensureName(this.state.compositeForm.name, 'composite');
           if (!name || !a || !b) throw new Error('Заполните имя и выберите обе функции');
+          console.log(`[saveComposite] Saving composite: name=${name}, firstFunctionId=${a}, secondFunctionId=${b}`);
+          if (a === b) {
+            console.warn(`[saveComposite] WARNING: firstFunctionId === secondFunctionId (${a})! This will create a composition of a function with itself.`);
+          }
           await api.post('/composite-functions', {
             userId: Number(this.state.credentials.userId),
             compositeName: name,
             firstFunctionId: a,
             secondFunctionId: b,
           });
-          this.toast('Композит сохранён');
+          this.toast(this.t('toastCompositeSaved'));
           this.state.compositeForm = createInitialState().compositeForm;
           this.state.modals.composite = false;
           await this.refreshFunctions();
         } catch (e) {
-          this.showError('Композитная функция', e.message);
+          this.showError(this.t('errorCompositeFunction'), e.message);
         }
       },
       addEmptyPointRow() {
         const isComposite = this.state.selectedFunction?._composite || (this.state.selectedFunction?.functionType || '').toUpperCase() === 'COMPOSITE';
         if (isComposite) {
-          this.toast('Добавляйте точки в дочерние функции, не в композицию', 'warning');
+          this.toast(this.t('toastAddPointsInChild'), 'warning');
           return;
         }
         this.state.points.push({
@@ -1236,24 +2204,25 @@ function synthesizePointsFromFunction(fn, count = 25) {
         localStorage.setItem('ui-inclusive', this.state.ui.inclusive ? 'true' : 'false');
         localStorage.setItem('ui-edges', this.state.ui.edges || 'soft');
         localStorage.setItem('ui-adblock', this.state.ads.adBlock ? 'true' : 'false');
+        localStorage.setItem('ui-newyear', this.state.ui.newYearMode ? 'true' : 'false');
+        localStorage.setItem('ui-ticker', this.state.ui.tickerEnabled ? 'true' : 'false');
         this.scheduleApplyTheme();
         this.state.modals.settings = false;
-        this.toast('Настройки сохранены');
+        this.toast(this.t('toastSettingsSaved'));
         location.reload();
       },
   async openProfile() {
-    try {
-      this.state.loadingGlobal = true;
-      const me = await this.loadCurrentUser(this.state.credentials.username);
-      this.state.profileForm.username = me?.username || this.state.credentials.username || '';
-      this.state.profileForm.email = me?.email || this.state.credentials.email || this.state.authForm.email || '';
-      this.state.profileForm.password = '';
-      this.state.modals.profile = true;
-    } catch (e) {
-      this.showError('Профиль', e.message || 'Не удалось загрузить профиль');
-    } finally {
-      this.state.loadingGlobal = false;
-    }
+    await this.showLoadingWithMinTime(async () => {
+      try {
+        const me = await this.loadCurrentUser(this.state.credentials.username);
+        this.state.profileForm.username = me?.username || this.state.credentials.username || '';
+        this.state.profileForm.email = me?.email || this.state.credentials.email || this.state.authForm.email || '';
+        this.state.profileForm.password = '';
+        this.state.modals.profile = true;
+      } catch (e) {
+        this.showError(this.t('profile'), e.message || this.t('errorLoadingProfile'));
+      }
+    });
   },
   async saveProfile() {
     try {
@@ -1261,33 +2230,23 @@ function synthesizePointsFromFunction(fn, count = 25) {
             await this.loadCurrentUser();
           }
           if (!this.state.credentials.userId) {
-            this.showError(this.t('profile'), this.state.ui.lang === 'en'
-              ? 'User id is unknown. Re-login, please.'
-              : 'UserId не определён. Перелогиньтесь.');
+            this.showError(this.t('profile'), this.t('errorUserIdUnknown'));
             return;
       }
       if (!/^[A-Za-z0-9_-]{3,32}$/.test(this.state.profileForm.username)) {
-        throw new Error(this.state.ui.lang === 'en'
-          ? 'Username must be 3-32 chars, letters/digits/_/- only.'
-          : 'Логин 3-32 символа, только буквы/цифры/_/-');
+        throw new Error(this.t('errorUsernameFormat'));
       }
       if (this.state.profileForm.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.state.profileForm.email)) {
-        throw new Error(this.state.ui.lang === 'en'
-          ? 'Enter a valid email.'
-          : 'Введите корректный email.');
+        throw new Error(this.t('errorEmailInvalid'));
       }
       if (this.state.profileForm.password && this.state.profileForm.password.length < 6) {
-        throw new Error(this.state.ui.lang === 'en'
-          ? 'Password must be at least 6 characters.'
-          : 'Пароль должен быть не короче 6 символов.');
+        throw new Error(this.t('errorPasswordTooShort'));
       }
       if (this.state.profileForm.password) {
         const pwd = this.state.profileForm.password;
         const strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,128}$/;
         if (!strong.test(pwd)) {
-          throw new Error(this.state.ui.lang === 'en'
-            ? 'Password must have upper, lower, digit and special char (6-128).'
-            : 'Пароль должен содержать прописные, строчные, цифру и спецсимвол (6-128).');
+          throw new Error(this.t('errorPasswordWeak'));
         }
       }
       const payload = {
@@ -1322,11 +2281,11 @@ function synthesizePointsFromFunction(fn, count = 25) {
       const low = (e.message || '').toLowerCase();
       let msg;
       if (low.includes('already exists') || low.includes('username') && low.includes('exists')) {
-        msg = this.state.ui.lang === 'en' ? 'This username is already taken.' : 'Такой логин уже занят.';
+        msg = this.t('errorUsernameTaken');
       } else {
         msg = e.message || this.t('error');
       }
-      this.showError('Профиль', msg);
+      this.showError(this.t('profile'), msg);
     }
   },
   async deleteAccount() {
@@ -1342,14 +2301,14 @@ function synthesizePointsFromFunction(fn, count = 25) {
       const msg = e.message?.includes('403')
         ? (this.state.ui.lang === 'en' ? 'You have no rights to delete this user.' : 'Нет прав удалить этого пользователя.')
         : (e.message || (this.state.ui.lang === 'en' ? 'Failed to delete user' : 'Не удалось удалить пользователя'));
-      this.showError('Удаление', msg);
+      this.showError(this.t('errorDeleting'), msg);
     }
   },
       async saveAllPoints() {
         if (!this.state.selectedFunction || !this.state.points.length) return;
         const isComposite = this.state.selectedFunction?._composite || (this.state.selectedFunction?.functionType || '').toUpperCase() === 'COMPOSITE';
         if (isComposite) {
-          this.toast('Сохраняйте точки в базовых функциях, композиция только читает', 'warning');
+          this.toast(this.t('toastSaveInBaseFunctions'), 'warning');
           return;
         }
         try {
@@ -1395,7 +2354,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
         a.download = `${this.state.selectedFunction.functionName || 'function'}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        this.toast('Экспортировано в JSON');
+        this.toast(this.t('toastExportedJson'));
       },
       async importJson(event) {
         const file = event.target.files?.[0];
@@ -1412,9 +2371,9 @@ function synthesizePointsFromFunction(fn, count = 25) {
             y: p.yValue ?? p.y,
           }));
           this.state.modals.create = true;
-          this.toast('Точки загружены в форму создания');
+          this.toast(this.t('toastPointsLoaded'));
         } catch (e) {
-          this.showError('Импорт', e.message);
+          this.showError(this.t('errorImport'), e.message);
         } finally {
           event.target.value = '';
         }
@@ -1427,6 +2386,24 @@ function synthesizePointsFromFunction(fn, count = 25) {
         }
         this.state.graph.evalResult = linearInterpolate(this.state.points, x);
       },
+      initSnow() {
+        if (this.state.ui.newYearMode) {
+          snowManagerBg.start();
+          snowManagerFg.start();
+          christmasLightsManager.start();
+        } else {
+          snowManagerBg.stop();
+          snowManagerFg.stop();
+          christmasLightsManager.stop();
+        }
+      },
+      initTicker() {
+        if (this.state.ui.tickerEnabled) {
+          tickerManager.start(this.state.ui.lang);
+        } else {
+          tickerManager.stop();
+        }
+      },
     },
     watch: {
       'state.ui.theme'(val, old) {
@@ -1438,6 +2415,7 @@ function synthesizePointsFromFunction(fn, count = 25) {
         if (val === old) return;
         localStorage.setItem('ui-inclusive', this.state.ui.inclusive ? 'true' : 'false');
         this.scheduleApplyTheme();
+        location.reload();
       },
       'state.ui.edges'(val, old) {
         if (val === old) return;
@@ -1446,6 +2424,42 @@ function synthesizePointsFromFunction(fn, count = 25) {
       },
       'state.ui.lang'() {
         localStorage.setItem('ui-lang', this.state.ui.lang);
+        this.updateTitle();
+        if (this.state.ui.tickerEnabled) {
+          tickerManager.updateLanguage(this.state.ui.lang);
+        }
+      },
+      'state.ui.tickerEnabled'(val, old) {
+        if (val === old) return;
+        localStorage.setItem('ui-ticker', val ? 'true' : 'false');
+        if (val) {
+          tickerManager.start(this.state.ui.lang);
+        } else {
+          tickerManager.stop();
+        }
+      },
+      'state.isAuthed'() {
+        this.updateTitle();
+      },
+      'state.modals.profile'() {
+        this.updateTitle();
+      },
+      'state.modals.settings'() {
+        this.updateTitle();
+      },
+      'state.modals.create'() {
+        this.updateTitle();
+      },
+      'state.modals.math'() {
+        this.updateTitle();
+      },
+      'state.modals.composite'() {
+        this.updateTitle();
+      },
+      'state.authMode'() {
+        if (!this.state.isAuthed) {
+          this.updateTitle();
+        }
       },
       'state.ads.adBlock'(val, old) {
         if (val === old) return;
@@ -1456,6 +2470,11 @@ function synthesizePointsFromFunction(fn, count = 25) {
         } else {
           this.spawnAds();
         }
+      },
+      'state.ui.newYearMode'(val, old) {
+        if (val === old) return;
+        localStorage.setItem('ui-newyear', val ? 'true' : 'false');
+        this.initSnow();
       },
     },
     created() {
