@@ -124,6 +124,7 @@ export function createInitialState() {
       name: '',
       a: null,
       b: null,
+      operationMethod: 'ADDITION',
     },
     toasts: [],
   };

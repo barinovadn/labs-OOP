@@ -4,6 +4,8 @@ import dto.ApiResponse;
 import dto.CompositeFunctionRequest;
 import dto.CompositeFunctionResponse;
 import dto.CompositeFunctionPointResponse;
+import dto.PointResponse;
+import entity.PointEntity;
 import service.CompositeFunctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.logging.Logger;
 
 @RestController
@@ -47,6 +50,23 @@ public class CompositeFunctionController {
         } catch (Exception e) {
             logger.severe("Error getting composite points meta: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{id}/calculated-points")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<ApiResponse<List<PointResponse>>> getCompositeCalculatedPoints(@PathVariable Long id) {
+        logger.info("GET /api/composite-functions/" + id + "/calculated-points");
+        try {
+            List<PointEntity> points = compositeFunctionService.calculateCompositeFunctionPoints(id);
+            List<PointResponse> response = points.stream()
+                    .map(p -> new PointResponse(p.getPointId(), null, p.getXValue(), p.getYValue(), p.getComputedAt()))
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(ApiResponse.success(response));
+        } catch (Exception e) {
+            logger.severe("Error calculating composite points: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error(e.getMessage()));
         }
     }

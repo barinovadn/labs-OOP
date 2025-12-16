@@ -39,6 +39,9 @@ public class CompositeFunctionEntity {
 
     @Column(name = "x_to")
     private Double xTo;
+
+    @Column(name = "operation_method", length = 50)
+    private String operationMethod;
     
     public CompositeFunctionEntity() {}
     
@@ -74,4 +77,7 @@ public class CompositeFunctionEntity {
 
     public Double getXTo() { return xTo; }
     public void setXTo(Double xTo) { this.xTo = xTo; }
+
+    public String getOperationMethod() { return operationMethod; }
+    public void setOperationMethod(String operationMethod) { this.operationMethod = operationMethod; }
 }

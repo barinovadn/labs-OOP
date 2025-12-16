@@ -18,6 +18,8 @@
   --r-xs: 6px;
   --r-pill: 999px;
   --ad-height: 200px;
+  --label-font-size: 13px;
+  --label-margin-bottom: 5px;
 }
 
 [data-edges="round"] {
@@ -465,6 +467,12 @@ p {
 }
 
 .muted { color: var(--muted); }
+
+label.muted:not(.row) {
+  font-size: var(--label-font-size);
+  margin-bottom: var(--label-margin-bottom);
+  display: block;
+}
 
 .btn {
   appearance: none;

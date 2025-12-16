@@ -12,28 +12,32 @@
 
       <div v-if="state.authMode==='login'" class="grid">
         <label class="muted">{{t('nickname')}}
-          <input class="input" v-model="state.credentials.username" autocomplete="username" placeholder="your_nick">
+          <input class="input" v-model="state.credentials.username" @input="state.credentials.username = state.credentials.username.replace(/\s/g, '')" autocomplete="username" placeholder="your_nick">
         </label>
         <label class="muted">{{t('password')}}
-          <input class="input" type="password" v-model="state.credentials.password" autocomplete="current-password" placeholder="••••••">
+          <input class="input" type="password" v-model="state.credentials.password" @input="state.credentials.password = state.credentials.password.replace(/\s/g, '')" autocomplete="current-password" placeholder="••••••">
         </label>
-        <button class="btn" @click="tryLogin" :disabled="state.loading">{{t('loginAction')}}</button>
+        <button class="btn" @click="tryLogin" :disabled="state.loading">
+          <span class="btn-icon" v-html="icons.profile"></span><span>{{t('loginAction')}}</span>
+        </button>
       </div>
 
       <div v-else class="grid">
         <label class="muted">{{t('nickname')}} (3-16, A-Z a-z 0-9 - _)
-          <input class="input" v-model="state.authForm.username" placeholder="your_nick">
+          <input class="input" v-model="state.authForm.username" @input="state.authForm.username = state.authForm.username.replace(/\s/g, '')" placeholder="your_nick">
         </label>
         <label class="muted">{{t('email')}}
-          <input class="input" type="email" v-model="state.authForm.email" placeholder="you@example.com">
+          <input class="input" type="email" v-model="state.authForm.email" @input="state.authForm.email = state.authForm.email.replace(/\s/g, '')" placeholder="you@example.com">
         </label>
         <label class="muted">{{t('password')}} (A/a/0/спец, 6-128)
-          <input class="input" type="password" v-model="state.authForm.password" placeholder="••••••">
+          <input class="input" type="password" v-model="state.authForm.password" @input="state.authForm.password = state.authForm.password.replace(/\s/g, '')" placeholder="••••••">
         </label>
         <label class="muted">{{t('repeatPassword')}}
-          <input class="input" type="password" v-model="state.authForm.confirm" placeholder="••••••">
+          <input class="input" type="password" v-model="state.authForm.confirm" @input="state.authForm.confirm = state.authForm.confirm.replace(/\s/g, '')" placeholder="••••••">
         </label>
-        <button class="btn success" @click="register" :disabled="state.loading">{{t('registerAction')}}</button>
+        <button class="btn success" @click="register" :disabled="state.loading">
+          <span class="btn-icon" v-html="icons.logout"></span><span>{{t('registerAction')}}</span>
+        </button>
       </div>
     </div>
   </div>
@@ -299,7 +303,7 @@
         </div>
         <div class="grid grid-2">
           <label class="muted">{{t('name')}}
-            <input class="input" v-model="state.compositeForm.name" placeholder="">
+            <input class="input" v-model="state.compositeForm.name" :placeholder="generateCompositeName() || ''">
           </label>
           <label class="muted">{{t('firstFn')}}
             <select class="input" v-model.number="state.compositeForm.a">
@@ -307,10 +311,21 @@
               <option v-for="fn in state.functions" :value="fn.functionId">{{fn.functionName}}</option>
             </select>
           </label>
-          <label class="muted">{{t('secondFn')}}
+          <label class="muted" v-if="!isSingleFunctionOperation()">{{t('secondFn')}}
             <select class="input" v-model.number="state.compositeForm.b">
               <option :value="null">—</option>
               <option v-for="fn in state.functions" :value="fn.functionId">{{fn.functionName}}</option>
+            </select>
+          </label>
+          <label class="muted">{{t('operationMethod')}}
+            <select class="input" v-model="state.compositeForm.operationMethod">
+              <option value="ADDITION">{{operationMethodLabel('ADDITION')}}</option>
+              <option value="SUBTRACTION">{{operationMethodLabel('SUBTRACTION')}}</option>
+              <option value="MULTIPLICATION">{{operationMethodLabel('MULTIPLICATION')}}</option>
+              <option value="DIVISION">{{operationMethodLabel('DIVISION')}}</option>
+              <option value="DIFFERENTIATION">{{operationMethodLabel('DIFFERENTIATION')}}</option>
+              <option value="INTEGRATION">{{operationMethodLabel('INTEGRATION')}}</option>
+              <option value="INTERPOLATION">{{operationMethodLabel('INTERPOLATION')}}</option>
             </select>
           </label>
         </div>

@@ -7,6 +7,7 @@ public class CompositeFunctionRequest {
     private Long secondFunctionId;
     private Double xFrom;
     private Double xTo;
+    private String operationMethod;
 
     public CompositeFunctionRequest() {}
 
@@ -27,5 +28,8 @@ public class CompositeFunctionRequest {
 
     public Double getXTo() { return xTo; }
     public void setXTo(Double xTo) { this.xTo = xTo; }
+
+    public String getOperationMethod() { return operationMethod; }
+    public void setOperationMethod(String operationMethod) { this.operationMethod = operationMethod; }
 }
 

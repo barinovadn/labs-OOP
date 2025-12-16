@@ -112,4 +112,101 @@ public class TabulatedFunctionOperationService {
         logger.info("Операция вычитания функций завершена");
         return result;
     }
+
+    public TabulatedFunction integrate(TabulatedFunction function) {
+        logger.info("Начало операции интегрирования функции");
+        Point[] points = asPoints(function);
+        int count = points.length;
+        
+        if (count < 2) {
+            throw new RuntimeException("Function must have at least 2 points for integration");
+        }
+        
+        double[] xValues = new double[count];
+        double[] yValues = new double[count];
+        
+        double cumulativeIntegral = 0.0;
+        xValues[0] = points[0].x;
+        yValues[0] = 0.0;
+        
+        for (int i = 1; i < count; i++) {
+            double x1 = points[i - 1].x;
+            double x2 = points[i].x;
+            double y1 = points[i - 1].y;
+            double y2 = points[i].y;
+            
+            // Трапециевидное правило для интегрирования
+            double segmentIntegral = (y1 + y2) * (x2 - x1) / 2.0;
+            cumulativeIntegral += segmentIntegral;
+            
+            xValues[i] = x2;
+            yValues[i] = cumulativeIntegral;
+        }
+        
+        logger.info("Операция интегрирования функции завершена");
+        return factory.create(xValues, yValues);
+    }
+
+    public TabulatedFunction interpolateLinearly(TabulatedFunction function, double[] newXValues) {
+        logger.info("Начало линейной интерполяции функции");
+        Point[] points = asPoints(function);
+        int count = points.length;
+        
+        if (count < 2) {
+            throw new RuntimeException("Function must have at least 2 points for interpolation");
+        }
+        
+        double[] yValues = new double[newXValues.length];
+        
+        for (int i = 0; i < newXValues.length; i++) {
+            double x = newXValues[i];
+            yValues[i] = interpolateAtX(points, x);
+        }
+        
+        logger.info("Линейная интерполяция функции завершена");
+        return factory.create(newXValues, yValues);
+    }
+    
+    private double interpolateAtX(Point[] points, double x) {
+        int n = points.length;
+        
+        // Если x меньше минимального значения, экстраполируем влево
+        if (x < points[0].x) {
+            if (n < 2) return points[0].y;
+            return linearExtrapolate(points[0].x, points[0].y, points[1].x, points[1].y, x);
+        }
+        
+        // Если x больше максимального значения, экстраполируем вправо
+        if (x > points[n - 1].x) {
+            if (n < 2) return points[n - 1].y;
+            return linearExtrapolate(points[n - 2].x, points[n - 2].y, points[n - 1].x, points[n - 1].y, x);
+        }
+        
+        // Ищем интервал для интерполяции
+        for (int i = 0; i < n - 1; i++) {
+            if (x >= points[i].x && x <= points[i + 1].x) {
+                return linearInterpolate(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, x);
+            }
+        }
+        
+        // Если x точно равен одной из точек
+        for (int i = 0; i < n; i++) {
+            if (Math.abs(x - points[i].x) < EPSILON) {
+                return points[i].y;
+            }
+        }
+        
+        return points[n - 1].y;
+    }
+    
+    private double linearInterpolate(double x1, double y1, double x2, double y2, double x) {
+        if (Math.abs(x2 - x1) < EPSILON) {
+            return y1;
+        }
+        return y1 + (y2 - y1) * (x - x1) / (x2 - x1);
+    }
+    
+    private double linearExtrapolate(double x1, double y1, double x2, double y2, double x) {
+        return linearInterpolate(x1, y1, x2, y2, x);
+    }
 }

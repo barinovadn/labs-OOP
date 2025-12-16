@@ -317,7 +317,17 @@ const i18n = {
     modalCompositeTitle: 'Создание сложной функции',
     firstFn: 'Первая функция (f)',
     secondFn: 'Вторая функция (g)',
+    operationMethod: 'Метод операции',
     save: 'Сохранить',
+    operationMethods: {
+      ADDITION: 'Сложение',
+      SUBTRACTION: 'Вычитание',
+      MULTIPLICATION: 'Умножение',
+      DIVISION: 'Деление',
+      DIFFERENTIATION: 'Дифференцирование',
+      INTEGRATION: 'Интегрирование',
+      INTERPOLATION: 'Линейная интерполяция',
+    },
     settingsTitle: 'Настройки',
     theme: 'Тема',
     edges: 'Скругление',
@@ -376,6 +386,7 @@ const i18n = {
     errorPasswordWeak: 'Пароль должен содержать прописные, строчные, цифру и спецсимвол (6-128).',
     errorUserIdUnknown: 'UserId не определён. Перелогиньтесь.',
     errorUsernameTaken: 'Такой логин уже занят.',
+    errorDivideByZero: 'Нельзя делить на нулевую функцию. Вторая функция не должна быть тождественно нулевой.',
     toastFunctionDeleted: 'Функция удалена',
     toastCompositeChildError: 'Не удалось получить дочерние функции для композиции',
     toastCompositeOutOfRange: 'Композиция вне области определения: скорректируйте диапазоны',
@@ -485,7 +496,17 @@ const i18n = {
     modalCompositeTitle: 'Create composite function',
     firstFn: 'First function (f)',
     secondFn: 'Second function (g)',
+    operationMethod: 'Operation method',
     save: 'Save',
+    operationMethods: {
+      ADDITION: 'Addition',
+      SUBTRACTION: 'Subtraction',
+      MULTIPLICATION: 'Multiplication',
+      DIVISION: 'Division',
+      DIFFERENTIATION: 'Differentiation',
+      INTEGRATION: 'Integration',
+      INTERPOLATION: 'Linear interpolation',
+    },
     settingsTitle: 'Settings',
     theme: 'Theme',
     edges: 'Corner style',
@@ -544,6 +565,7 @@ const i18n = {
     errorPasswordWeak: 'Password must have upper, lower, digit and special char (6-128).',
     errorUserIdUnknown: 'User id is unknown. Re-login, please.',
     errorUsernameTaken: 'This username is already taken.',
+    errorDivideByZero: 'Cannot divide by zero function. The second function must not be identically zero.',
     toastFunctionDeleted: 'Function deleted',
     toastCompositeChildError: 'Failed to get child functions for composition',
     toastCompositeOutOfRange: 'Composition out of domain: adjust ranges',
@@ -1670,6 +1692,15 @@ const snowManagerFg = new SnowManager({
           if (!this.state.authForm.username || !this.state.authForm.password) {
             throw new Error(this.t('errorFillLoginPassword'));
           }
+          // Remove spaces from all fields
+          this.state.authForm.username = this.state.authForm.username.replace(/\s/g, '');
+          this.state.authForm.email = this.state.authForm.email ? this.state.authForm.email.replace(/\s/g, '') : '';
+          this.state.authForm.password = this.state.authForm.password.replace(/\s/g, '');
+          this.state.authForm.confirm = this.state.authForm.confirm ? this.state.authForm.confirm.replace(/\s/g, '') : '';
+          
+          if (this.state.authForm.username.includes(' ')) {
+            throw new Error(this.t('errorUsernameFormat'));
+          }
           if (this.state.authForm.username.length > 32) {
             throw new Error(this.t('errorUsernameTooLong'));
           }
@@ -1678,6 +1709,9 @@ const snowManagerFg = new SnowManager({
           }
           if (this.state.authForm.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.authForm.email)) {
             throw new Error(this.t('errorEmailInvalid'));
+          }
+          if (this.state.authForm.password.includes(' ')) {
+            throw new Error('Пароль не должен содержать пробелы');
           }
           if (this.state.authForm.password.length > 128) {
             throw new Error(this.t('errorPasswordTooLong'));
@@ -1806,6 +1840,70 @@ const snowManagerFg = new SnowManager({
       edgeLabel(key) {
         return (i18n[this.state.ui.lang]?.edgesDict && i18n[this.state.ui.lang].edgesDict[key]) || key;
       },
+      operationMethodLabel(key) {
+        return (i18n[this.state.ui.lang]?.operationMethods && i18n[this.state.ui.lang].operationMethods[key]) || key;
+      },
+      getOperationSymbol(operationMethod) {
+        const symbols = {
+          'ADDITION': '+',
+          'SUBTRACTION': '-',
+          'MULTIPLICATION': '*',
+          'DIVISION': '/',
+          'DIFFERENTIATION': "d/dx",
+          'INTEGRATION': '∫',
+          'INTERPOLATION': '~',
+        };
+        return symbols[operationMethod] || '∘';
+      },
+      generateCompositeName() {
+        const { a, b, operationMethod } = this.state.compositeForm;
+        if (!a) return '';
+        
+        const firstFn = this.state.functions.find(f => f.functionId === a);
+        if (!firstFn) return '';
+        
+        const op = (operationMethod || 'ADDITION').toUpperCase();
+        const isSingleOp = op === 'DIFFERENTIATION' || op === 'INTEGRATION';
+        
+        if (isSingleOp) {
+          const symbol = this.getOperationSymbol(operationMethod || 'ADDITION');
+          return `${symbol}(${firstFn.functionName})`;
+        }
+        
+        if (!b) return '';
+        const secondFn = this.state.functions.find(f => f.functionId === b);
+        if (!secondFn) return '';
+        
+        const symbol = this.getOperationSymbol(operationMethod || 'ADDITION');
+        return `${firstFn.functionName} ${symbol} ${secondFn.functionName}`;
+      },
+      updateCompositeName() {
+        // This method is kept for potential future use, but doesn't auto-fill the name field
+        // The name is only assigned when saving if the field is empty
+      },
+      isAutoGeneratedName(name) {
+        if (!name) return false;
+        const { a, b, operationMethod } = this.state.compositeForm;
+        if (!a) return false;
+        const firstFn = this.state.functions.find(f => f.functionId === a);
+        if (!firstFn) return false;
+        
+        const op = (operationMethod || 'ADDITION').toUpperCase();
+        const isSingleOp = op === 'DIFFERENTIATION' || op === 'INTEGRATION';
+        
+        if (isSingleOp) {
+          const symbol = this.getOperationSymbol(operationMethod || 'ADDITION');
+          const expectedName = `${symbol}(${firstFn.functionName})`;
+          return name === expectedName;
+        }
+        
+        if (!b) return false;
+        const secondFn = this.state.functions.find(f => f.functionId === b);
+        if (!secondFn) return false;
+        const symbol = this.getOperationSymbol(operationMethod || 'ADDITION');
+        const expectedName = `${firstFn.functionName} ${symbol} ${secondFn.functionName}`;
+        return name === expectedName;
+      },
       themeIcon(key) {
         return themeIcons[key] || themeIcons.default;
       },
@@ -1815,6 +1913,10 @@ const snowManagerFg = new SnowManager({
       isCompositeSelected() {
         const t = (this.state.selectedFunction?.functionType || '').toUpperCase();
         return this.state.selectedFunction?._composite || t === 'COMPOSITE';
+      },
+      isSingleFunctionOperation() {
+        const op = (this.state.compositeForm.operationMethod || '').toUpperCase();
+        return op === 'DIFFERENTIATION' || op === 'INTEGRATION';
       },
       toggleMobileMenu() {
         this.mobileMenuOpen = !this.mobileMenuOpen;
@@ -1942,7 +2044,20 @@ const snowManagerFg = new SnowManager({
               if (firstId === secondId) {
                 console.warn(`[loadPoints] WARNING: firstId === secondId (${firstId})! This means the same function is used for both parts of the composition.`);
               }
-              points = await composeFunctions(firstId, secondId);
+              // Use new endpoint for calculated points with operation method
+              try {
+                const calculatedPoints = await api.get(`/composite-functions/${compId || functionId}/calculated-points`);
+                points = (calculatedPoints || []).map(normalizePoint).map((p, idx) => ({
+                  ...p,
+                  xValue: p.xValue,
+                  yValue: p.yValue,
+                  pointId: p.pointId ?? p.id ?? `comp-${idx}`,
+                  functionId: functionId,
+                }));
+              } catch (err) {
+                console.warn('Failed to get calculated points, falling back to composeFunctions', err);
+                points = await composeFunctions(firstId, secondId);
+              }
               console.log(`[loadPoints] Composite function points computed: ${points.length} points`);
               if (points.length > 0) {
                 console.log(`[loadPoints] First 3 computed points:`, points.slice(0, 3).map(p => `(${p.xValue.toFixed(3)}, ${p.yValue.toFixed(3)})`));
@@ -2161,25 +2276,47 @@ const snowManagerFg = new SnowManager({
       async saveComposite() {
         try {
           if (!this.state.credentials.userId) throw new Error('Укажите userId');
-          const { a, b } = this.state.compositeForm;
-          const name = ensureName(this.state.compositeForm.name, 'composite');
-          if (!name || !a || !b) throw new Error('Заполните имя и выберите обе функции');
-          console.log(`[saveComposite] Saving composite: name=${name}, firstFunctionId=${a}, secondFunctionId=${b}`);
-          if (a === b) {
+          const { a, b, operationMethod } = this.state.compositeForm;
+          const op = (operationMethod || 'ADDITION').toUpperCase();
+          const isSingleOp = op === 'DIFFERENTIATION' || op === 'INTEGRATION';
+          
+          if (!a) throw new Error('Выберите первую функцию');
+          if (!isSingleOp && !b) throw new Error('Выберите обе функции');
+          
+          // Use generated name if field is empty or contains default value
+          let name = this.state.compositeForm.name?.trim();
+          if (!name || name === 'composite' || this.isAutoGeneratedName(name)) {
+            name = this.generateCompositeName();
+          }
+          if (!name) {
+            name = ensureName('', 'composite');
+          }
+          
+          console.log(`[saveComposite] Saving composite: name=${name}, firstFunctionId=${a}, secondFunctionId=${b}, operation=${operationMethod}`);
+          if (!isSingleOp && a === b) {
             console.warn(`[saveComposite] WARNING: firstFunctionId === secondFunctionId (${a})! This will create a composition of a function with itself.`);
           }
-          await api.post('/composite-functions', {
+          
+          const requestBody = {
             userId: Number(this.state.credentials.userId),
             compositeName: name,
             firstFunctionId: a,
-            secondFunctionId: b,
-          });
+            secondFunctionId: isSingleOp ? a : b, // Use first function as second for single-function operations
+            operationMethod: operationMethod || 'ADDITION',
+          };
+          
+          await api.post('/composite-functions', requestBody);
           this.toast(this.t('toastCompositeSaved'));
           this.state.compositeForm = createInitialState().compositeForm;
           this.state.modals.composite = false;
           await this.refreshFunctions();
         } catch (e) {
-          this.showError(this.t('errorCompositeFunction'), e.message);
+          let errorMessage = e.message;
+          // Translate division by zero error
+          if (errorMessage && (errorMessage.includes('Cannot divide by zero') || errorMessage.includes('divide by zero'))) {
+            errorMessage = this.t('errorDivideByZero');
+          }
+          this.showError(this.t('errorCompositeFunction'), errorMessage);
         }
       },
       addEmptyPointRow() {
@@ -2475,6 +2612,15 @@ const snowManagerFg = new SnowManager({
         if (val === old) return;
         localStorage.setItem('ui-newyear', val ? 'true' : 'false');
         this.initSnow();
+      },
+      'state.compositeForm.a'() {
+        this.updateCompositeName();
+      },
+      'state.compositeForm.b'() {
+        this.updateCompositeName();
+      },
+      'state.compositeForm.operationMethod'() {
+        this.updateCompositeName();
       },
     },
     created() {

@@ -5,6 +5,7 @@ public class CompositeFunctionPointResponse {
     private Long userId;
     private Long firstFunctionId;
     private Long secondFunctionId;
+    private String operationMethod;
 
     public CompositeFunctionPointResponse() {}
 
@@ -19,6 +20,9 @@ public class CompositeFunctionPointResponse {
 
     public Long getSecondFunctionId() { return secondFunctionId; }
     public void setSecondFunctionId(Long secondFunctionId) { this.secondFunctionId = secondFunctionId; }
+
+    public String getOperationMethod() { return operationMethod; }
+    public void setOperationMethod(String operationMethod) { this.operationMethod = operationMethod; }
 }
 
 

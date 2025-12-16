@@ -11,6 +11,7 @@ public class CompositeFunctionResponse {
     private LocalDateTime createdAt;
     private Double xFrom;
     private Double xTo;
+    private String operationMethod;
 
     public CompositeFunctionResponse() {}
 
@@ -37,5 +38,8 @@ public class CompositeFunctionResponse {
 
     public Double getXTo() { return xTo; }
     public void setXTo(Double xTo) { this.xTo = xTo; }
+
+    public String getOperationMethod() { return operationMethod; }
+    public void setOperationMethod(String operationMethod) { this.operationMethod = operationMethod; }
 }
 
